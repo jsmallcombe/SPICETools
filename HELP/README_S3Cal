@@ -1,0 +1,21 @@
+Automated S3 calibration 1.0
+
+Very small program for automated calibration of S3 detector.
+
+Run the following to generate a blank S3 .cal file of the grsisort format:
+
+./bin/S3Cal MAKEBLANK [blank.cal optional] [Mnemonic_prefix optional]
+
+The default output is called S3cal.cal
+The default mnemonic is SPE02F (telescope)
+
+Now sort some midas data. Run:
+
+grsisort -laq --suppress-errors [blank.cal] [runfile.midas]
+
+Then sort the resultant analysis trees to make the calibration. Run:
+
+./bin/S3Cal [blank.cal optional] [analysistree.root] [histograms.root optional]
+
+By default histograms are saved to S3energycal.root
+The final calibration is saved to S3EnergyCalibrated.cal

@@ -1,0 +1,42 @@
+SPICE VISUAL PARSER VERSION 1.2
+
+Usage dependent on grsisort classes (and subclasses)
+TSiLi, TSiLiHit, TFragment
+And on jgatingtool from personal Jlibrary.
+Built using ROOT 6.04/12
+
+
+Programs for scanning SPICE behaviour
+DDparser is a program for sorting Fragment OR Analysis tree SPICE singles data for scanning SPICE behaviour 
+SSparser is a viewer program (but can be used to sort and view, calling DDparser internally)
+
+
+SSparser can be used to view externally sorted data, simply provide a root file containing 2D histogram of channelvs energy. If DDparser/SSparser is used to sort a fragment tree, waveform data is also stored for viewing.
+
+Usage:
+./SSparser analysis37434.root [Calibration.cal optional]
+./DDparser analysis37434.root [Calibration.cal optional]
+
+No wildcards may be used, use command line inputs to make use of variable substitution
+e.g. ./SSparser $(echo analysis/analysis37434_*.root)
+
+Inputs:
+
+Data file -
+Any .root file containing "analysis" or "fragment" in the title.
+Any Tree contained will be added to the TChain for processing
+
+Output/vuew file -
+Any .root file NOT containing "analysis" or "fragment" in the title.
+A default output.root will be created if not provided.
+
+Calibration file - Any .cal file e.g. Calibration.cal
+Values will be loaded from the Tree if not provided
+
+Sort Flags - The following flags may be parsed to change default sort behaviour:
+UseFitCharge - All SiLi energies will be calculated from the waveform fit charge
+FitShape - Do very slow shape fitting, results saved as histograms and written to WaveShapeParam.txt
+MohRotate - Produce Mohamad's rotation histograms
+
+View Flags
+Path - Input is not from DDparser, ask for channelVenergy histogram location.

@@ -1,0 +1,56 @@
+
+LIB = $(shell pwd)
+INCLUDE = $(shell pwd)/include
+
+ROOT_LIBS = `root-config --glibs`
+ROOT_GCC_FLAGS = `root-config --cflags`
+
+GRSI_LIBS = -L$(GRSISYS)/libraries `grsi-config --all-libs` -lTreePlayer -lMathMore -lSpectrum -lMinuit -lPyROOT
+GRSI_GCC_FLAGS = `grsi-config --cflags`
+EXTERNAL_LIBS = -lJanalysistools
+
+CC = g++
+CFLAGS = -std=c++11 -g -fPIC $(ROOT_GCC_FLAGS) $(GRSI_GCC_FLAGS) -I$(INCLUDE) 
+LIBRS = -L$(INCLUDE) $(EXTERNAL_LIBS) $(ROOT_LIBS) $(GRSI_LIBS) -L$(LIB)/bin
+
+SYSHEAD = $(wildcard include/spice_*.h)
+OBJECTS = $(patsubst include/%.h,bin/build/%.o,$(SYSHEAD))
+HEAD = $(patsubst %.h,$(shell pwd)/%.h,$(SYSHEAD))
+
+PROGRAMS = $(patsubst programs/%.cpp,bin/%,$(wildcard programs/*.cpp))
+
+TARG = bin/libspice_comp.so
+
+DUMMY: $(PROGRAMS)
+
+$(TARG): $(OBJECTS) bin/DictOutput.cxx $(GRSISYS)/bin/grsi-config $(JATOOLLIB)/bin/libJanalysistools.so
+	$(CC) $(CFLAGS) -o $@ -shared bin/DictOutput.cxx $(OBJECTS) -I. $(LIBRS) $(EXTERNAL_LIBS) # -Wl,--verbose
+	bash bin/build/header.sh
+	bash bin/build/make_export.sh
+
+bin/DictOutput.cxx: $(HEAD)
+	bash bin/build/link.sh $(HEAD)
+	rootcint -f $@ -c -I$(INCLUDE) $(HEAD) bin/build/Linkdef.h
+		
+bin/build/%.o: src/%.cpp include/%.h
+	$(CC) $(CFLAGS) -o $@ -c $< $(LIBRS)
+	
+bin/%: programs/%.cpp $(TARG) $(OBJECTS)
+	$(CC) $(CFLAGS) -o $@ $< $(LIBRS) bin/DictOutput.cxx -I. $(OBJECTS)
+	chmod +x $@	
+
+# 	$(CC) $(CFLAGS) -o $@ $< $(LIBRS) -lspice_comp #-Wl,--verbose
+# 	chmod +x $@
+
+
+clean:
+	rm -f $(LIB)/bin/build/*.o
+	rm -f $(LIB)/bin/build/Linkdef.h
+	rm -f $(LIB)/bin/DictOutput*
+	rm -f $(PROGRAMS)
+	rm -f $(TARG)
+
+
+
+
+

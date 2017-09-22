@@ -1,0 +1,28 @@
+Automated SiLi calibration 1.0
+
+Program for automated calibration of SiLi detector with Bi207.
+
+Run the following to generate a blank SiLi .cal file of the grsisort format
+
+./bin/CalSiLi MAKEBLANK [blank.cal optional] 
+
+The default output is called SPICE_blank_calfile.cal
+
+If desired you can now parsedata with DDparser/SSparser to generate waveformshape info.
+To combine this, run:
+
+./bin/CalSiLi ADDWAVE [wave.txt] [blank.cal] 
+
+Now sort some midas data. Run:
+
+grsisort -laq --suppress-errors [blank.cal] [runfile.midas]
+
+Then sort the resultant analysis trees to make the calibration. Run:
+
+./bin/CalSiLi [blank.cal optional] [analysistree.root] [UseFitCharge optional]
+
+The final calibration is saved to SiLiEnergyCalibrated.cal
+
+To amend a calibration file run:
+
+./bin/CalSiLi Fix [blank.cal optional] [analysistree.root] [UseFitCharge optional]
