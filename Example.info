@@ -1,0 +1,81 @@
+### CONTROL FLAGS ###
+
+UseFitCharge
+# All SiLi energies will be calculated from the waveform fit charge, if waveform fitting was enabled in grsisort
+
+#Telescope
+# Sort S3 as dE (rings) E (sectors) telescope, not a single detector.
+
+#UseSiLiRFCoinc
+#The 2D SiLi-S3-RF gates are used in determining SiLi-S3 coincidence
+
+TigressSuppressed
+#Set Tigress detector positions to suppressed mode (backward)
+
+DoDoubleElectrons
+#Enable the creation and filling of double electron histograms
+
+#timecompressoff
+#Use the absolute clock time, do not compress
+
+#KeepChargeShare
+#Keep rather than discard S3 charge sharing events
+#NOT appropriate for telescope
+
+UseFirst
+#Only fill particle histograms for the first particle of each type in each event.
+
+### CONTROL NUMBERS ###
+
+FrontBackTime 100
+#(S3 ring sector gate, given in ticks =75)
+
+FrontBackEnergy 0.92
+#(S3 ring sector gate, given as a fraction =0.9)
+
+S3EnergyLimit 40000
+#(Total energy range in keV for heavy ions =50000)
+
+SiLiWaveTOffset 8850
+#(Offset relative to normal trigger cfd =7000)
+
+#BetaZero 0.04
+#A default experimental beta value
+
+TigressTargetOffset 0.5
+
+SiLiNoiseLimit 0.1
+
+SiLiSmirnovLimit 300
+
+### TIME GATES ###
+
+s3_gamma_t 0 150 
+s3_sili_t -100 300 
+gamma_gamma_t -100 100 
+sili_sili_t -150 150 
+gamma_sili_t -200 450 
+#s3_dEE_t -120 10 
+#rf_S3 -50 0 
+
+rf_sili 80 91 
+#rf_sili 130 140 
+rf_gamma -6 10
+
+### FILE INPUTS ###
+
+CalibrationFile.cal
+
+
+### PARTICLE GATE INPUTS ###
+
+s3_rs_2D0 title protons
+s3_rs_2D0 gatefile infofiles/protongate.root
+#s3_rs_2D0 gate 0 0
+#s3_rs_2D0 gate 0 5000
+#s3_rs_2D0 gate 5000 0
+
+s3_rs_2D1 title alpha
+s3_rs_2D1 gatefile infofiles/alphagate.root
+   
+
