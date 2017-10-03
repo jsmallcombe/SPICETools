@@ -13,7 +13,7 @@ int main(int argc, char *argv[]){
 	
 	if(inp.IsPresent("MAKEBLANK")){
 		MakeSiLiBlankCal(OrDefault("SPICE_blank_calfile.cal",inp.ReturnFind(".cal")));
-	}if(inp.IsPresent("ADDWAVE")){
+	}else if(inp.IsPresent("ADDWAVE")){
 		if(inp.IsPresent(".cal")&&inp.IsPresent(".txt"))
 			AddWave(inp.ReturnFind(".cal"),inp.ReturnFind(".txt"));
 	}else{

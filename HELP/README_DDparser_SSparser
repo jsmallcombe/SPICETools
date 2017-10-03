@@ -10,7 +10,6 @@ Programs for scanning SPICE behaviour
 DDparser is a program for sorting Fragment OR Analysis tree SPICE singles data for scanning SPICE behaviour 
 SSparser is a viewer program (but can be used to sort and view, calling DDparser internally)
 
-
 SSparser can be used to view externally sorted data, simply provide a root file containing 2D histogram of channelvs energy. If DDparser/SSparser is used to sort a fragment tree, waveform data is also stored for viewing.
 
 Usage:
@@ -19,6 +18,8 @@ Usage:
 
 No wildcards may be used, use command line inputs to make use of variable substitution
 e.g. ./SSparser $(echo analysis/analysis37434_*.root)
+
+When sorting is taking a very long time (when using FitShape option for example) a single press of ctrl+c interrupt will safely end the sorting early and save the data.
 
 Inputs:
 
