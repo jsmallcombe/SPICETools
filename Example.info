@@ -1,5 +1,8 @@
 ### CONTROL FLAGS ###
 
+#NoSPICE 
+# SPICE is not used. No SPICE histograms.
+
 UseFitCharge
 # All SiLi energies will be calculated from the waveform fit charge, if waveform fitting was enabled in grsisort
 
@@ -12,18 +15,21 @@ UseFitCharge
 TigressSuppressed
 #Set Tigress detector positions to suppressed mode (backward)
 
-DoDoubleElectrons
+#DoDoubleElectrons
 #Enable the creation and filling of double electron histograms
 
-#timecompressoff
+TimeCompressOff
 #Use the absolute clock time, do not compress
 
 #KeepChargeShare
 #Keep rather than discard S3 charge sharing events
 #NOT appropriate for telescope
 
-UseFirst
-#Only fill particle histograms for the first particle of each type in each event.
+FirstOnly
+#Only fill particle coincident gamma and electron histograms once per gate type. i.e. 2p coincident gamma ray fills the p-gamma histogram only once.
+
+MultiParticles
+#Make special histograms for gamma and electron coincident with several particles.
 
 ### CONTROL NUMBERS ###
 

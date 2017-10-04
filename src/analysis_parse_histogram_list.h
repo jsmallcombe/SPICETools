@@ -10,11 +10,13 @@ outfile->cd();
 	TH1F *S3_sectormult,*S3_ringmult,*S3_mult;
 	TH2F *S3_theta,*S3flat;
 	TH1F *S3ring_sum,*S3sector_sum;
+	TH3F *S3_map3;
 
 	outfile->mkdir("S3");
 	outfile->cd("S3");
 	
 		S3_map= new TH2F("S3_map","S3_map",800,-40,40,800,-40,40);axislab(S3_map,"X [mm]","Y [mm]");
+		S3_map3= new TH3F("S3_map3","S3_map3;Z [mm];X [mm];Y [mm]",80,-40,40,80,-40,40,100,-50,50);
 
 		if(Telescope){
 			S3_dedx= new TH2F("S3_dedx","S3_dedx;Total Energy [keV];dE/dx [arb.]",1000,0,control[S3EnergyLimit],1000,0,control[S3EnergyLimit]*.4);
@@ -37,27 +39,27 @@ outfile->cd();
 		S3ring_sum= new TH1F("S3ring_sum","S3ring_sum",2000,0,control[S3EnergyLimit]);axislab(S3ring_sum,"Energy [keV]");
 		S3sector_sum= new TH1F("S3sector_sum","S3sector_sum",2000,0,control[S3EnergyLimit]);axislab(S3sector_sum,"Energy [keV]");
 		
-		outfile->mkdir("S3/elements");
-		outfile->cd("S3/elements");
-		
-			TH1F *S3rings[24];
-			for(int i=0;i<24;i++){
-				stringstream ss;ss<<"S3_ring_energy_"<<i;
-				S3rings[i] = new TH1F(ss.str().c_str(),ss.str().c_str(),1000,0,control[S3EnergyLimit]);axislab(S3rings[i],"Energy [keV]");
-			}  
-			
-			TH1F *S3sectors[32];
-			for(int i=0;i<32;i++){
-				stringstream ss;ss<<"S3_sector_energy_"<<i;
-				S3sectors[i] = new TH1F(ss.str().c_str(),ss.str().c_str(),1000,0,control[S3EnergyLimit]);axislab(S3sectors[i],"Energy [keV]");
-			}
-		outfile->mkdir("S3/sectorcal");
-		outfile->cd("S3/sectorcal");
-			TH2F *S3sectorsout[32];
-			for(int i=0;i<32;i++){
-				stringstream sss;sss<<"S3_sector_"<<i;
-				S3sectorsout[i] = new TH2F(sss.str().c_str(),sss.str().c_str(),1000,0,control[S3EnergyLimit],24,0,24);
-			}  
+// 		outfile->mkdir("S3/elements");
+// 		outfile->cd("S3/elements");
+// 		
+// 			TH1F *S3rings[24];
+// 			for(int i=0;i<24;i++){
+// 				stringstream ss;ss<<"S3_ring_energy_"<<i;
+// 				S3rings[i] = new TH1F(ss.str().c_str(),ss.str().c_str(),1000,0,control[S3EnergyLimit]);axislab(S3rings[i],"Energy [keV]");
+// 			}  
+// 			
+// 			TH1F *S3sectors[32];
+// 			for(int i=0;i<32;i++){
+// 				stringstream ss;ss<<"S3_sector_energy_"<<i;
+// 				S3sectors[i] = new TH1F(ss.str().c_str(),ss.str().c_str(),1000,0,control[S3EnergyLimit]);axislab(S3sectors[i],"Energy [keV]");
+// 			}
+// 		outfile->mkdir("S3/sectorcal");
+// 		outfile->cd("S3/sectorcal");
+// 			TH2F *S3sectorsout[32];
+// 			for(int i=0;i<32;i++){
+// 				stringstream sss;sss<<"S3_sector_"<<i;
+// 				S3sectorsout[i] = new TH2F(sss.str().c_str(),sss.str().c_str(),1000,0,control[S3EnergyLimit],24,0,24);
+// 			}  
 	outfile->cd();	
 
 	TH2F *SiLiflat,*SiLiring,*SiLisector,*SiLipreamp,*SiLi_map;
@@ -273,14 +275,14 @@ outfile->cd();
 	vector< TH2F* >  GUncorrectedring,Gcorrectedring;
 	vector< TH1F* >  GammaPG,SiLiPG,GUnshifted,GUncorrected;
 	vector< TH1F* >  SiLiPGRF,PGmult;
-	vector< TH2F* >  GammaEPG,SiLiEPG;
+	vector< TH2F* >  GammaEPG,SiLiEPG,PGmultGamma,PGmultSili;
 	vector< TH2F* >  GammaSiLiPG,GammaGammaPG;
-	vector< TH2F* >  TigressEThetaPG,S3multiHit;
+	vector< TH2F* >  TigressEThetaPG;
 	vector< TH3F* >  TigressEEThetaPG,TigressEEdThetaPG;
 	vector<	vector< TH2F* > >  TigressDopplerAngle;
 	vector<	vector< TH1F* > >  RingGroupGammaSingles;
 	
-	if(gate2D[s3_rs_2D].size()>0){
+	if(ParticleGate.size()>0){
 		outfile->mkdir("ParticleGates");
 		outfile->cd("ParticleGates");
 			
@@ -288,8 +290,8 @@ outfile->cd();
 				GammaS3dedx= new TH3F("GammaS3dedx","GammaS3dedx;Total Energy [keV];dE/dx [arb.];#gamma Energy [keV]",100,0,control[S3EnergyLimit],100,0,control[S3EnergyLimit]*.4,1000,0,2000);
 			}
 			
-			for(int n=0;n<gate2D[s3_rs_2D].size();n++){
-				string t=gate2D[s3_rs_2D][n].title;
+			for(int n=0;n<ParticleGate.size();n++){
+				string t=ParticleGate[n].title;
 				string tf="ParticleGates/"+t;
 				
 				outfile->mkdir(tf.c_str());
@@ -325,11 +327,17 @@ outfile->cd();
 					TigressEEdThetaPG.push_back(TigressEEdThetapg);
 					
 					
-					TH1F* pgmult= new TH1F(("Multiplicity_"+t).c_str(),("Multiplicity_"+t).c_str(),10,0,10);axislab(pgmult,"#gamma Energy [keV]");
+					TH1F* pgmult= new TH1F(("Multiplicity_"+t).c_str(),("Multiplicity_"+t+";Multiplicity").c_str(),10,0,10);
 					PGmult.push_back(pgmult);
-					TH2F* Smult= new TH2F(("S3multiHit"+t).c_str(),("S3multiHit"+t).c_str(),24,0,24,24,0,24);axislab(Smult,"Ring High E","Ring Low E");
-					S3multiHit.push_back(Smult);
 					
+					if(MultiParticles){
+						TH2F* pgmultg= new TH2F(("Multiplicity_v_gamma_"+t).c_str(),("Multiplicity_v_gamma_"+t+";Multiplicity;#gamma Energy [keV]").c_str(),5,0,5,2000,0,2000);
+						PGmultGamma.push_back(pgmultg);
+						if(DS){
+							TH2F* pgmults= new TH2F(("Multiplicity_v_sili_"+t).c_str(),("Multiplicity_v_sili_"+t+";Multiplicity;Electron Energy [keV]").c_str(),5,0,5,2000,0,2000);
+							PGmultSili.push_back(pgmults);
+						}
+					}
 					
 					TH2F* S3Pgtd;
 					if(Telescope)S3Pgtd= new TH2F(("S3particleGated"+t).c_str(),("S3particleGated"+t+";Total Energy [keV];dE/dx [arb.]").c_str(),500,0,control[S3EnergyLimit],500,0,control[S3EnergyLimit]*.4);
@@ -337,47 +345,94 @@ outfile->cd();
 					S3particleGated.push_back(S3Pgtd);
 					
 					
-					
-					
-					outfile->mkdir((tf+"/Doppler").c_str());
-					outfile->cd((tf+"/Doppler").c_str());
-					
-						TH1F* gshift= new TH1F(("GammaUnshifted_"+t).c_str(),("GammaUnshifted_"+t).c_str(),2500,0,2500);axislab(gshift,"#gamma Energy [keV]");
-						GUnshifted.push_back(gshift);
-					
-						TH1F* guncor= new TH1F(("GammaUncorrected_"+t).c_str(),("GammaUncorrected_"+t).c_str(),2500,0,2500);axislab(gshift,"#gamma Energy [keV]");
-						GUncorrected.push_back(guncor);
+					if(ParticleGate[n].use_beta){
+						outfile->mkdir((tf+"/Doppler").c_str());
+						outfile->cd((tf+"/Doppler").c_str());
 						
-						TH2F* guncorR= new TH2F(("GammaUncorrectedRing_"+t).c_str(),("GammaUncorrectedRing_"+t).c_str(),1000,0,2000,24,0,24);axislab(gshift,"#gamma Energy [keV]","S3 Ring Number");
-						GUncorrectedring.push_back(guncorR);
-
-						TH2F* gcorR= new TH2F(("GammaCorrectedRing_"+t).c_str(),("GammaCorrectedRing_"+t).c_str(),1000,0,2000,24,0,24);axislab(gshift,"#gamma Energy [keV]","S3 Ring Number");
-						Gcorrectedring.push_back(gcorR);
-					
-						TigressDopplerAngle.push_back(vector< TH2F* >());
-						for(int r=0;r<24;r++){
-							stringstream subname;subname<<"TigressDopplerAngle_"<<t<<"_Ring"<<r;
-							TH2F* Tigressdopplerangle= new TH2F(subname.str().c_str(),subname.str().c_str(),100,0,TMath::Pi(),2000,0,2000);axislab(Tigressdopplerangle,"#theta [rad]","#gamma Energy [keV]");
-							TigressDopplerAngle[n].push_back(Tigressdopplerangle);
-						}
-
-					if(ringgroups.size()){
-						outfile->mkdir((tf+"/RingGroups").c_str());
-						outfile->cd((tf+"/RingGroups").c_str());
+							TH1F* gshift= new TH1F(("GammaUnshifted_"+t).c_str(),("GammaUnshifted_"+t).c_str(),2500,0,2500);axislab(gshift,"#gamma Energy [keV]");
+							GUnshifted.push_back(gshift);
 						
-						vector< TH1F* > rggs;
-						for(unsigned int r=0;r<ringgroups.size();r++){
-							stringstream histname;
-							histname<<"GammaCorrect_Rings_"<<ringgroups[r].inner<<"-"<<ringgroups[r].outer<<t;
-							rggs.push_back(new TH1F(histname.str().c_str(),histname.str().c_str(),2500,0,2500));
-							axislab(rggs[r],"#gamma Energy [keV]");
+							TH1F* guncor= new TH1F(("GammaUncorrected_"+t).c_str(),("GammaUncorrected_"+t).c_str(),2500,0,2500);axislab(gshift,"#gamma Energy [keV]");
+							GUncorrected.push_back(guncor);
+							
+							TH2F* guncorR= new TH2F(("GammaUncorrectedRing_"+t).c_str(),("GammaUncorrectedRing_"+t).c_str(),1000,0,2000,24,0,24);axislab(gshift,"#gamma Energy [keV]","S3 Ring Number");
+							GUncorrectedring.push_back(guncorR);
+
+							TH2F* gcorR= new TH2F(("GammaCorrectedRing_"+t).c_str(),("GammaCorrectedRing_"+t).c_str(),1000,0,2000,24,0,24);axislab(gshift,"#gamma Energy [keV]","S3 Ring Number");
+							Gcorrectedring.push_back(gcorR);
+						
+							TigressDopplerAngle.push_back(vector< TH2F* >());
+							for(int r=0;r<24;r++){
+								stringstream subname;subname<<"TigressDopplerAngle_"<<t<<"_Ring"<<r;
+								TH2F* Tigressdopplerangle= new TH2F(subname.str().c_str(),subname.str().c_str(),100,0,TMath::Pi(),2000,0,2000);axislab(Tigressdopplerangle,"#theta [rad]","#gamma Energy [keV]");
+								TigressDopplerAngle[n].push_back(Tigressdopplerangle);
+							}
+
+						if(ringgroups.size()){
+							outfile->mkdir((tf+"/RingGroups").c_str());
+							outfile->cd((tf+"/RingGroups").c_str());
+							
+							vector< TH1F* > rggs;
+							for(unsigned int r=0;r<ringgroups.size();r++){
+								stringstream histname;
+								histname<<"GammaCorrect_Rings_"<<ringgroups[r].first<<"-"<<ringgroups[r].second<<t;
+								rggs.push_back(new TH1F(histname.str().c_str(),histname.str().c_str(),2500,0,2500));
+								axislab(rggs[r],"#gamma Energy [keV]");
+							}
+							RingGroupGammaSingles.push_back(rggs);
 						}
-						RingGroupGammaSingles.push_back(rggs);
 					}
+					
 
 			}
 		outfile->cd();
 	}
+
+	
+	
+	vector< TH1F* >  MultiPartTig,MultiPartSPICE;
+	vector< TH2F* >  PhiTheta,multisA,multisB,multigA,multigB;
+	
+	if(ParticleGate.size()>1&&MultiParticles){
+		outfile->mkdir("MultiParticleGates");
+		outfile->cd("MultiParticleGates");
+		
+		for(int n=0;n<ParticleGate.size();n++){
+			string t=ParticleGate[n].title;
+			
+			for(int m=n+1;m<ParticleGate.size();m++){
+				string T=ParticleGate[m].title;
+			
+				string tf="MultiParticleGates/"+t+T;
+				outfile->mkdir(tf.c_str());
+				outfile->cd(tf.c_str());
+				
+				if(DS){
+					TH1F* spmt= new TH1F(("SiLi_"+t+T).c_str(),("SiLi_"+t+T).c_str(),2000,0,2000);axislab(spmt,"Electron Energy [keV]");
+					MultiPartSPICE.push_back(spmt);
+
+					TH2F* pgmults= new TH2F(("Mult_sili_"+t).c_str(),("Mult_sili_"+t+";Multiplicity;Electron Energy [keV]").c_str(),5,0,5,2000,0,2000);
+					multisA.push_back(pgmults);
+					pgmults= new TH2F(("Mult_sili_"+T).c_str(),("Mult_sili_"+T+";Multiplicity;Electron Energy [keV]").c_str(),5,0,5,2000,0,2000);
+					multisB.push_back(pgmults);
+				}
+				
+				TH1F* tigmt= new TH1F(("Gamma_"+t+T).c_str(),("Gamma_"+t+T).c_str(),2500,0,2500);axislab(tigmt,"#gamma Energy [keV]");
+				MultiPartTig.push_back(tigmt);
+				
+				TH2F* pgmultg= new TH2F(("Mult_gamma_"+t).c_str(),("Mult_gamma_"+t+";Multiplicity;#gamma Energy [keV]").c_str(),5,0,5,2500,0,2500);
+				multigA.push_back(pgmultg);
+				pgmultg= new TH2F(("Mult_gamma_"+T).c_str(),("Mult_gamma_"+T+";Multiplicity;#gamma Energy [keV]").c_str(),5,0,5,2500,0,2500);
+				multigB.push_back(pgmultg);
+				
+				TH2F* phth= new TH2F(("Angle_"+t+T).c_str(),("Angle_"+t+T+";#Delta#Theta;#Delta#Phi").c_str(),128,0,pi,128,0,pi);
+				PhiTheta.push_back(phth);
+			}
+		}
+		outfile->cd();
+	}
+		
+
 	
 	TH1F*ee_singles,*ee_sum,*ee_sum_gtfifty,*silirawtotal;	TH2F*ee_vs,*ee_singleVsum,*ee_singleVsum_gt50,*ee_sum_distance,*ee_sum_ring,*e_single_ring,*e_single_preamp,*e_vs_rawtotal,*ee_sum_vs_rawtotal,*ee_single_gamma,*ee_sum_gamma;
 	TH3F*e_e_y,*ee_e_y;
@@ -411,9 +466,9 @@ outfile->cd();
 	
 	Gamma_singles= new TH1D("Gamma_singles","Gamma_singles",2000,0,2000);axislab(Gamma_singles,"#gamma Energy [keV]");	
 	Gamma_Gamma= new TH2F("Gamma_Gamma","Gamma_Gamma",1000,0,2000,1000,0,2000);axislab(Gamma_Gamma,"#gamma Energy [keV]","#gamma Energy [keV]");
-	Gamma_Gamma_Gamma= new TH3F("Gamma_Gamma_Gamma","Gamma_Gamma_Gamma",500,0,2000,500,0,2000,500,0,2000);axislab(Gamma_Gamma_Gamma,"#gamma Energy
+	Gamma_Gamma_Gamma= new TH3F("Gamma_Gamma_Gamma","Gamma_Gamma_Gamma",500,0,2000,500,0,2000,500,0,2000);axislab(Gamma_Gamma_Gamma,"#gamma Energy [keV]","#gamma Energy [keV]","#gamma Energy [keV]");
 	if(DS){SiLi_singles= new TH1D("SiLi_singles","SiLi_singles",2000,0,2000);axislab(SiLi_singles,"Electron Energy [keV]");
-	Gamma_SiLi= new TH2F("Gamma_SiLi","Gamma_SiLi",1000,0,2000,1000,0,2000);axislab(Gamma_SiLi,"#gamma Energy [keV]","Electron Energy [keV]");} [keV]","#gamma Energy [keV]","#gamma Energy [keV]");
+	Gamma_SiLi= new TH2F("Gamma_SiLi","Gamma_SiLi",1000,0,2000,1000,0,2000);axislab(Gamma_SiLi,"#gamma Energy [keV]","Electron Energy [keV]");}
 	
 	if(DS){
 		GammaSiLiPlus= new TH1D("GammaSiLiPlus","GammaSiLiPlus",4000,0,4000);axislab(GammaSiLiPlus,"#gamma+SiLi Energy [keV]");

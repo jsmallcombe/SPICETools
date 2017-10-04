@@ -140,7 +140,7 @@ for(unsigned int i=0;i<s3->GetRingMultiplicity();i++){
 // 		S3ringT.push_back(T);//we're going to use the dE for time
 		S3ring_sum->Fill(e);//Fill some flat histograms, we will only use dE+E events for coincidence work later
 		if(s>=0&&s<24){
-			S3rings[s]->Fill(e);
+			//S3rings[s]->Fill(e);
 			S3flat->Fill(s,e);
 		}			
 
@@ -156,7 +156,7 @@ for(unsigned int i=0;i<s3->GetSectorMultiplicity();i++){
 		int s=SS->GetSegment();
 		S3sector_sum->Fill(e);
 		if(s>=0&&s<32){
-			S3sectors[s]->Fill(e);
+			//S3sectors[s]->Fill(e);
 			S3flat->Fill(s+24,e);
 		}
 		//
@@ -190,7 +190,7 @@ for(unsigned int i=0;i<s3->GetSectorMultiplicity();i++){
 				if(abs(TT)<control[FrontBackTime]){
 					S3RS_tgate->Fill(TT);
 					if(!RFfail)S3RS_RFgated->Fill((SR->GetCfd()-rf_cfd)/16.0,(SS->GetCfd()-rf_cfd)/16.0);
-					S3sectorsout[s]->Fill(SS->GetCharge(),r);
+					//S3sectorsout[s]->Fill(SS->GetCharge(),r);
 				}
 			}
 		}
@@ -202,8 +202,8 @@ for(unsigned int i=0;i<s3->GetSectorMultiplicity();i++){
 //////////////////////////////////////////
 
 
-std::vector< TVector3 > S3pos;
-std::vector< vector < bool > > S32D(gate2D[s3_rs_2D].size(),vector < bool >());
+std::vector< TVector3 > S3pos,S3posspear;
+std::vector< vector < bool > > S32D(ParticleGate.size(),vector < bool >());
 std::vector< double > S3Trf;
 std::vector< TS3Hit* > S3select;
 std::vector< double > Vdedx;
@@ -228,6 +228,8 @@ for(unsigned int i=0;i<s3->GetPixelMultiplicity();i++){//GetPixelMultiplicity bu
 	TVector3 pos = SH->GetPosition(true);
 //	TVector3 pos = TS3::GetPosition(S3ring_i[i],S3sec_i[j],-22.5*TMath::Pi()/180.,32.1,Telescope,false);//Get the hit vector with some random smoothing	
 	S3_map->Fill(pos.X(),pos.Y());//This is more for online checking of hit map
+	S3_map3->Fill(pos.Z(),pos.X(),pos.Y());//This is more for online checking of hit map
+	S3posspear.push_back(pos);	
 	
 	double theta=pos.Theta();	
 	
@@ -269,8 +271,8 @@ for(unsigned int i=0;i<s3->GetPixelMultiplicity();i++){//GetPixelMultiplicity bu
 	S3_theta->Fill(E,theta);	
 	
 	//Check for each gate of particles
-	for(int g=0;g<gate2D[s3_rs_2D].size();g++){
-		if(gate2D[s3_rs_2D][g].gate.IsInside(E,dE)){
+	for(int g=0;g<ParticleGate.size();g++){
+		if(ParticleGate[g].gate.IsInside(E,dE)){
 			S32D[g].push_back(true);
 			S3particleGated[g]->Fill(E,dE);
 		}else{
@@ -287,24 +289,12 @@ for(unsigned int i=0;i<s3->GetPixelMultiplicity();i++){//GetPixelMultiplicity bu
 }
 int S3N=S3select.size();
 
-for(int g=0;g<gate2D[s3_rs_2D].size();g++){
+for(int g=0;g<ParticleGate.size();g++){
 	int m=0;
 	for(unsigned int i=0;i<S32D[g].size();i++){
 		if(S32D[g][i])m++;
 	}
 	PGmult[g]->Fill(m);
-}
-
-
-//Remove all but the first particle of each type
-if(FirstOnly){
-	for(int g=0;g<gate2D[s3_rs_2D].size();g++){
-		bool foundfirst=false;
-		for(unsigned int i=0;i<S32D[g].size();i++){
-			if(foundfirst)S32D[g][i]=false;
-			if(S32D[g][i])foundfirst=true;
-		}
-	}
 }
 
 
@@ -454,8 +444,8 @@ for(int i=0;i<tigress->GetAddbackMultiplicity();i++){
 	
 	if(suppressed)Gamma_suppressed->Fill(e);
 	
-	if(e>10)Gamma_singles_no_bgo->Fill(e);
-	if(e>10&&!suppressed){//noise and basic BGO gate
+	if(e>40)Gamma_singles_no_bgo->Fill(e);
+	if(e>40&&!suppressed){//noise and basic BGO gate
 						
 		gammaE.push_back(e);
 		gammaEdop.push_back(e);
@@ -580,13 +570,20 @@ for(unsigned int i=0;i<gammaN;i++){
 ////////////////// S3 and xxx //////////////////
 ////////////////////////////////////////////////////
 
+std::vector< std::vector< unsigned short > > SiLiFirstOnly;
+std::vector< std::vector< unsigned short > > GammaFirstOnly;
+
+if(FirstOnly||MultiParticles){
+	SiLiFirstOnly= std::vector< std::vector< unsigned short > > (SiLiN,std::vector< unsigned short >(S32D.size(),0));
+	GammaFirstOnly= std::vector< std::vector< unsigned short > > (gammaN,std::vector< unsigned short >(S32D.size(),0));
+}
+
 for(unsigned int j=0;j<S3N;j++){
 	TS3Hit* SH=S3select[j];
 	
-	
 	//Stores if Sili hits are time coincident with current S3
 	std::vector< bool > SiLiS3loop(SiLiN,false);		
-		
+	
 	//// Do S3 and SiLi coincidence check ////
 	if(DS){for(unsigned int i=0;i<SiLiN;i++){
 		double TT=SiLit[i]-SH->GetCfd();
@@ -601,7 +598,7 @@ for(unsigned int j=0;j<S3N;j++){
 		if(!RFfail){
 			S3_SiLi_RF->Fill(S3Trf[j],SiLitRF[i]);
 			S3_SiLi_RFe->Fill(S3Trf[j],SiLitRF[i],e);	
-			for(int g=0;g<gate2D[s3silirf2D].size();g++)rf2dgate+=gate2D[s3silirf2D][g].gate.IsInside(SiLitRF[i],S3Trf[j]);
+			for(int g=0;g<s3silirf2D.size();g++)rf2dgate+=s3silirf2D[g].IsInside(SiLitRF[i],S3Trf[j]);
 			if(!UseSiLiRFCoinc)rf2dgate=false;
 		}
 		
@@ -609,7 +606,7 @@ for(unsigned int j=0;j<S3N;j++){
 		if((t_gate(TT,s3_sili_t)&&!UseSiLiRFCoinc) || rf2dgate){
 			SiLi_S3_tgate->Fill(TT);
 			if(!RFfail)S3_SiLi_RFgated->Fill(S3Trf[j],SiLitRF[i]);
-			SiLiS3loop[i]=true;	
+			SiLiS3loop[i]=true;
 		}
 	}}
 	
@@ -632,30 +629,45 @@ for(unsigned int j=0;j<S3N;j++){
 			Gamma_S3_RFe->Fill(S3Trf[j],gammaTrf[i],e);}	
 	}
 	
+	int mulparthist=0;
+	
 	//// Iterate of S3 kinematic gates, which define a particle type ////
 	for(int g=0;g<S32D.size();g++){if(S32D[g][j]){
 		TVector3 particlevec=S3pos[j];
 		
-		gate2Ddata* ggate=&gate2D[s3_rs_2D][g];
+		gate2Ddata* ggate=&ParticleGate[g];
 		
 		//Convert from S3 particle to particle of interest
 		if(ggate->use_tt){
 			particlevec.SetMagThetaPhi(1,ggate->theta_theta.Eval(particlevec.Theta()), particlevec.Phi()+TMath::Pi());
 		}
 		
-		//get the previously calculated beta value for a particle
+		//get the calculated beta value for a particle
 		double betal=0;
-		if(ggate->use_tb){
-			betal=ggate->theta_beta.Eval(particlevec.Theta());
-		}else{
-			while(ggate->ring_beta.size()<=SH->GetRing())ggate->ring_beta.push_back(0);
-			betal=ggate->ring_beta[SH->GetRing()];
+		if(ggate->use_beta){
+			betal=control[BetaZero];
+			if(ggate->use_rb){
+				unsigned int rrr=SH->GetRing();
+				if(ggate->ring_beta.size()>rrr)betal=ggate->ring_beta[rrr];
+			}else if(ggate->use_tb){
+				betal=ggate->theta_beta.Eval(particlevec.Theta());
+			}
 		}
 		
 		//Do SiLi kinematic adjust
 		if(DS){for(unsigned int i=0;i<SiLiN;i++){if(SiLiS3loop[i]){
-// 			double e=SiLii[i]->GetDoppler(betal,&particlevec);
-			double e=SiLiE[i];
+			
+			if(FirstOnly||MultiParticles){
+				if(FirstOnly)if(SiLiFirstOnly[i][g]){
+					SiLiS3loop[i]=false;
+					continue;
+				}
+				SiLiFirstOnly[i][g]++;
+			}
+			
+			double e;
+			if(ggate->use_beta)e=SiLiE[i];//e=SiLii[i]->GetDoppler(betal,&particlevec);
+			else e=SiLiE[i];
 			SiLiEdop[i]=e;
 			SiLiPG[g]->Fill(e);
 			if(SiLiRF[i])SiLiPGRF[g]->Fill(e);
@@ -666,32 +678,43 @@ for(unsigned int j=0;j<S3N;j++){
 		//// Do kinematic adjust gammas ////
 		for(unsigned int i=0;i<gammaN;i++){if(gammaS3loop[i]){
 			
-			double e=gammai[i]->GetEnergy();
-			unsigned int R=SH->GetRing();
+			if(FirstOnly||MultiParticles){
+				if(FirstOnly)if(GammaFirstOnly[i][g]){
+					gammaS3loop[i]=false;
+					continue;
+				}
+				GammaFirstOnly[i][g]++;
+			}
 			
-			double ang=gammapos[i].Angle(particlevec);
-			TigressDopplerAngle[g][R]->Fill(ang,e);
-			
-			//Really should replace this with a precalc list
-			double usangle=2*atan(pow(1-betal,0.25)/pow(1+betal,0.25));
-			
-			if(abs(ang-usangle)<0.01) GUnshifted[g]->Fill(e);
-			GUncorrected[g]->Fill(e);
-			GUncorrectedring[g]->Fill(e,R);
-			
-			
-			double E=gammai[i]->GetDoppler(betal,&particlevec);
+			double E;
+			if(ggate->use_beta)E=gammai[i]->GetDoppler(betal,&particlevec);
+			else E=gammai[i]->GetEnergy();
 			gammaEdop[i]=E;
-			Gcorrectedring[g]->Fill(E,R);
 			
+			if(ggate->use_beta){
+				double e=gammai[i]->GetEnergy();
+				unsigned int R=SH->GetRing();
+				
+				Gcorrectedring[g]->Fill(E,R);
+				
+				double ang=gammapos[i].Angle(particlevec);
+				TigressDopplerAngle[g][R]->Fill(ang,e);
+
+				//Really should replace this with a precalc list
+				double usangle=2*atan(pow(1-betal,0.25)/pow(1+betal,0.25));
+				if(abs(ang-usangle)<0.01) GUnshifted[g]->Fill(e);
+				GUncorrected[g]->Fill(e);
+				GUncorrectedring[g]->Fill(e,R);
+				
+				for(unsigned int r=0;r<ringgroups.size();r++){
+					if(R>=ringgroups[r].first&&R<=ringgroups[r].second)
+						RingGroupGammaSingles[g][r]->Fill(E);
+				}	
+			}
+
 			GammaPG[g]->Fill(E);
 			GammaEPG[g]->Fill(E,SH->GetEnergy());
 			TigressEThetaPG[g]->Fill(E,gammapos[i].Theta());
-			
-			for(unsigned int r=0;r<ringgroups.size();r++){
-				if(R>=ringgroups[r].inner&&R<=ringgroups[r].outer)
-					RingGroupGammaSingles[g][r]->Fill(E);
-			}
 			
 			if(Telescope){GammaS3dedx->Fill(SH->GetEnergy(),Vdedx[j],E);}
 			
@@ -715,15 +738,56 @@ for(unsigned int j=0;j<S3N;j++){
 			}}
 		}}
 		
-			
-		//Do Mutli S3 Hit
-		for(unsigned int i=0;i<S3N;i++){
-			if(i==j)continue;
-			int ds=abs(SH->GetSector()-S3select[i]->GetSector());
-			if(ds>10&&ds<14)S3multiHit[g]->Fill(SH->GetRing(),S3select[i]->GetRing());
-		}
+
+		//// Go Through Multi S3 gates ////
+		if(MultiParticles)for(int k=g+1;k<S32D.size();k++){{
+			for(unsigned int i=0;i<S3N;i++){
+				if(i==j)continue;
+				
+				if(S32D[k][i]){
+					double thth=S3posspear[i].Theta()+S3posspear[j].Theta();
+					if(thth>pi)thth=2*pi-thth;
+					PhiTheta[mulparthist]->Fill(thth,S3posspear[j].DeltaPhi(S3posspear[i]));
+				}
+			}
+			mulparthist++;
+		}}
 	}}		
 }
+
+
+
+//// Iterate double S3 kinematic gates ////
+if(MultiParticles){
+	int mulparthist=0;
+	for(int g=0;g<S32D.size();g++){
+		for(int k=g+1;k<S32D.size();k++){
+		
+			if(DS){for(unsigned int i=0;i<SiLiN;i++){
+				if(SiLiFirstOnly[i][g]&&SiLiFirstOnly[i][k])
+					MultiPartSPICE[mulparthist]->Fill(SiLiE[i]);
+					multisA[mulparthist]->Fill(SiLiFirstOnly[i][g],SiLiE[i]);
+					multisB[mulparthist]->Fill(SiLiFirstOnly[i][k],SiLiE[i]);
+			}}	
+			
+			for(unsigned int i=0;i<gammaN;i++){
+				if(GammaFirstOnly[i][g]&&GammaFirstOnly[i][k]){
+					MultiPartTig[mulparthist]->Fill(gammaE[i]);
+					multigA[mulparthist]->Fill(GammaFirstOnly[i][g],gammaE[i]);
+					multigB[mulparthist]->Fill(GammaFirstOnly[i][k],gammaE[i]);
+				}
+			}
+			
+			mulparthist++;
+		}
+		
+		for(unsigned int i=0;i<gammaN;i++){
+			if(GammaFirstOnly[i][g])PGmultGamma[g]->Fill(GammaFirstOnly[i][g],gammaE[i]);
+		}
+	}
+}
+
+
 
 ////////////////////////////////
 //////// Do sili + sili ////////

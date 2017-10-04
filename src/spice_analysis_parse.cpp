@@ -1,55 +1,66 @@
 #include "spice_analysis_parse.h"
 
-
-double pi=TMath::Pi();
-//Declare gates at global scope
-enum gatenames{s3_gamma_t,s3_sili_t,gamma_gamma_t,sili_sili_t,gamma_sili_t,rf_S3,rf_sili,rf_gamma};
-vector< string > gatetitles={"s3_gamma_t","s3_sili_t","gamma_gamma_t","sili_sili_t","gamma_sili_t","rf_S3","rf_sili","rf_gamma"};
-vector< vector < double > > gates;
-
-enum gate2Dtypes{s3_rs_2D,s3silirf2D};
-vector< string > gate2Dnames={"s3_rs_2D","s3silirf2D"};
+///////////////////////
+///////////////////////
+//  DEFINE VARIABLES //
+///////////////////////
+///////////////////////
 
 typedef struct gate2Ddata{
 	TGraph gate;
 	string title;
 	std::vector< double > ring_beta;
+	bool use_rb;
 	TGraph theta_beta;
 	bool use_tb;
 	TGraph theta_theta;
 	bool use_tt;
+	bool use_beta;
 } gate2Ddata;
 
-typedef struct ringgroup{
-	unsigned int inner;
-	unsigned int outer;
-} ringgroup;
+double pi=TMath::Pi();
 
-vector< vector< gate2Ddata > > gate2D;
-vector< ringgroup > ringgroups;
+enum gatenames{s3_gamma_t,s3_sili_t,gamma_gamma_t,sili_sili_t,gamma_sili_t,rf_S3,rf_sili,rf_gamma};
+vector< string > gatetitles={"s3_gamma_t","s3_sili_t","gamma_gamma_t","sili_sili_t","gamma_sili_t","rf_S3","rf_sili","rf_gamma"};
+
+
+vector< pair<double,double> > gates;
+vector< gate2Ddata > ParticleGate;
+vector< TGraph > s3silirf2D;
+vector< pair<unsigned int,unsigned int> > ringgroups;
 
 enum controlenum{BetaZero,TigressDistance,FrontBackEnergy,FrontBackTime,S3EnergyLimit,SiLiWaveTOffset,TigressTargetOffset,SiLiNoiseLimit,SiLiSmirnovLimit};
 vector< string > controlnames={"BetaZero","TigressDistance","FrontBackEnergy","FrontBackTime","S3EnergyLimit","SiLiWaveTOffset","TigressTargetOffset","SiLiNoiseLimit","SiLiSmirnovLimit"};
 vector< double > control={0.0,110.,0.9,75,50000,7000,-8,0.15,500};
 
+std::vector< string > filelist;
+std::vector< long > fileentriessum;
 
-//Declare subroutines
+///////////////////////
+///////////////////////
+//Declare subroutines//
+///////////////////////
+///////////////////////
 bool t_gate(double,gatenames);
 long t_stamp(TRF*,TTigress*,TSiLi*);
 long t_stamp_fix(long &);
 TGraph* FileTGraph(string filepath);
 
+///////////////////////
+///////////////////////
+// START OF MAIN FUNCTION //
+///////////////////////
+///////////////////////
+
+
 int analysis_parse(int argc, char *argv[]){	
+	
+gates.clear();
+ParticleGate.clear();
+s3silirf2D.clear();
+ringgroups.clear();
 
-////////////////// OVERARCHING CONTROL VARIABLES //////////////////	
-
-
-std::vector< string > filelist;
-std::vector< long > fileentriessum;
-
-
-for(int z=0;z<gatetitles.size();z++)gates.push_back(vector < double >{-1E10,1E10});
-for(int z=0;z<gate2Dnames.size();z++)gate2D.push_back(vector < gate2Ddata >());
+for(int z=0;z<gatetitles.size();z++)gates.push_back(pair < double,double >{-1E10,1E10});
 
 /////////////////////////////////////////////////////////////////
 ////////////////// PROCESS COMMAND LINE INPUTS //////////////////
@@ -63,7 +74,7 @@ if(!inp.LoadCal(DataChain)){
 }
 string outputfile=OrDefault("AparserOut.root",inp.RootFile("gate"));
 
-bool RemoveTimeGaps=!inp.IsPresent("timecompressoff");//for decay work or to see DAQ problems you may want to false this
+bool RemoveTimeGaps=!inp.IsPresent("TimeCompressOff");//for decay work or to see DAQ problems you may want to false this
 if(RemoveTimeGaps)cout<<endl<<"Time Gaps Now unsuppressed.";
 
 bool UseSiLiRFCoinc=inp.IsPresent("UseSiLiRFCoinc");
@@ -83,6 +94,9 @@ if(KeepChargeShare)cout<<endl<<"Keeping S3 Charge Sharing Events.";
 
 bool FirstOnly=inp.IsPresent("FirstOnly");
 if(FirstOnly)cout<<endl<<"Filling particle gates only once.";
+
+bool MultiParticles=inp.IsPresent("MultiParticles");
+if(MultiParticles)cout<<endl<<"Making Multi-Particle Histograms.";
 
 bool DS=!inp.IsPresent("NoSPICE");
 if(!DS)cout<<endl<<"Omitting SPICE Histograms.";
@@ -105,9 +119,9 @@ for(int z=0;z<controlnames.size();z++)
 //1D gates		
 for(int z=0;z<gatetitles.size();z++){
 	if(inp.IsPresent(gatetitles[z])){
-		inp.NextTwo(gatetitles[z],gates[z][0],gates[z][1]);
-		higher_jd(gates[z][0],gates[z][1]);
-		cout<<endl<<"Setting gate "<<gatetitles[z]<<" "<<gates[z][0]<<"  "<<gates[z][1];
+		inp.NextTwo(gatetitles[z],gates[z].first,gates[z].second);
+		higher_jd(gates[z].first,gates[z].second);
+		cout<<endl<<"Setting gate "<<gatetitles[z]<<" "<<gates[z].first<<"  "<<gates[z].second;
 	}
 }
 
@@ -125,97 +139,131 @@ while(inp>>str){
 
 	//Data file loading
 	if(str.find("RingGroup")<str.size()){
-			ringgroup rg;
-			inp>>rg.inner>>rg.outer;
+			pair<unsigned int,unsigned int> rg;
+			inp>>rg.first>>rg.second;
 			ringgroups.push_back(rg);
-			cout<<endl<<"New Ring Group "<<rg.inner<<"-"<<rg.outer<<flush;
-
+			cout<<endl<<"New Ring Group "<<rg.first<<"-"<<rg.second<<flush;
 	}
 	
 	//2D gates and any associated kinematic data
-	for(int z=0;z<gate2Dnames.size();z++){
-		int strfi=str.find(gate2Dnames[z]);
-		if(strfi<str.size()){
-			//Get the number at the end of the name
-			int x=strfi+gate2Dnames[z].size();
-			int N=abs(atoi(str.substr(x,str.size()-x).c_str()));
-			
-			while(gate2D[z].size()<=N){
-				gate2Ddata push;
-				push.use_tb=false;//solving a really weird problem
-				push.use_tt=false;
-				push.title=str.substr(strfi,str.size()-strfi);
-				gate2D[z].push_back(push);
-			}
-			
-			string mode;
-			inp>>mode;
-			
-			if(mode.find("title")<mode.size()){
-				inp>>gate2D[z][N].title;
-			}else if(mode.find("ring")<mode.size()){
-				int ring;double beta;
-				inp>>ring>>beta;
-				while(gate2D[z][N].ring_beta.size()<=ring)gate2D[z][N].ring_beta.push_back(0);
-				gate2D[z][N].ring_beta[ring]=beta;
-			}else{
-				if(mode.find("file")<mode.size()){					
-					string gfile;
-					inp>>gfile;
-					TGraph* G=FileTGraph(gfile);
-					if(G){
-						if(mode.find("beta")<mode.size()){
-							gate2D[z][N].use_tb=true;
-							gate2D[z][N].theta_beta=*G;
-						}else if(mode.find("theta")<mode.size()){
-							gate2D[z][N].use_tt=true;
-							gate2D[z][N].theta_theta=*G;
-						}else{
-							cout<<endl<<"Setting TGraph as gate."<<flush;
-							gate2D[z][N].gate=*G;
-						}
-						delete G;
-					}
-				}else{
-					double x,y;
-					inp>>x>>y;
-					TGraph* G=0;
-					
+	int strfi=str.find("s3_rs_2D");
+	if(strfi<str.size()){
+		//Get the number at the end of the name
+		int X=strfi+8;
+		int N=abs(atoi(str.substr(X,str.size()-X).c_str()));
+		
+		while(ParticleGate.size()<=N)ParticleGate.push_back(gate2Ddata());
+		
+		string mode;
+		inp>>mode;
+		
+		if(mode.find("title")<mode.size()){
+			inp>>ParticleGate[N].title;
+		}else if(mode.find("ring")<mode.size()){
+			int ring;double beta;
+			inp>>ring>>beta;
+			while(ParticleGate[N].ring_beta.size()<=ring)ParticleGate[N].ring_beta.push_back(0);
+			ParticleGate[N].ring_beta[ring]=beta;
+		}else{
+			if(mode.find("file")<mode.size()){					
+				string gfile;
+				inp>>gfile;
+				TGraph* G=FileTGraph(gfile);
+				if(G){
 					if(mode.find("beta")<mode.size()){
-// 							gate2D[z][N].use_tb=true;
-						G=&gate2D[z][N].theta_beta;
+						ParticleGate[N].theta_beta=*G;
 					}else if(mode.find("theta")<mode.size()){
-						gate2D[z][N].use_tt=true;
-						G=&gate2D[z][N].theta_theta;
+						ParticleGate[N].theta_theta=*G;
 					}else{
-						G=&gate2D[z][N].gate;
+						cout<<endl<<"Setting TGraph as gate."<<flush;
+						ParticleGate[N].gate=*G;
 					}
-					
-					if(G)G->SetPoint(G->GetN(),x,y);
+					delete G;
 				}
-					
+			}else{
+				double x,y;
+				inp>>x>>y;
+				TGraph* G=0;
+				
+				if(mode.find("beta")<mode.size()){
+					G=&ParticleGate[N].theta_beta;
+				}else if(mode.find("theta")<mode.size()){
+					G=&ParticleGate[N].theta_theta;
+				}else{
+					G=&ParticleGate[N].gate;
+				}
+				
+				if(G)G->SetPoint(G->GetN(),x,y);
 			}
-		}			
+		}
+	}
+	
+	//2D gates and any associated kinematic data
+	strfi=str.find("s3silirf2D");
+	if(strfi<str.size()){
+		//Get the number at the end of the name
+		int X=strfi+10;
+		int N=abs(atoi(str.substr(X,str.size()-X).c_str()));
+		
+		while(s3silirf2D.size()<=N)s3silirf2D.push_back(TGraph());
+		
+		double x,y;
+		inp>>x>>y;
+		s3silirf2D[N].SetPoint(s3silirf2D[N].GetN(),x,y);
 	}
 
 }
 gROOT->cd();
 
+
 //
 // Format the gates a bit
 //
-for(int x=0;x<gate2D.size();x++){
-	for(int y=0;y<gate2D[x].size();y++){
-		string t=gate2D[x][y].title;
-		gate2D[x][y].gate.SetTitle(t.c_str());
-		gate2D[x][y].theta_beta.SetTitle((t+"beta").c_str());
-		if(gate2D[x][y].theta_beta.GetN()<2){
-				gate2D[x][y].theta_beta.SetPoint(0,0,control[BetaZero]);
-				gate2D[x][y].theta_beta.SetPoint(1,pi,control[BetaZero]);
-		}	
-		gate2D[x][y].theta_theta.SetTitle((t+"thetaVS").c_str());
+for(int y=0;y<ParticleGate.size();y++){
+	if(ParticleGate[y].gate.GetN()<3){
+		ParticleGate.erase(ParticleGate.begin()+y);
+		y--;
+		continue;
+	}
+	
+	if(ParticleGate[y].title.size()<1){
+		stringstream ss;
+		ss<<"Gate"<<y;
+		ParticleGate[y].title=ss.str();
+	}
+	string t=ParticleGate[y].title;
+	ParticleGate[y].gate.SetTitle(t.c_str());
+	
+	
+	ParticleGate[y].use_beta=false;
+	ParticleGate[y].use_rb=true;
+	ParticleGate[y].use_tb=false;
+	if(ParticleGate[y].ring_beta.size()==0){
+		ParticleGate[y].use_beta=(control[BetaZero]);
+		ParticleGate[y].use_rb=false;
+		if(ParticleGate[y].theta_beta.GetN()>1){
+			ParticleGate[y].use_tb=true;
+			ParticleGate[y].use_beta=true;
+			ParticleGate[y].theta_beta.SetTitle((t+"beta").c_str());
+		}
+	}
+	
+	
+	ParticleGate[y].use_tt=false;
+	if(!ParticleGate[y].theta_theta.GetN()>1){
+		ParticleGate[y].use_tt=true;
+		ParticleGate[y].theta_theta.SetTitle((t+"thetaVS").c_str());
 	}
 }
+
+for(int y=0;y<s3silirf2D.size();y++){
+	if(s3silirf2D[y].GetN()<3){
+		s3silirf2D.erase(s3silirf2D.begin()+y);
+		y--;
+		continue;
+	}
+}
+
 
 /////////////////////////////////////////////////////////////////
 /////////////////  Check all needed inputs     //////////////////
@@ -496,20 +544,21 @@ outfile->cd("RunTime");
 	timequick->Write();
 	sorttime->Write("SortTime");
 	guessend->Write("GuessEndTime");
-for(int g=0;g<gate2D[s3_rs_2D].size();g++){
-	string t=gate2D[s3_rs_2D][g].title;
+	
+for(int g=0;g<ParticleGate.size();g++){
+	string t=ParticleGate[g].title;
 	string tf="ParticleGates/"+t;
 	outfile->cd(tf.c_str());
-		gate2D[s3_rs_2D][g].gate.Write(t.c_str());
-		if(gate2D[s3_rs_2D][g].use_tt){
-			gate2D[s3_rs_2D][g].theta_theta.Write((t+"thetaVS").c_str());
+		ParticleGate[g].gate.Write(t.c_str());
+		if(ParticleGate[g].use_tt){
+			ParticleGate[g].theta_theta.Write((t+"thetaVS").c_str());
 		}
-		if(gate2D[s3_rs_2D][g].use_tb){
-			gate2D[s3_rs_2D][g].theta_beta.Write((t+"beta").c_str());
-		}else{
-			int N=gate2D[s3_rs_2D][g].ring_beta.size() ;
+		if(ParticleGate[g].use_tb){
+			ParticleGate[g].theta_beta.Write((t+"beta").c_str());
+		}else if(ParticleGate[g].use_rb){
+			int N=ParticleGate[g].ring_beta.size() ;
 			TH1F h((t+"beta").c_str(),(t+"beta").c_str(),N+2,0,N+2);
-			for(int i=0;i<N;i++)h.SetBinContent(i+1,gate2D[s3_rs_2D][g].ring_beta[i]);
+			for(int i=0;i<N;i++)h.SetBinContent(i+1,ParticleGate[g].ring_beta[i]);
 			h.Write();
 		}
 }
@@ -538,7 +587,7 @@ return 0;
 
 
 bool t_gate(double t,gatenames g){
-	if(t>=gates[g][0]&&t<=gates[g][1])return true;
+	if(t>=gates[g].first&&t<=gates[g].second)return true;
 	return false;	
 }
 

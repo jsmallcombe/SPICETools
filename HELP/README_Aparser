@@ -6,12 +6,10 @@
    Some minimal dependence on personal Jlibrary, easily patched out.
 
    All commands can be given either on the command line or by passing a command list file.
-   Command list file is any plain file containing a list of commands e.g. info.txt run.info
-   The # mark at the start of a line comments out the line in and info file
+   Command list file is any plain text file named *.info
+   The # mark at the start of a line comments out the line in an info file
+   Command line inputs and info files can be combined. Info file can be nested 
    Usage: ./Aparser run.info
-
-   Command line inputs and info files can be combined, for output/cal file the first encountered is used
-   Nesting of info files is not supported
    Usage: ./Aparser files.info analysis37434.root gates.info
 
    No wildcards may be used, use command line inputs to make use of variable substitution
@@ -25,8 +23,8 @@
 		e.g. analysis****.root
 
 	Output file -
-		Any .root file NOT containing "analysis" in the title.
-		A default output.root will be created if not provided
+		Any .root file NOT containing "analysis" or "gate" in the title.
+		A default AparserOut.root will be created if not provided
 		e.g. firstrun.root
 
 
@@ -36,19 +34,27 @@
 		e.g. Calibration.cal
 
 
-   Flags -
+   -----------------------------------------------------
+   Flags
+   -----------------------------------------------------
    The following flags may be parsed to change default sort behaviour:
+   
+   NoSPICE - SPICE is not used. No SPICE histograms.
    UseFitCharge - All SiLi energies will be calculated from the waveform fit charge, if waveform fitting was enabled in grsisort
    Telescope - Sort S3 as dE (rings) E (sectors) telescope, not a single detector.
-   UseSiLiRFCoinc - The 2D SiLi-S3-RF gates are used in determining SiLi-S3 coincidence
+   UseSiLiRFCoinc - 2D SiLi-S3-RF time gates are used in determining SiLi-S3 coincidence.
    TigressSuppressed - Set Tigress detector positions to suppressed mode (backward)
    DoDoubleElectrons - Enable the creation and filling of double electron histograms
-   timecompressoff - Use the absolute clock time, do not compress
-   KeepChargeShare - Keep rather than discard S3 charge sharing events
-   UseFirst - Only fill particle histograms for the first particle of each type in each event.
+   TimeCompressOff - Use the absolute clock time, do not compress
+   KeepChargeShare - Keep rather than discard S3 charge sharing events. NOT appropriate for telescope
+   FirstOnly - Only fill particle coincident gamma and electron histograms once per gate type. i.e. 2p coincident gamma ray fills the p-gamma histogram only once.
+   MultiParticles - Make special histograms for gamma and electron coincident with several particles.
 
-   Set Numbers  -
+   -----------------------------------------------------
+   Set Numbers
+   -----------------------------------------------------
    The following internal numbers can modified from there default value by passing their name followed by the new number:
+   
    BetaZero    (A default experimental beta value =0.0)
    TigressDistance  (Tigress face distance =110.0, see also TigressSuppressed flag)
    FrontBackEnergy  (S3 ring sector gate, given as a fraction =0.9)
@@ -61,12 +67,13 @@
 
    If an argument matches none of the above it is assumed to be a gate name.
    
-   NOTES ON RF GATES:
-   As SPICE is mainly run with a coincidence trigger RF gates are rarely useful.
-   RF triggers are best for cleaning singles data.
-   Coincidence triggers are better for cleaning coindence data without loosing events that were genuine but not part of the trigger pair
-   This is particularly true when some runs have high SPICE noise which may effect trigger (and hence RF) but still contain good events.
-   The RF gates consequently are only used to fill a few RF specific histograms
+   -----------------------------------------------------
+   NOTES ON RF GATES
+   -----------------------------------------------------
+
+   As SPICE is mainly run with a coincidence trigger, RF gates are rarely useful (RF triggers are best for cleaning singles data.)
+   Coincidence triggers are better for cleaning coincidence data without losing events that were genuine but not part of the trigger pair.  This is particularly true when some runs have high SPICE noise which may effect trigger, but still contain good events. The RF gates consequently are only used to fill a few RF specific histograms
+   
    RF coincidence MAY be used for 2D gating SiLi-S3 where it has been found to be advantageous.
    
    -----------------------------------------------------
@@ -74,41 +81,46 @@
    -----------------------------------------------------
    Immediately following the the gate name the upper and lower limits must be passed, this enables the gate in the appropriate part of the sort
    e.g. rf_gamma -15 15
+   
    The following gates exist at the time of writing:
    s3_gamma_t, s3_sili_t, gamma_gamma_t, sili_sili_t, gamma_sili_t, rf_S3, rf_sili, rf_gamma
 
    -----------------------------------------------------
-   2D Gates
+   2D Particle Gates
    -----------------------------------------------------
-   Gate names indicate a TYPE of 2D gate, each type can have as many gates as desired
-   The input name should be concatenated with an index starting at zero to designate the gate e.g. s3_rs_2D0
-   The current types are:
-   s3_rs_2D - A particle gate on the S3 detector, either dE-E or E-theta depending on the Telescope flag
-   s3silirf2D - S3 SiLi RF time gates used with the UseSiLiRFCoinc flag
+   
+   Lines starting "s3_rs_2D" add data to a particle gate on the S3 detector, either dE-E or E-theta depending on the Telescope flag.  
+   "s3_rs_2D" should be concatenated with an index starting at zero to designate the gate e.g. s3_rs_2D0
 
-   Following the gate name a data associated with the gate may be declared
-   A type specifier should be given followed by input data.
+   Next a type specifier should be given followed by input data.
    The following specifiers exist:
    title STRING - the title to use when saving the gate and associated histograms [title]
-   gate # # - An point of the gate [X,Y]
-   theta # # - A point of angle map for a binary particle of interest [ThetaS3,Theta1]
+   gate # # - A point of the gate [X,Y]
+   theta # # - A point of angle map for a binary reaction particle of interest [ThetaDetcted,ThetaOther]
    beta # # - A point of beta vs angle map [Theta,beta]
    ring # # - The beta value to use for a specified S3 ring [Ring,theta]
    
-   gatefile *.root - A file containing a TGraph for the gate
-   thetafile *.root - A file containing a TGraph for angle map for a binary particle of interest
-   betafile *.root - A file containing a TGraph for beta vs angle map
-   
-   If a mix of "beta" AND "ring" inputs are given the ring values will be used for kinematic adjustment
-
    e.g.
-   titles3_rs_2D0 protons
-   s3_rs_2D0 gate 6812.61 3556.14
-   s3_rs_2D0 gate  8065.76 3022.72
+   s3_rs_2D0 title protons
+   s3_rs_2D0 gate 6812 3556.14
+   s3_rs_2D0 gate 8065.76 3022.72
    s3_rs_2D0 gate 9297.68 2654.04
    s3_rs_2D0 beta 0 0.05
    s3_rs_2D0 beta 0.1 0.04
-   s3_rs_2D0 beta 0.5 0.03
+   s3_rs_2D0 beta 0.5 0.03  
+   
+   OR gates can be loaded from files:
+    
+   gatefile *.root - A file containing a TGraph for the gate
+   thetafile *.root - A file containing a TGraph for angle map for a binary particle of interest
+   betafile *.root - A file containing a TGraph for beta vs angle map
+   (File name should contain "gate" else it may be overwritten by histogram output!)
+   
+   e.g.
+   s3_rs_2D1 title alpha
+   s3_rs_2D1 gate alphagate.root
+   
+   If a mix of "beta" AND "ring" inputs are given the ring values will be used for kinematic adjustment
 
    In a binary reaction one may wish to gate on one particle and kinematically correct based on the other.
    In this case specify "gate" inputs for the gate particle "beta" inputs for the other particle and 
@@ -126,3 +138,18 @@
    
    e.g.
    RingGroup 0 4
+   
+   -----------------------------------------------------
+   2D SPICE s3 RF gate
+   -----------------------------------------------------
+   
+   Lines starting "s3silirf2D" add data to a time gate for SPICE S3 coincidence with respect to the RF
+   "s3silirf2D" should be concatenated with an index starting at zero to designate the gate e.g. s3silirf2D0
+   and followed by the x & y point of the gate
+
+   e.g.
+   s3silirf2D0 -100.3 50.1
+   s3silirf2D0 -100.3 -40.9
+   s3silirf2D0 60.1 10.1
+   
+   (S3 SiLi RF time gates are only used with the UseSiLiRFCoinc flag)
