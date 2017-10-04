@@ -374,20 +374,18 @@ for(int i=0;i<sili->GetAddbackMultiplicity();i++){
 			
 				SiLi_addback->Fill(e);
 				
-				double edop=sili_hit->GetDoppler(control[BetaZero]);
+// 				double edop=sili_hit->GetDoppler(control[BetaZero]);
 				
 				//Calc a "cfd" time from the fit and timestamp
 				double T=sili_hit->GetTimeFitCfd()-control[SiLiWaveTOffset];
 				
 				SiLiE.push_back(e);
-				SiLii.push_back(sili_hit);
-// 				SiLiEdop.push_back(edop);
 				SiLiEdop.push_back(e);
-				
+				SiLii.push_back(sili_hit);
+			
 				SiLit.push_back(T);	
 				
 				SiLi_singles->Fill(e);
-				SiLi_singles_dop->Fill(edop);
 				runtime_sili->Fill(tstamp,e);
 				fileN_sili->Fill(fileiterator,e);	
 				eventN_sili->Fill(jentry,e);	
@@ -456,14 +454,11 @@ for(int i=0;i<tigress->GetAddbackMultiplicity();i++){
 	
 	if(e>10)Gamma_singles_no_bgo->Fill(e);
 	if(e>10&&!suppressed){//noise and basic BGO gate
-			
-		double edop=tigress_hit->GetDoppler(control[BetaZero]);
-			
+						
 		gammaE.push_back(e);
-		gammaEdop.push_back(edop);
+		gammaEdop.push_back(e);
 		gammai.push_back(tigress_hit);
 		Gamma_singles->Fill(e);
-		Gamma_singles_dop->Fill(edop);
 		runtime_gamma->Fill(tstamp,e);
 		fileN_gamma->Fill(fileiterator,e);
 		eventN_gamma->Fill(jentry,e);
@@ -525,8 +520,6 @@ for(unsigned int i=0;i<gammaN;i++){
 			GammaSiLiPlus_Gamma->Fill(gammaE[i]+SiLiE[j],gammaE[i]);
 			GammaSiLiPlus_SiLi->Fill(gammaE[i]+SiLiE[j],SiLiE[j]);
 			
-			Gamma_SiLi_dop->Fill(gammaEdop[i],SiLiEdop[j]);
-			
 			if(!RFfail)Gamma_SiLi_SiliRF->Fill(gammaE[i],SiLiE[j],SiLitRF[j]);
 			
 			if(gammaRF[i]&&SiLiRF[j]){
@@ -547,9 +540,6 @@ for(unsigned int i=0;i<gammaN;i++){
 			GG_tgate->Fill(TT);
 			Gamma_Gamma->Fill(gammaE[i],gammaE[j]);
 			Gamma_Gamma->Fill(gammaE[j],gammaE[i]);
-			
-			Gamma_Gamma_dop->Fill(gammaEdop[i],gammaEdop[j]);
-			Gamma_Gamma_dop->Fill(gammaEdop[j],gammaEdop[i]);
 			
 			TigressEETheta->Fill(gammaE[i],gammaE[j],gammapos[i].Theta());
 			TigressEEdTheta->Fill(gammaE[i],gammaE[j],gammapos[i].Angle(gammapos[j]));
