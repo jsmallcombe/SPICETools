@@ -61,7 +61,7 @@ if(!inp.LoadCal(DataChain)){
 	cout<<"FAIL";
 	return 0;
 }
-string outputfile=OrDefault("spice_check.root",inp.RootFile("gate"));
+string outputfile=OrDefault("AparserOut.root",inp.RootFile("gate"));
 
 bool RemoveTimeGaps=!inp.IsPresent("timecompressoff");//for decay work or to see DAQ problems you may want to false this
 if(RemoveTimeGaps)cout<<endl<<"Time Gaps Now unsuppressed.";
@@ -83,6 +83,9 @@ if(KeepChargeShare)cout<<endl<<"Keeping S3 Charge Sharing Events.";
 
 bool FirstOnly=inp.IsPresent("FirstOnly");
 if(FirstOnly)cout<<endl<<"Filling particle gates only once.";
+
+bool DS=!inp.IsPresent("NoSPICE");
+if(!DS)cout<<endl<<"Omitting SPICE Histograms.";
 
 bool TigressSuppressed=inp.IsPresent("TigressSuppressed");
 if(TigressSuppressed){
@@ -414,7 +417,7 @@ cout<<endl<< "100 \% COMPLETE          \n";
 //////////////////// Rate Ratio Histograms ////////////////////
 ///////////////////////////////////////////////////////////////
 gROOT->cd();
-
+if(DS){
 //These aren't saved 
 TAxis* AY=eventN_gamma->GetYaxis();
 TAxis* AYY=fileN_gamma->GetYaxis();
@@ -478,6 +481,8 @@ delete highgamma,highgammaF;
 	eventN_sili_noiseratio->SetMinimum(0);
 	fileN_e_y_highratio->SetMinimum(0);
 	fileN_sili_noiseratio->SetMinimum(0);
+	
+}
 
 ///////////////////////////////////////////////////////////////  
 /////////////////////// WRITING OUTPUT ////////////////////////

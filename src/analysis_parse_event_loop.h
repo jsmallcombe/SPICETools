@@ -312,13 +312,15 @@ if(FirstOnly){
 //////// Do spice singles ////////
 //////////////////////////////////
 
+	
 double rawsilisum=0;
-
 if(UseFitCharge)sili->UseFitCharge();
 
 // First we fill the raw stuff
-SiLi_mult->Fill(sili->GetMultiplicity());
-for(int i=0;i<sili->GetMultiplicity();i++){
+
+
+if(DS)SiLi_mult->Fill(sili->GetMultiplicity());
+if(DS){for(int i=0;i<sili->GetMultiplicity();i++){
 	sili_hit = sili->GetSiLiHit(i);
 	double e=sili_hit->GetEnergy();
 	fileN_silinoise->Fill(fileiterator,e);
@@ -354,7 +356,7 @@ for(int i=0;i<sili->GetMultiplicity();i++){
 			}
 		}
 	}
-}
+}}
 
 std::vector< double > SiLiE,SiLiEdop,SiLit,SiLitRF;
 std::vector< TSiLiHit* > SiLii;
@@ -362,8 +364,8 @@ std::vector< bool > SiLiRF;
 
 
 //Next we do the addback selected hits that we will use for the rest
-SiLiAdd_mult->Fill(sili->GetAddbackMultiplicity());
-for(int i=0;i<sili->GetAddbackMultiplicity();i++){
+if(DS)SiLiAdd_mult->Fill(sili->GetAddbackMultiplicity());
+if(DS){for(int i=0;i<sili->GetAddbackMultiplicity();i++){
 	sili_hit = sili->GetAddbackHit(i);
 	double e=sili_hit->GetEnergy();
 	if(e>10&&e<4000){//noise gate and common sense gate
@@ -417,7 +419,7 @@ for(int i=0;i<sili->GetAddbackMultiplicity();i++){
 			SiLi_rejected_sum->Fill(e);
 		}
 	}
-}
+}}
 int SiLiN=SiLii.size();
 
 //////////////////////////////////
@@ -503,33 +505,35 @@ int gammaN=gammai.size();
 for(unsigned int i=0;i<gammaN;i++){
 
 	//////// Do gammas + SiLi ////////
-	for(unsigned int j=0;j<SiLiN;j++){
-		double TT=gammai[i]->GetCfd()-SiLit[j];
-		Gamma_SiLi_t->Fill(TT);
-		Gamma_SiLi_tw->Fill(TT);
-		Gamma_SiLi_t2->Fill(gammaE[i],TT);
-		Gamma_SiLi_t3->Fill(gammaE[i],SiLiE[j],TT);
-		
-		if(t_gate(TT,gamma_sili_t)){
-			Gamma_SiLi_tgate->Fill(TT);
+	if(DS){
+		for(unsigned int j=0;j<SiLiN;j++){
+			double TT=gammai[i]->GetCfd()-SiLit[j];
+			Gamma_SiLi_t->Fill(TT);
+			Gamma_SiLi_tw->Fill(TT);
+			Gamma_SiLi_t2->Fill(gammaE[i],TT);
+			Gamma_SiLi_t3->Fill(gammaE[i],SiLiE[j],TT);
+			
+			if(t_gate(TT,gamma_sili_t)){
+				Gamma_SiLi_tgate->Fill(TT);
 
-			runtime_gammasili->Fill(tstamp,gammaE[i],SiLiE[j]);
-			eventN_gammasili->Fill(jentry,gammaE[i],SiLiE[j]);
-			Gamma_SiLi->Fill(gammaE[i],SiLiE[j]);
-			GammaSiLiPlus->Fill(gammaE[i]+SiLiE[j]);
-			GammaSiLiPlus_Gamma->Fill(gammaE[i]+SiLiE[j],gammaE[i]);
-			GammaSiLiPlus_SiLi->Fill(gammaE[i]+SiLiE[j],SiLiE[j]);
-			
-			if(!RFfail)Gamma_SiLi_SiliRF->Fill(gammaE[i],SiLiE[j],SiLitRF[j]);
-			
-			if(gammaRF[i]&&SiLiRF[j]){
-				SiLiGamma__RFgated->Fill(gammaE[i],SiLiE[j]);
+				runtime_gammasili->Fill(tstamp,gammaE[i],SiLiE[j]);
+				eventN_gammasili->Fill(jentry,gammaE[i],SiLiE[j]);
+				Gamma_SiLi->Fill(gammaE[i],SiLiE[j]);
+				GammaSiLiPlus->Fill(gammaE[i]+SiLiE[j]);
+				GammaSiLiPlus_Gamma->Fill(gammaE[i]+SiLiE[j],gammaE[i]);
+				GammaSiLiPlus_SiLi->Fill(gammaE[i]+SiLiE[j],SiLiE[j]);
+				
+				if(!RFfail)Gamma_SiLi_SiliRF->Fill(gammaE[i],SiLiE[j],SiLitRF[j]);
+				
+				if(gammaRF[i]&&SiLiRF[j]){
+					SiLiGamma__RFgated->Fill(gammaE[i],SiLiE[j]);
+				}
+				
+				Gamma_SiLi_RFgated->Fill(gammaTrf[i],SiLitRF[j]);
 			}
 			
-			Gamma_SiLi_RFgated->Fill(gammaTrf[i],SiLitRF[j]);
+			Gamma_SiLi_RF->Fill(gammaTrf[i],SiLitRF[j]);
 		}
-		
-		Gamma_SiLi_RF->Fill(gammaTrf[i],SiLitRF[j]);
 	}
 	
 	//////// Do gammas + gammas ////////
@@ -579,11 +583,12 @@ for(unsigned int i=0;i<gammaN;i++){
 for(unsigned int j=0;j<S3N;j++){
 	TS3Hit* SH=S3select[j];
 	
-	//Stores if Sili hits are time coincident with current S3
-	std::vector< bool > SiLiS3loop(SiLiN,false);
 	
+	//Stores if Sili hits are time coincident with current S3
+	std::vector< bool > SiLiS3loop(SiLiN,false);		
+		
 	//// Do S3 and SiLi coincidence check ////
-	for(unsigned int i=0;i<SiLiN;i++){
+	if(DS){for(unsigned int i=0;i<SiLiN;i++){
 		double TT=SiLit[i]-SH->GetCfd();
 		double e=SiLiE[i];
 
@@ -606,7 +611,7 @@ for(unsigned int j=0;j<S3N;j++){
 			if(!RFfail)S3_SiLi_RFgated->Fill(S3Trf[j],SiLitRF[i]);
 			SiLiS3loop[i]=true;	
 		}
-	}
+	}}
 	
 	std::vector< bool > gammaS3loop(gammaN,false);
 
@@ -648,14 +653,14 @@ for(unsigned int j=0;j<S3N;j++){
 		}
 		
 		//Do SiLi kinematic adjust
-		for(unsigned int i=0;i<SiLiN;i++){if(SiLiS3loop[i]){
+		if(DS){for(unsigned int i=0;i<SiLiN;i++){if(SiLiS3loop[i]){
 // 			double e=SiLii[i]->GetDoppler(betal,&particlevec);
 			double e=SiLiE[i];
 			SiLiEdop[i]=e;
 			SiLiPG[g]->Fill(e);
 			if(SiLiRF[i])SiLiPGRF[g]->Fill(e);
 			SiLiEPG[g]->Fill(e,SH->GetEnergy());	
-		}}
+		}}}
 			
 
 		//// Do kinematic adjust gammas ////
@@ -663,7 +668,6 @@ for(unsigned int j=0;j<S3N;j++){
 			
 			double e=gammai[i]->GetEnergy();
 			unsigned int R=SH->GetRing();
-
 			
 			double ang=gammapos[i].Angle(particlevec);
 			TigressDopplerAngle[g][R]->Fill(ang,e);
@@ -704,11 +708,11 @@ for(unsigned int j=0;j<S3N;j++){
 			}
 			
 			//// Do particle gated gammas + electron ////
-			for(unsigned int m=0;m<SiLiN;m++){
+			if(DS){for(unsigned int m=0;m<SiLiN;m++){
 				if(SiLiS3loop[m]){if(t_gate(gammai[i]->GetCfd()-SiLit[m],gamma_sili_t)){
 					GammaSiLiPG[g]->Fill(gammaEdop[i],SiLiEdop[m]);	
 				}}
-			}	
+			}}
 		}}
 		
 			
@@ -726,7 +730,7 @@ for(unsigned int j=0;j<S3N;j++){
 ////////////////////////////////
 // Shouldnt use the doppler adjust values any more here
 
-if(DoDoubleElectrons){
+if(DoDoubleElectrons&&DS){
 if(rawsilisum>10&&SiLiN>0)silirawtotal->Fill(rawsilisum);
 for(unsigned int i=0;i<SiLiN;i++){
 	double e=SiLii[i]->GetEnergy();
