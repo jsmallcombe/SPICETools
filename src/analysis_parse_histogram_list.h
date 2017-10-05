@@ -4,41 +4,67 @@
 
 outfile->cd();
 
-	TH1F *front_back,*front_backgate;
-	TH2F *S3_map,*S3_dedx,*frontVback,*frontVbackGated;
-	TH3F *S3_d3dx;
-	TH1F *S3_sectormult,*S3_ringmult,*S3_mult;
-	TH2F *S3_theta,*S3flat;
-	TH1F *S3ring_sum,*S3sector_sum;
 	TH3F *S3_map3;
+	TH2F *S3_theta;
+	TH1F* S3_multot;
+	
+	vector< TH1F* > front_back,front_backgate,S3_sectormult,S3_ringmult,S3_mult,S3ring_sum,S3sector_sum,S3RS_t,S3RS_tgate;
+	vector< TH2F* > S3_map,S3_dedx,frontVback,frontVbackGated,S3flat;
+	vector< TH3F* > S3_d3dx,S3RS_t3;
+	
+	
 
 	outfile->mkdir("S3");
 	outfile->cd("S3");
-	
-		S3_map= new TH2F("S3_map","S3_map",800,-40,40,800,-40,40);axislab(S3_map,"X [mm]","Y [mm]");
-		S3_map3= new TH3F("S3_map3","S3_map3;Z [mm];X [mm];Y [mm]",80,-40,40,80,-40,40,100,-50,50);
-
-		if(Telescope){
-			S3_dedx= new TH2F("S3_dedx","S3_dedx;Total Energy [keV];dE/dx [arb.]",1000,0,control[S3EnergyLimit],1000,0,control[S3EnergyLimit]*.4);
-			S3_d3dx= new TH3F("S3_d3dx","S3_d3dx;Total Energy [keV];dE/dx [arb.];Theta [rad]",100,0,control[S3EnergyLimit],100,0,control[S3EnergyLimit]*.4,100,0,pi/2);
-		}else{
-			frontVback= new TH2F("frontVback","frontVback;Ring Energy [keV];Sector Energy [keV]",1000,0,control[S3EnergyLimit],1000,0,control[S3EnergyLimit]);
-			frontVbackGated= new TH2F("frontVbackGated","frontVbackGated;Ring Energy [keV];Sector Energy [keV]",1000,0,control[S3EnergyLimit],1000,0,control[S3EnergyLimit]);
-			front_back= new TH1F("front_back","front_back;Ring Energy-Sector Energy [keV];",1000,-25000,25000);
-			front_backgate= new TH1F("front_backgate","front_backgate;Ring Energy-Sector Energy [keV];",1000,-25000,25000);
-		}
-
-
-		S3_sectormult= new TH1F("S3_sectormult","S3_sectormult;Sector Multiplicity;Counts",20,0,20);
-		S3_ringmult= new TH1F("S3_ringmult","S3_ringmult;Ring Multiplicity;Counts",20,0,20);
-		S3_mult= new TH1F("S3_mult","S3_mult;S3 Multiplicity;Counts",20,0,20);
-		
+		S3_map3= new TH3F("S3_map3","S3_map3;Z [mm];X [mm];Y [mm]",80,-50,50,80,-40,40,100,-40,40);
 		S3_theta= new TH2F("S3_theta","S3_theta;Total Energy [keV];Theta [rad]",1000,0,control[S3EnergyLimit],200,0.2,1.2);
 		
-		S3flat= new TH2F("S3flat","S3flat",56,0,56,1000,0,control[S3EnergyLimit]);axislab(S3flat,"Channel","Energy [keV]");
-		S3ring_sum= new TH1F("S3ring_sum","S3ring_sum",2000,0,control[S3EnergyLimit]);axislab(S3ring_sum,"Energy [keV]");
-		S3sector_sum= new TH1F("S3sector_sum","S3sector_sum",2000,0,control[S3EnergyLimit]);axislab(S3sector_sum,"Energy [keV]");
+		int k=0;
+		for(unsigned short i=0;i<4;i++){
+			
+			string sfx="";
+			if(MultiS3){
+				if(!s3used[i])continue;
+				s3index[i]=k;
+				k++;
+				stringstream ss;
+				ss<<i;
+				sfx=ss.str();
+				string tf="S3/Pos"+sfx;
+				outfile->mkdir(tf.c_str());
+				outfile->cd(tf.c_str());
+				
+			}else{i=4;}
+			
+			S3_map.push_back(new TH2F(("S3_map"+sfx).c_str(),("S3_map;X [mm];Y [mm]"+sfx).c_str(),800,-40,40,800,-40,40));
+
+			if(Telescope){
+				S3_dedx.push_back( new TH2F(("S3_dedx"+sfx).c_str(),("S3_dedx"+sfx+";Total Energy [keV];dE/dx [arb.]").c_str(),1000,0,control[S3EnergyLimit],1000,0,control[S3EnergyLimit]*.4));
+				S3_d3dx.push_back( new TH3F(("S3_d3dx"+sfx).c_str(),("S3_d3dx"+sfx+";Total Energy [keV];dE/dx [arb.];Theta [rad]").c_str(),100,0,control[S3EnergyLimit],100,0,control[S3EnergyLimit]*.4,100,0,pi/2));
+				S3RS_t3.push_back( new TH3F(("S3RS_t3"+sfx).c_str(),("S3RS_t3"+sfx+";#Deltat [10/16 ns];dE/dx [arb.];Total Energy [keV]").c_str(),100,-500,500,200,0,control[S3EnergyLimit],250,0,control[S3EnergyLimit]));
+			}else{
+				frontVback.push_back( new TH2F(("frontVback"+sfx).c_str(),("frontVback"+sfx+";Ring Energy [keV];Sector Energy [keV]").c_str(),1000,0,control[S3EnergyLimit],1000,0,control[S3EnergyLimit]));
+				frontVbackGated.push_back( new TH2F(("frontVbackGated"+sfx).c_str(),("frontVbackGated"+sfx+";Ring Energy [keV];Sector Energy [keV]").c_str(),1000,0,control[S3EnergyLimit],1000,0,control[S3EnergyLimit]));
+				front_back.push_back( new TH1F(("front_back"+sfx).c_str(),("front_back"+sfx+";Ring Energy-Sector Energy [keV];").c_str(),1000,-25000,25000));
+				front_backgate.push_back( new TH1F(("front_backgate"+sfx).c_str(),("front_backgate"+sfx+";Ring Energy-Sector Energy [keV];").c_str(),1000,-25000,25000));
+			}
+
+			S3RS_t.push_back( new TH1F(("S3RS_t"+sfx).c_str(),("S3RS_t"+sfx+";#Deltat [10/16 ns]").c_str(),1024,-512,512));
+			S3RS_tgate.push_back( new TH1F(("S3RS_tgate"+sfx).c_str(),("S3RS_tgate"+sfx+";#Deltat [10/16 ns]").c_str(),1024,-512,512));
+
+			S3_sectormult.push_back( new TH1F(("S3_sectormult"+sfx).c_str(),("S3_sectormult"+sfx+";Sector Multiplicity;Counts").c_str(),20,0,20));
+			S3_ringmult.push_back( new TH1F(("S3_ringmult"+sfx).c_str(),("S3_ringmult"+sfx+";Ring Multiplicity;Counts").c_str(),20,0,20));
+			S3_mult.push_back( new TH1F(("S3_mult"+sfx).c_str(),("S3_mult"+sfx+"+;S3 Multiplicity;Counts").c_str(),20,0,20));
+			
+			S3flat.push_back( new TH2F(("S3flat"+sfx).c_str(),("S3flat"+sfx+";Channel;Energy [keV]").c_str(),56,0,56,1000,0,control[S3EnergyLimit]));
+			S3ring_sum.push_back( new TH1F(("S3ring_sum"+sfx).c_str(),("S3ring_sum"+sfx+";Energy [keV]").c_str(),2000,0,control[S3EnergyLimit]));
+			S3sector_sum.push_back( new TH1F(("S3sector_sum"+sfx).c_str(),("S3sector_sum"+sfx+";Energy [keV]").c_str(),2000,0,control[S3EnergyLimit]));
+		}
 		
+		
+		
+		outfile->cd("S3");
+		if(MultiS3) S3_multot = new TH1F("S3_mult","S3_mult;S3 Multiplicity;Counts",20,0,20);
 // 		outfile->mkdir("S3/elements");
 // 		outfile->cd("S3/elements");
 // 		
@@ -145,15 +171,14 @@ outfile->cd();
 	outfile->cd();
 	
 	
-	TH1F *S3RS_t, *GG_t, *ee_t, *SiLi_S3_t, *SiLi_S3_tw, *Gamma_S3_t, *Gamma_SiLi_t, *Gamma_SiLi_tw, *S3RS_tgate, *GG_tgate, *ee_tgate, *SiLi_S3_tgate, *Gamma_S3_tgate, *Gamma_SiLi_tgate, *S3_rf, *SiLi_rf, *Gamma_rf, *S3_rfgate, *SiLi_rfgate, *Gamma_rfgate;
+	TH1F *GG_t, *ee_t, *SiLi_S3_t, *SiLi_S3_tw, *Gamma_S3_t, *Gamma_SiLi_t, *Gamma_SiLi_tw, *GG_tgate, *ee_tgate, *SiLi_S3_tgate, *Gamma_S3_tgate, *Gamma_SiLi_tgate, *S3_rf, *SiLi_rf, *Gamma_rf, *S3_rfgate, *SiLi_rfgate, *Gamma_rfgate;
 	TH2F *SiLi_S3_t2, *Gamma_S3_t2, *Gamma_SiLi_t2, *SiLi_rf2, *EGamma_rf2, *S3RS_RF, *S3_SiLi_RF, *Gamma_SiLi_RF, *Gamma_S3_RF, *S3RS_RFgated, *S3_SiLi_RFgated, *Gamma_SiLi_RFgated, *Gamma_S3_RFgated;
-	TH3F *S3RS_t3, *Gamma_SiLi_t3, *S3_SiLi_RFe, *Gamma_S3_RFe, *Gamma_SiLi_SiliRF;
+	TH3F *Gamma_SiLi_t3, *S3_SiLi_RFe, *Gamma_S3_RFe, *Gamma_SiLi_SiliRF;
 	
 	outfile->mkdir("CoinTimegates");
 	outfile->cd("CoinTimegates");
 		outfile->mkdir("CoinTimegates/Time1D");
 		outfile->cd("CoinTimegates/Time1D");
-			 S3RS_t = new TH1F("S3RS_t","S3RS_t",1024,-512,512);axislab(S3RS_t,"#Deltat [10/16 ns]");
 			 GG_t = new TH1F("GG_t","GG_t",1024,-512,512);axislab(GG_t,"#Deltat [10/16 ns]");
 			 ee_t = new TH1F("ee_t","ee_t",1024,-1024,1024);axislab(ee_t,"#Deltat [10/16 ns]");
 			 Gamma_S3_t= new TH1F("Gamma_S3_t","Gamma_S3_t",1024,-512,512);axislab(Gamma_S3_t,"#Deltat [10/16 ns]");
@@ -163,7 +188,6 @@ outfile->cd();
 			Gamma_SiLi_tw= new TH1F("Gamma_SiLi_tw","Gamma_SiLi_tw",2048,-10240,10240);axislab(Gamma_SiLi_t,"#Deltat [10/16 ns]");}
 		outfile->mkdir("CoinTimegates/Gates");
 		outfile->cd("CoinTimegates/Gates");
-			 S3RS_tgate = new TH1F("S3RS_tgate","S3RS_tgate",1024,-512,512);axislab(S3RS_tgate,"#Deltat [10/16 ns]");
 			 GG_tgate = new TH1F("GG_tgate","GG_tgate",1024,-512,512);axislab(GG_tgate,"#Deltat [10/16 ns]");
 			 ee_tgate = new TH1F("ee_tgate","ee_tgate",1024,-1024,1024);axislab(ee_tgate,"#Deltat [10/16 ns]");
 			 Gamma_S3_tgate= new TH1F("Gamma_S3_tgate","Gamma_S3_tgate",1024,-512,512); axislab(Gamma_S3_tgate,"#Deltat [10/16 ns]");
@@ -171,7 +195,6 @@ outfile->cd();
 			Gamma_SiLi_tgate= new TH1F("Gamma_SiLi_tgate","Gamma_SiLi_tgate",1024,-512,512); axislab(Gamma_SiLi_tgate,"#Deltat [10/16 ns]");}
 		outfile->mkdir("CoinTimegates/TimeEnergy");
 		outfile->cd("CoinTimegates/TimeEnergy");
-			 S3RS_t3 = new TH3F("S3RS_t3","S3RS_t3",100,-500,500,200,0,control[S3EnergyLimit],250,0,control[S3EnergyLimit]);axislab(S3RS_t3,"#Deltat [10/16 ns]","dE/dx [arb.]","Total Energy [keV]");
 			 Gamma_S3_t2= new TH2F("Gamma_S3_t2","Gamma_S3_t2",2000,0,2000,1024,-512,512);axislab(Gamma_S3_t2,"Gamma Energy [keV]","#Deltat [10/16 ns]");
 			if(DS) {SiLi_S3_t2= new TH2F("SiLi_S3_t2","SiLi_S3_t2",2000,0,2000,1024,-1024,1024);axislab(SiLi_S3_t2,"Electron Energy [keV]","#Deltat [10/16 ns]");
 			Gamma_SiLi_t2= new TH2F("Gamma_SiLi_t2","Gamma_SiLi_t2",2000,0,2000,1024,-512,512);axislab(Gamma_SiLi_t2,"Gamma Energy [keV]","#Deltat [10/16 ns]");

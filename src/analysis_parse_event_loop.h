@@ -16,7 +16,7 @@ DataChain->GetEntry(jentry);  //start the loop
 //////// Do timestamp & RF ////////
 ///////////////////////////////////
 
-long tstamp=t_stamp(rf,tigress,sili);//Fetch a time stamp from whichever of these is in the event, adjusted for the tigress high low griffin grsisort mismatch
+long tstamp=t_stamp(rf,tigress,sili,s3);//Fetch a time stamp from whichever of these is in the event, adjusted for the tigress high low griffin grsisort mismatch
 
 
 bool RFfail=true;
@@ -77,12 +77,11 @@ if(tstamp>0&&tstamp<timestamp_max){//If time stamp is crazy ignore
 // 			cout<<endl<<"doooooom";
 // 					nentries=jentry+150;
 
-	
 			//A disk access intensive last ditch check to see if the time stamp REALLY changes and doesn't just glitch
 			long futurestamp=0;
 			if(jentry+128<nentries){
 				DataChain->GetEntry(jentry+128);
-				futurestamp=t_stamp(rf,tigress,sili);
+				futurestamp=t_stamp(rf,tigress,sili,s3);
 				DataChain->GetEntry(jentry);
 			}
 			if(!futurestamp || abs(futurestamp -(movelong>>7)) > tpgap){
@@ -126,38 +125,46 @@ if(!(jentry%(nentries/10000))){
 //////// Do S3 singles ////////
 ///////////////////////////////
 
-//Get hits for dE S3 (rings)
-S3_ringmult->Fill(s3->GetRingMultiplicity());
+//Get hits for rings S3 (dE in telescope)
+unsigned short apmult[4]={0,0,0,0};
 for(unsigned int i=0;i<s3->GetRingMultiplicity();i++){
 	TS3Hit* SR=s3->GetRingHit(i);
+	unsigned short id=s3id(SR);
+	apmult[id]++;
+	
 	double e=SR->GetEnergy();
-	if(e>control[S3EnergyLimit]*0.005){//noise gate
+	if(e>control[S3EnergyLimit]*0.01){//noise gate
 // 		double T=SH->GetCfd();
 		
 		int s=SR->GetSegment();
 // 		S3ring.push_back(e);//store energy dE
 // 		S3ring_i.push_back(s);//GetSegment == ring number 
 // 		S3ringT.push_back(T);//we're going to use the dE for time
-		S3ring_sum->Fill(e);//Fill some flat histograms, we will only use dE+E events for coincidence work later
+		S3ring_sum[id]->Fill(e);//Fill some flat histograms, we will only use dE+E events for coincidence work later
 		if(s>=0&&s<24){
 			//S3rings[s]->Fill(e);
-			S3flat->Fill(s,e);
+			S3flat[id]->Fill(s,e);
 		}			
 
 	}
 }
+if(MultiS3)for(unsigned short i=0;i<4;i++){if(s3used[i])S3_ringmult[s3index[i]]->Fill(apmult[i]);apmult[i]=0;}
+else S3_ringmult[0]->Fill(s3->GetRingMultiplicity());
+
 
 //Get hits for E S3 (sectors)
-S3_sectormult->Fill(s3->GetSectorMultiplicity());
 for(unsigned int i=0;i<s3->GetSectorMultiplicity();i++){
 	TS3Hit* SS=s3->GetSectorHit(i);
+	unsigned short id=s3id(SS);
+	apmult[id]++;
+	
 	double e=SS->GetEnergy();
 	if(e>control[S3EnergyLimit]*0.005){//increased noise gate
 		int s=SS->GetSegment();
-		S3sector_sum->Fill(e);
+		S3sector_sum[id]->Fill(e);
 		if(s>=0&&s<32){
 			//S3sectors[s]->Fill(e);
-			S3flat->Fill(s+24,e);
+			S3flat[id]->Fill(s+24,e);
 		}
 		//
 		// End of singles
@@ -168,27 +175,29 @@ for(unsigned int i=0;i<s3->GetSectorMultiplicity();i++){
 		//
 		for(unsigned int i=0;i<s3->GetRingMultiplicity();i++){
 			TS3Hit* SR=s3->GetRingHit(i);
+			if(MultiS3)if(SS->GetArrayPosition()!=SR->GetArrayPosition())continue;
+			
 			double re=SR->GetEnergy();
 			if(re>control[S3EnergyLimit]*0.01){//noise gate
 				int r=SR->GetSegment();
 				
 				if(!Telescope){
-					frontVback->Fill(re,e);
-					front_back->Fill(e-re);
+					frontVback[id]->Fill(re,e);
+					front_back[id]->Fill(e-re);
 					if(e*control[FrontBackEnergy]<re&&re*control[FrontBackEnergy]<e){
-						front_backgate->Fill(e-re);
-						frontVbackGated->Fill(re,e);
+						front_backgate[id]->Fill(e-re);
+						frontVbackGated[id]->Fill(re,e);
 					}
 					else continue;
 				}
 				
 				double TT=SR->GetCfd()-SS->GetCfd();
-				S3RS_t->Fill(TT);
-				S3RS_t3->Fill(TT,re,e);
+				S3RS_t[id]->Fill(TT);
+				if(Telescope)S3RS_t3[id]->Fill(TT,re,e);
 				if(!RFfail)S3RS_RF->Fill((SR->GetCfd()-rf_cfd)/16.0,(SS->GetCfd()-rf_cfd)/16.0);
 				
 				if(abs(TT)<control[FrontBackTime]){
-					S3RS_tgate->Fill(TT);
+					S3RS_tgate[id]->Fill(TT);
 					if(!RFfail)S3RS_RFgated->Fill((SR->GetCfd()-rf_cfd)/16.0,(SS->GetCfd()-rf_cfd)/16.0);
 					//S3sectorsout[s]->Fill(SS->GetCharge(),r);
 				}
@@ -196,6 +205,8 @@ for(unsigned int i=0;i<s3->GetSectorMultiplicity();i++){
 		}
 	}
 }
+if(MultiS3)for(unsigned short i=0;i<4;i++){if(s3used[i])S3_sectormult[s3index[i]]->Fill(apmult[i]);apmult[i]=0;}
+else S3_sectormult[0]->Fill(s3->GetSectorMultiplicity());
 
 //////////////////////////////////////////
 //////// Make S3 complete events ////////
@@ -209,9 +220,10 @@ std::vector< TS3Hit* > S3select;
 std::vector< double > Vdedx;
 
 // Build the combined hits we will use for coincidences
-S3_mult->Fill(s3->GetPixelMultiplicity());
 for(unsigned int i=0;i<s3->GetPixelMultiplicity();i++){//GetPixelMultiplicity builds the events based on pre-set settings
 	TS3Hit* SH=s3->GetS3Hit(i);
+	unsigned short id=s3id(SH);
+	apmult[id]++;
 	
 	//RF gate for singles triggers
 	double TT=SH->GetCfd()-rf_cfd;TT/=16.0;		
@@ -227,7 +239,7 @@ for(unsigned int i=0;i<s3->GetPixelMultiplicity();i++){//GetPixelMultiplicity bu
 
 	TVector3 pos = SH->GetPosition(true);
 //	TVector3 pos = TS3::GetPosition(S3ring_i[i],S3sec_i[j],-22.5*TMath::Pi()/180.,32.1,Telescope,false);//Get the hit vector with some random smoothing	
-	S3_map->Fill(pos.X(),pos.Y());//This is more for online checking of hit map
+	S3_map[id]->Fill(pos.X(),pos.Y());//This is more for online checking of hit map
 	S3_map3->Fill(pos.Z(),pos.X(),pos.Y());//This is more for online checking of hit map
 	S3posspear.push_back(pos);	
 	
@@ -261,8 +273,8 @@ for(unsigned int i=0;i<s3->GetPixelMultiplicity();i++){//GetPixelMultiplicity bu
 
 	
 	if(Telescope){
-		S3_dedx->Fill(E,dE); //Fill the ID histogram
-		S3_d3dx->Fill(E,dE,theta); //Fill the ID 3D histogram
+		S3_dedx[id]->Fill(E,dE); //Fill the ID histogram
+		S3_d3dx[id]->Fill(E,dE,theta); //Fill the ID 3D histogram
 		//We are using the blurred theta so it will be lower "resolution" but not fence post
 	}else{				
 		dE=theta;//This line might seem a little odd but dE is only sparsely used
@@ -272,9 +284,22 @@ for(unsigned int i=0;i<s3->GetPixelMultiplicity();i++){//GetPixelMultiplicity bu
 	
 	//Check for each gate of particles
 	for(int g=0;g<ParticleGate.size();g++){
-		if(ParticleGate[g].gate.IsInside(E,dE)){
+		
+		bool goodgate=true;
+		if(MultiS3&&ParticleGate[g].s3Limit){
+			goodgate=false;
+			for(unsigned short s=0;s<ParticleGate[g].s3.size();s++){
+				if(SH->GetArrayPosition()==ParticleGate[g].s3[s]){
+					goodgate=true;
+					break;
+				}
+			}
+		}		
+		
+		if(goodgate&&ParticleGate[g].gate.IsInside(E,dE)){
 			S32D[g].push_back(true);
 			S3particleGated[g]->Fill(E,dE);
+
 		}else{
 			S32D[g].push_back(false);
 		}
@@ -285,9 +310,14 @@ for(unsigned int i=0;i<s3->GetPixelMultiplicity();i++){//GetPixelMultiplicity bu
 	S3pos.push_back(SH->GetPosition(false));
 	if(Telescope)Vdedx.push_back(dE);
 
-
 }
 int S3N=S3select.size();
+
+if(MultiS3){
+	for(unsigned short i=0;i<4;i++){if(s3used[i])S3_mult[s3index[i]]->Fill(apmult[i]);}
+	if(MultiS3)S3_multot->Fill(s3->GetPixelMultiplicity());
+}else S3_mult[0]->Fill(s3->GetPixelMultiplicity());
+
 
 for(int g=0;g<ParticleGate.size();g++){
 	int m=0;

@@ -16,6 +16,8 @@ typedef struct gate2Ddata{
 	TGraph theta_theta;
 	bool use_tt;
 	bool use_beta;
+	std::vector< short > s3;
+	bool s3Limit;
 } gate2Ddata;
 
 double pi=TMath::Pi();
@@ -36,13 +38,23 @@ vector< double > control={0.0,110.,0.9,75,50000,7000,-8,0.15,500};
 std::vector< string > filelist;
 std::vector< long > fileentriessum;
 
+bool s3used[4]={0,0,0,0};
+short s3index[4]={0,0,0,0};
+bool MultiS3=false;
+
+unsigned short s3id(TS3Hit* s3hit){
+	if(!MultiS3)return 0;
+	unsigned short i=s3hit->GetArrayPosition();
+	if(i<4)return s3index[i];
+}
+
 ///////////////////////
 ///////////////////////
 //Declare subroutines//
 ///////////////////////
 ///////////////////////
 bool t_gate(double,gatenames);
-long t_stamp(TRF*,TTigress*,TSiLi*);
+long t_stamp(TRF*,TTigress*,TSiLi*,TS3*);
 long t_stamp_fix(long &);
 TGraph* FileTGraph(string filepath);
 
@@ -133,9 +145,17 @@ gROOT->cd();
 //////////////////     PROCESS COMBINED INPUTS       ////////////
 /////////////////////////////////////////////////////////////////
 
+
 inp.Rewind();
 string str;
 while(inp>>str){
+	
+	//Set multiple S3 detectors
+	if(str.find("MultiS3")<str.size()){
+		unsigned short s;
+		inp>>s;
+		if(s<4)	s3used[s]=true;
+	}
 
 	//Data file loading
 	if(str.find("RingGroup")<str.size()){
@@ -164,6 +184,10 @@ while(inp>>str){
 			inp>>ring>>beta;
 			while(ParticleGate[N].ring_beta.size()<=ring)ParticleGate[N].ring_beta.push_back(0);
 			ParticleGate[N].ring_beta[ring]=beta;
+		}else if(mode.find("MS3")<mode.size()){
+			short s;
+			inp>>s;
+			ParticleGate[N].s3.push_back(s);
 		}else{
 			if(mode.find("file")<mode.size()){					
 				string gfile;
@@ -215,6 +239,17 @@ while(inp>>str){
 }
 gROOT->cd();
 
+int c=0;
+stringstream cc;
+cc<<"Multiple S3s position ";
+for(int i=0;i<4;i++)if(s3used[i]){
+	c++;cc<<i<<" ";
+}
+
+if(c>1){
+	MultiS3=true;
+	cout<<endl<<cc.str();
+}
 
 //
 // Format the gates a bit
@@ -254,6 +289,9 @@ for(int y=0;y<ParticleGate.size();y++){
 		ParticleGate[y].use_tt=true;
 		ParticleGate[y].theta_theta.SetTitle((t+"thetaVS").c_str());
 	}
+	
+	ParticleGate[y].s3Limit=false;
+	if(MultiS3&&ParticleGate[y].s3.size())ParticleGate[y].s3Limit=true;
 }
 
 for(int y=0;y<s3silirf2D.size();y++){
@@ -363,7 +401,7 @@ for(int i=0;i<timeaveragesamples;i++){
 		long k=jentry+i*samples;
 		if(k>=nentries)break;
 		DataChain->GetEntry(k);
-		ulong t=t_stamp(rf,tigress,sili);
+		ulong t=t_stamp(rf,tigress,sili,s3);
 		if(t>0)timegrad.SetPoint(timegrad.GetN(),jentry,t);
 		timequick->Fill(i*1000+jentry,t);
 	}
@@ -383,6 +421,8 @@ for(int i=0;i<timeaveragesamples;i++){
 	if(i==0){if(timef1grad.GetParameter(0)>0)timestampstart=timef1grad.GetParameter(0);}
 }cout<<endl;
 tickspereven/=validtimes;
+
+timequick->Sumw2(kFALSE);
 
 //If the rate at any long point is much lower than samples, there will be more time intervals between each event
 //Hence we will have underestimated the experiment length and have overflow
@@ -591,7 +631,7 @@ bool t_gate(double t,gatenames g){
 	return false;	
 }
 
-long t_stamp(TRF *rf,TTigress *tigress,TSiLi*sili){
+long t_stamp(TRF *rf,TTigress *tigress,TSiLi *sili,TS3 *s3){
 	if(tigress){
 		for(unsigned int i=0;i<tigress->GetMultiplicity();i++){
 			long t=tigress->GetTigressHit(i)->GetTimeStamp();
@@ -605,6 +645,12 @@ long t_stamp(TRF *rf,TTigress *tigress,TSiLi*sili){
 	if(sili){
 		for(unsigned int i=0;i<sili->GetMultiplicity();i++){
 			long t=sili->GetSiLiHit(i)->GetTimeStamp();
+			if(t>0)return t;
+		}
+	}
+	if(s3){
+		for(unsigned int i=0;i<s3->GetRingMultiplicity();i++){
+			long t=s3->GetRingHit(i)->GetTimeStamp();
 			if(t>0)return t;
 		}
 	}

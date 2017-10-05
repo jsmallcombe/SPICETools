@@ -64,6 +64,8 @@
    TigressTargetOffset (mm between centre of target and tigress=-8)
    SiLiNoiseLimit   (cut of limit to throw away spice events =0.15)
    SiLiSmirnovLimit (cut of limit to throw away spice events =500)
+   
+   MultiS3 (Give the mnemonic array position of one of the S3s when there are multiple, call for each)
 
    If an argument matches none of the above it is assumed to be a gate name.
    
@@ -99,6 +101,7 @@
    theta # # - A point of angle map for a binary reaction particle of interest [ThetaDetcted,ThetaOther]
    beta # # - A point of beta vs angle map [Theta,beta]
    ring # # - The beta value to use for a specified S3 ring [Ring,theta]
+   MS3 # - When there are multiple S3 limit this gate to only s3 with mnemonic array position #, may add multiple with repeat commands.
    
    e.g.
    s3_rs_2D0 title protons

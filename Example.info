@@ -49,10 +49,17 @@ SiLiWaveTOffset 8850
 #A default experimental beta value
 
 TigressTargetOffset 0.5
+# (mm between centre of target and tigress=-8)
 
 SiLiNoiseLimit 0.1
+# (cut of limit to throw away spice events =0.15)
 
 SiLiSmirnovLimit 300
+# (cut of limit to throw away spice events =500)
+
+#MultiS3 1
+#MultiS3 0
+# (Give the mnemonic array position of one of the S3s when there are multiple, call for each)
 
 ### TIME GATES ###
 
@@ -80,6 +87,7 @@ s3_rs_2D0 gatefile infofiles/protongate.root
 #s3_rs_2D0 gate 0 0
 #s3_rs_2D0 gate 0 5000
 #s3_rs_2D0 gate 5000 0
+#s3_rs_2D0 s3 1
 
 s3_rs_2D1 title alpha
 s3_rs_2D1 gatefile infofiles/alphagate.root
