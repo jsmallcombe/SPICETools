@@ -68,7 +68,6 @@ s3_sili_t -100 300
 gamma_gamma_t -100 100 
 sili_sili_t -150 150 
 gamma_sili_t -200 450 
-#s3_dEE_t -120 10 
 #rf_S3 -50 0 
 
 rf_sili 80 91 
@@ -91,5 +90,6 @@ s3_rs_2D0 gatefile infofiles/protongate.root
 
 s3_rs_2D1 title alpha
 s3_rs_2D1 gatefile infofiles/alphagate.root
+#s3_rs_2D1 UseEnergyBeta 15
    
 

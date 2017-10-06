@@ -60,7 +60,7 @@ using namespace std;
 
 int S3CalParse(int,char**,TApplication* app=0);
 
-void S3CalParseChain(TChain* DataChain,string outputcalfile,TApplication* app=0);
+void S3CalParseChain(TChain* DataChain,string outputcalfile,TApplication* app=0,bool=false);
 
 void MakeBlankS3cal(string mnemonic, string calout);
 

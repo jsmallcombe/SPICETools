@@ -8,9 +8,9 @@ int S3CalParse(int argc, char *argv[],TApplication* app){
 	string outputfile=OrDefault("S3energycal.root",inp.RootFile());
 		
 	TChain *DataChain=inp.AnalysisTree();
-	
+		
 	if(inp.LoadCal(DataChain)){
-		S3CalParseChain(DataChain,outputfile,app);
+		S3CalParseChain(DataChain,outputfile,app,inp.IsPresent("high"));
 	}
 	delete DataChain;
 
@@ -19,10 +19,15 @@ int S3CalParse(int argc, char *argv[],TApplication* app){
 
 
 
-void S3CalParseChain(TChain* DataChain,string outputfile,TApplication* app){
+void S3CalParseChain(TChain* DataChain,string outputfile,TApplication* app,bool gain){
 	
+	int gn=1;
+	if(gain)gn*=10;
+	
+	TChannel::SetIntegration("BAE",125);
 	TChannel::SetIntegration("SPE",125);
 	TChannel::SetUseCalFileIntegration("SP",true);
+	TChannel::SetUseCalFileIntegration("BA",true);
 
 	TS3 *s3 = 0;
 	Int_t nentries = DataChain->GetEntries();
@@ -49,16 +54,16 @@ void S3CalParseChain(TChain* DataChain,string outputfile,TApplication* app){
 	for(int i=0;i<24;i++){
 		stringstream ss;
 		ss<<"S3_ring_"<<i<<"_charge";
-		chargering[i] = new TH1F(ss.str().c_str(),ss.str().c_str(),10000,0,10000);
+		chargering[i] = new TH1F(ss.str().c_str(),ss.str().c_str(),10000,0,1000*gn);
 	}
 	TH1F *chargesector[32];
 	for(int i=0;i<32;i++){
 		stringstream ss;
 		ss<<"S3_sector_"<<i<<"_charge";
-		chargesector[i] = new TH1F(ss.str().c_str(),ss.str().c_str(),10000,0,10000);
+		chargesector[i] = new TH1F(ss.str().c_str(),ss.str().c_str(),10000,0,1000*gn);
 	}
 	
-	TH2F *chargechan=new TH2F("chargechan","chargechan",56,0,56,5000,0,10000);
+	TH2F *chargechan=new TH2F("chargechan","chargechan",56,0,56,5000,0,1000*gn);
 	
 	
 	

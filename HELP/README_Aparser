@@ -102,6 +102,7 @@
    beta # # - A point of beta vs angle map [Theta,beta]
    ring # # - The beta value to use for a specified S3 ring [Ring,theta]
    MS3 # - When there are multiple S3 limit this gate to only s3 with mnemonic array position #, may add multiple with repeat commands.
+   UseEnergyBeta # - Calculate beta from the detected energy using the given mass #
    
    e.g.
    s3_rs_2D0 title protons
@@ -121,7 +122,7 @@
    
    e.g.
    s3_rs_2D1 title alpha
-   s3_rs_2D1 gate alphagate.root
+   s3_rs_2D1 gatefile alphagate.root
    
    If a mix of "beta" AND "ring" inputs are given the ring values will be used for kinematic adjustment
 
@@ -129,6 +130,7 @@
    In this case specify "gate" inputs for the gate particle "beta" inputs for the other particle and 
    "theta" to specify a kinematic relation between the two (x the gate particle, y the correcting particle)
    If the curve has multiple solutions (i.e. inverse kinematics) these should be separated into multiple s3_rs_2D gates
+   When the beta inputs are given the angle is the detected angle regardless of which particle is being corrected.
 
    -----------------------------------------------------
    Ring Groups
@@ -141,6 +143,10 @@
    
    e.g.
    RingGroup 0 4
+   
+   Note: With multiple S3s the ring numbering convention is a little odd.
+   It defined in order mnemonic array position number.
+   E.g. Position 2 & 3 used: First ring of 2 = 0, First ring of 3 = 24 etc.
    
    -----------------------------------------------------
    2D SPICE s3 RF gate

@@ -368,6 +368,8 @@ outfile->cd();
 					S3particleGated.push_back(S3Pgtd);
 					
 					
+					TigressDopplerAngle.push_back(vector< TH2F* >());
+					
 					if(ParticleGate[n].use_beta){
 						outfile->mkdir((tf+"/Doppler").c_str());
 						outfile->cd((tf+"/Doppler").c_str());
@@ -375,17 +377,18 @@ outfile->cd();
 							TH1F* gshift= new TH1F(("GammaUnshifted_"+t).c_str(),("GammaUnshifted_"+t).c_str(),2500,0,2500);axislab(gshift,"#gamma Energy [keV]");
 							GUnshifted.push_back(gshift);
 						
-							TH1F* guncor= new TH1F(("GammaUncorrected_"+t).c_str(),("GammaUncorrected_"+t).c_str(),2500,0,2500);axislab(gshift,"#gamma Energy [keV]");
+							TH1F* guncor= new TH1F(("GammaUncorrected_"+t).c_str(),("GammaUncorrected_"+t).c_str(),2500,0,2500);axislab(guncor,"#gamma Energy [keV]");
 							GUncorrected.push_back(guncor);
 							
-							TH2F* guncorR= new TH2F(("GammaUncorrectedRing_"+t).c_str(),("GammaUncorrectedRing_"+t).c_str(),1000,0,2000,24,0,24);axislab(gshift,"#gamma Energy [keV]","S3 Ring Number");
+							if(!k)k=1;//MultiS3 variable
+							
+							TH2F* guncorR= new TH2F(("GammaUncorrectedRing_"+t).c_str(),("GammaUncorrectedRing_"+t).c_str(),1000,0,2000,24*k,0,24*k);axislab(guncorR,"#gamma Energy [keV]","S3 Ring Number");
 							GUncorrectedring.push_back(guncorR);
 
-							TH2F* gcorR= new TH2F(("GammaCorrectedRing_"+t).c_str(),("GammaCorrectedRing_"+t).c_str(),1000,0,2000,24,0,24);axislab(gshift,"#gamma Energy [keV]","S3 Ring Number");
+							TH2F* gcorR= new TH2F(("GammaCorrectedRing_"+t).c_str(),("GammaCorrectedRing_"+t).c_str(),1000,0,2000,24*k,0,24*k);axislab(gcorR,"#gamma Energy [keV]","S3 Ring Number");
 							Gcorrectedring.push_back(gcorR);
 						
-							TigressDopplerAngle.push_back(vector< TH2F* >());
-							for(int r=0;r<24;r++){
+							for(int r=0;r<24*k;r++){
 								stringstream subname;subname<<"TigressDopplerAngle_"<<t<<"_Ring"<<r;
 								TH2F* Tigressdopplerangle= new TH2F(subname.str().c_str(),subname.str().c_str(),100,0,TMath::Pi(),2000,0,2000);axislab(Tigressdopplerangle,"#theta [rad]","#gamma Energy [keV]");
 								TigressDopplerAngle[n].push_back(Tigressdopplerangle);

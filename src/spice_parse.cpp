@@ -49,6 +49,8 @@ void processchain(TChain* DataChain,string outputfile,bool frag,bool UseFitCharg
 	}else TChannel::SetIntegration("SP",125);
 	TChannel::SetUseCalFileIntegration("SP",true);	
 	
+	//This extra line is needed to use 2 different integrations for the 2 different charge calcs.
+	double integ=1;if(UseFitCharge)integ=125;
 	
 	TFragment *fragment = 0;  
 	TSiLi *sili = 0;  
@@ -255,11 +257,12 @@ void processchain(TChain* DataChain,string outputfile,bool frag,bool UseFitCharg
 
 			int s=sili_hit->GetSegment();
 			if(s>=0&&s<120&&sili_hit->GetEnergy()>10){
+				
 				fitcharge[s]->Fill(sili_hit->GetFitCharge());
-				charge[s]->Fill(sili_hit->GetCharge());
+				charge[s]->Fill(sili_hit->GetCharge()/integ);
 				energy2D->Fill(s,sili_hit->GetEnergy());
 				total->Fill(sili_hit->GetEnergy());
-				charge2D->Fill(s,sili_hit->GetCharge());
+				charge2D->Fill(s,sili_hit->GetCharge()/integ);
 				fitcharge2D->Fill(s,sili_hit->GetFitCharge());
 	
 				if(frag){
@@ -309,7 +312,7 @@ void processchain(TChain* DataChain,string outputfile,bool frag,bool UseFitCharg
 				if(fragment->HasWave()){
 					const vector<Short_t>* wave=fragment->GetWaveform();
 					if(wave->size()>0){
-						mohrotate->Fill(s,wave->at(0),fragment->GetCharge());
+						mohrotate->Fill(s,wave->at(0),fragment->GetCharge()/integ);
 					}
 				}
 			}

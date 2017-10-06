@@ -133,7 +133,7 @@ for(unsigned int i=0;i<s3->GetRingMultiplicity();i++){
 	apmult[id]++;
 	
 	double e=SR->GetEnergy();
-	if(e>control[S3EnergyLimit]*0.01){//noise gate
+	if(e>control[S3EnergyLimit]*0.004){//noise gate
 // 		double T=SH->GetCfd();
 		
 		int s=SR->GetSegment();
@@ -159,7 +159,7 @@ for(unsigned int i=0;i<s3->GetSectorMultiplicity();i++){
 	apmult[id]++;
 	
 	double e=SS->GetEnergy();
-	if(e>control[S3EnergyLimit]*0.005){//increased noise gate
+	if(e>control[S3EnergyLimit]*0.004){//increased noise gate
 		int s=SS->GetSegment();
 		S3sector_sum[id]->Fill(e);
 		if(s>=0&&s<32){
@@ -178,7 +178,7 @@ for(unsigned int i=0;i<s3->GetSectorMultiplicity();i++){
 			if(MultiS3)if(SS->GetArrayPosition()!=SR->GetArrayPosition())continue;
 			
 			double re=SR->GetEnergy();
-			if(re>control[S3EnergyLimit]*0.01){//noise gate
+			if(re>control[S3EnergyLimit]*0.004){//noise gate
 				int r=SR->GetSegment();
 				
 				if(!Telescope){
@@ -667,21 +667,23 @@ for(unsigned int j=0;j<S3N;j++){
 		
 		gate2Ddata* ggate=&ParticleGate[g];
 		
-		//Convert from S3 particle to particle of interest
-		if(ggate->use_tt){
-			particlevec.SetMagThetaPhi(1,ggate->theta_theta.Eval(particlevec.Theta()), particlevec.Phi()+TMath::Pi());
-		}
-		
 		//get the calculated beta value for a particle
 		double betal=0;
 		if(ggate->use_beta){
 			betal=control[BetaZero];
 			if(ggate->use_rb){
+				betal=calc_beta_KE(SH->GetEnergy()/1000.,ggate->mass);
+			}else if(ggate->use_rb){
 				unsigned int rrr=SH->GetRing();
 				if(ggate->ring_beta.size()>rrr)betal=ggate->ring_beta[rrr];
 			}else if(ggate->use_tb){
 				betal=ggate->theta_beta.Eval(particlevec.Theta());
 			}
+		}
+		
+		//Convert from S3 particle to particle of interest
+		if(ggate->use_tt){
+			particlevec.SetMagThetaPhi(1,ggate->theta_theta.Eval(particlevec.Theta()), particlevec.Phi()+TMath::Pi());
 		}
 		
 		//Do SiLi kinematic adjust
@@ -723,7 +725,7 @@ for(unsigned int j=0;j<S3N;j++){
 			
 			if(ggate->use_beta){
 				double e=gammai[i]->GetEnergy();
-				unsigned int R=SH->GetRing();
+				unsigned int R=s3r(SH);//SH->GetRing();
 				
 				Gcorrectedring[g]->Fill(E,R);
 				

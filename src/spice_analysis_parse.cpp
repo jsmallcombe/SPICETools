@@ -18,6 +18,8 @@ typedef struct gate2Ddata{
 	bool use_beta;
 	std::vector< short > s3;
 	bool s3Limit;
+	unsigned int mass;
+	bool UseEnergyBeta;
 } gate2Ddata;
 
 double pi=TMath::Pi();
@@ -43,10 +45,21 @@ short s3index[4]={0,0,0,0};
 bool MultiS3=false;
 
 unsigned short s3id(TS3Hit* s3hit){
-	if(!MultiS3)return 0;
-	unsigned short i=s3hit->GetArrayPosition();
-	if(i<4)return s3index[i];
+	if(MultiS3){
+		unsigned short i=s3hit->GetArrayPosition();
+		if(i<4)return s3index[i];
+	}
+	return 0;
 }
+unsigned short s3r(TS3Hit* s3hit){
+	int r=s3hit->GetRing();
+	if(MultiS3){
+		unsigned short i=s3hit->GetArrayPosition();
+		if(i<4)return s3index[i]*24+r;
+	}
+	return r;
+}
+
 
 ///////////////////////
 ///////////////////////
@@ -57,6 +70,7 @@ bool t_gate(double,gatenames);
 long t_stamp(TRF*,TTigress*,TSiLi*,TS3*);
 long t_stamp_fix(long &);
 TGraph* FileTGraph(string filepath);
+double calc_beta_KE(double emev,double Amass);
 
 ///////////////////////
 ///////////////////////
@@ -188,15 +202,20 @@ while(inp>>str){
 			short s;
 			inp>>s;
 			ParticleGate[N].s3.push_back(s);
+		}else if(mode.find("UseEnergyBeta")<mode.size()){
+			inp>>ParticleGate[N].mass;
+			ParticleGate[N].UseEnergyBeta=true;;
 		}else{
-			if(mode.find("file")<mode.size()){					
+			if(mode.find("file")<mode.size()){
 				string gfile;
 				inp>>gfile;
 				TGraph* G=FileTGraph(gfile);
 				if(G){
 					if(mode.find("beta")<mode.size()){
+						cout<<endl<<"Setting TGraph as beta."<<flush;
 						ParticleGate[N].theta_beta=*G;
 					}else if(mode.find("theta")<mode.size()){
+						cout<<endl<<"Setting TGraph as theta."<<flush;
 						ParticleGate[N].theta_theta=*G;
 					}else{
 						cout<<endl<<"Setting TGraph as gate."<<flush;
@@ -269,7 +288,6 @@ for(int y=0;y<ParticleGate.size();y++){
 	string t=ParticleGate[y].title;
 	ParticleGate[y].gate.SetTitle(t.c_str());
 	
-	
 	ParticleGate[y].use_beta=false;
 	ParticleGate[y].use_rb=true;
 	ParticleGate[y].use_tb=false;
@@ -285,13 +303,25 @@ for(int y=0;y<ParticleGate.size();y++){
 	
 	
 	ParticleGate[y].use_tt=false;
-	if(!ParticleGate[y].theta_theta.GetN()>1){
+	if(ParticleGate[y].theta_theta.GetN()>1){
 		ParticleGate[y].use_tt=true;
 		ParticleGate[y].theta_theta.SetTitle((t+"thetaVS").c_str());
 	}
 	
 	ParticleGate[y].s3Limit=false;
 	if(MultiS3&&ParticleGate[y].s3.size())ParticleGate[y].s3Limit=true;
+	
+	
+	if(ParticleGate[y].mass&&ParticleGate[y].UseEnergyBeta){
+		//If beta from energy override everything else
+		ParticleGate[y].ring_beta.clear();
+		ParticleGate[y].theta_beta=TGraph();
+		ParticleGate[y].theta_theta=TGraph();
+		ParticleGate[y].use_beta=true;
+		ParticleGate[y].use_rb=false;
+		ParticleGate[y].use_tb=false;
+		ParticleGate[y].use_tt=false;
+	}else{ParticleGate[y].UseEnergyBeta=false;}
 }
 
 for(int y=0;y<s3silirf2D.size();y++){
@@ -341,7 +371,9 @@ if(UseFitCharge){
 	TChannel::SetIntegration("SPI",1);
 	TChannel::SetIntegration("SPE",125);
 }else TChannel::SetIntegration("SP",125);
+TChannel::SetIntegration("BA",125);
 TChannel::SetIntegration("TI",125);
+TChannel::SetUseCalFileIntegration("BA",true);
 TChannel::SetUseCalFileIntegration("SP",true);
 TChannel::SetUseCalFileIntegration("TI",true);
 
@@ -360,7 +392,7 @@ if(Telescope){
 }else{
 	s3->SetMultiHit(true);
 	s3->SetFrontBackEnergy(control[FrontBackEnergy]);
-	s3->PreferenceSector();//Use the sector energy mostly, worse resolution but strangely more stable
+	//s3->PreferenceSector();//Use the sector energy mostly, worse resolution but strangely more stable
 	if(KeepChargeShare)s3->SetKeepShared();
 }
 
@@ -586,6 +618,7 @@ outfile->cd("RunTime");
 	guessend->Write("GuessEndTime");
 	
 for(int g=0;g<ParticleGate.size();g++){
+
 	string t=ParticleGate[g].title;
 	string tf="ParticleGates/"+t;
 	outfile->cd(tf.c_str());
@@ -688,5 +721,13 @@ TGraph* FileTGraph(string filepath){
 		delete f1;
 	}
 	return ret;
+}
+
+
+
+double calc_beta_KE(double emev,double Amass){//input particle KE in MeV and mass in amu
+	double mass=931.5*Amass;
+	double gamma=(emev/mass)+1;
+	return sqrt(1-pow(1/gamma,2));
 }
 
