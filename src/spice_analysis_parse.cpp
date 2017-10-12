@@ -39,6 +39,8 @@ vector< double > control={0.0,110.,0.9,75,50000,7000,-8,0.15,500};
 
 std::vector< string > filelist;
 std::vector< long > fileentriessum;
+std::vector< double > fileoffset,filegain;
+double FileOffset,FileGain;
 
 bool s3used[4]={0,0,0,0};
 short s3index[4]={0,0,0,0};
@@ -124,6 +126,9 @@ if(FirstOnly)cout<<endl<<"Filling particle gates only once.";
 bool MultiParticles=inp.IsPresent("MultiParticles");
 if(MultiParticles)cout<<endl<<"Making Multi-Particle Histograms.";
 
+bool PreferenceSectors=inp.IsPresent("PreferenceSectors");
+if(MultiParticles)cout<<endl<<"Making Multi-Particle Histograms.";
+
 bool DS=!inp.IsPresent("NoSPICE");
 if(!DS)cout<<endl<<"Omitting SPICE Histograms.";
 
@@ -151,12 +156,58 @@ for(int z=0;z<gatetitles.size();z++){
 	}
 }
 
+bool GainDrift=inp.IsPresent("gaindrift.txt");
+if(GainDrift){
+	string fst=inp.ReturnFind("gaindrift.txt");
+	ifstream f(fst.c_str());
+	if(f.good()){
+		FileOffset=0;
+		FileGain=1;
+		
+		string sfilen;
+		double soffset,sgain;
+		vector< string > Sfilen;
+		vector< double > Soffset,Sgain;
+		
+		while(f>>sfilen>>soffset>>sgain){
+			Sfilen.push_back(sfilen);
+			Soffset.push_back(soffset);
+			Sgain.push_back(sgain);
+		}
+		
+		int mcount=0;
+		for(unsigned int i=0;i<filelist.size();i++){
+			fileoffset.push_back(0);
+			filegain.push_back(0);
+			
+			for(unsigned int j=0;j<Sfilen.size();j++){
+				if(filelist[i].find(Sfilen[j])<filelist[i].size()){
+					fileoffset[i]=Soffset[j];
+					filegain[i]=Sgain[j];
+					mcount++;
+					break;
+				}
+			}
+		}
+		
+		cout<<endl<<"Loaded drift file : "<<fst<<" "<<Sfilen.size()<<" entries "<<mcount<<" files matched."<<flush;
+			
+		f.close();
+	}else{
+		cout<<endl<<"Failed to open gain drift file : "<<fst<<flush;
+		GainDrift=false;
+	}
+}
+
+
+
 cout<<flush;
 
 gROOT->cd();
 
+
 /////////////////////////////////////////////////////////////////
-//////////////////     PROCESS COMBINED INPUTS       ////////////
+//////////////////     PROCESS GATE TYPE INPUTS      ////////////
 /////////////////////////////////////////////////////////////////
 
 
@@ -392,7 +443,7 @@ if(Telescope){
 }else{
 	s3->SetMultiHit(true);
 	s3->SetFrontBackEnergy(control[FrontBackEnergy]);
-	//s3->PreferenceSector();//Use the sector energy mostly, worse resolution but strangely more stable
+	if(PreferenceSectors)s3->PreferenceSector();//Use the sector energy mostly, worse resolution but strangely more stable
 	if(KeepChargeShare)s3->SetKeepShared();
 }
 
@@ -439,7 +490,7 @@ for(int i=0;i<timeaveragesamples;i++){
 	}
 	
 	TF1 timef1grad("timef1grad","pol1",0,1000);
-	timegrad.Fit(&timef1grad,"QR");
+	timegrad.Fit(&timef1grad,"QR");//Warning in <TROOT::Append>: Replacing existing TH1: Graph (Potential memory leak).
 	double chi=timef1grad.GetChisquare()/timef1grad.GetNDF();
 	if(timef1grad.GetParameter(1)>0){//1E15 might seem high but is an experimentally determined limit, was 1E20 before I fixed tstamp
 		//cout<<endl<<timef1grad.GetParameter(1)<<" "<<chi;

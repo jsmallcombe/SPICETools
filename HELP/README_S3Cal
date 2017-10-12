@@ -11,11 +11,21 @@ The default mnemonic is SPE02F (telescope)
 
 Now sort some midas data. Run:
 
-grsisort -laq --suppress-errors [blank.cal] [runfile.midas]
+grsisort -laq --suppress_errors [blank.cal] [runfile.midas]
 
 Then sort the resultant analysis trees to make the calibration. Run:
 
-./bin/S3Cal [blank.cal optional] [analysistree.root] [histograms.root optional]
+./bin/S3Cal [blank.cal optional] [analysistree.root] [histograms.root optional] [high optional] [arraypos x optional]
 
 By default histograms are saved to S3energycal.root
 The final calibration is saved to S3EnergyCalibrated.cal
+
+Optional argument "high" adjusts histogram ranges for high-gain preamp chips 
+
+Optional argument "arraypos x" is for when there are multiple S3s in the data.
+x specifies the array position to calibrate, do each sequentially.
+
+
+To fix a calibration using beam data run 
+./bin/S3Cal [previous.cal optional] [analysistree.root] [histograms.root optional] [high optional] [arraypos x optional] energyfix [Energy]
+Where [Energy] is the mean energy of the highest peak in the inner ring.

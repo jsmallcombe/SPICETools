@@ -10,7 +10,17 @@ int S3CalParse(int argc, char *argv[],TApplication* app){
 	TChain *DataChain=inp.AnalysisTree();
 		
 	if(inp.LoadCal(DataChain)){
-		S3CalParseChain(DataChain,outputfile,app,inp.IsPresent("high"));
+		int select=-1;
+		if(inp.IsPresent("arraypos"))select=inp.Next("arraypos");
+		
+		if(inp.IsPresent("energyfix")){
+			cout<<endl<<" One Point Calibration From Beam Data "<<endl;
+			double energy_select=inp.Next("energyfix");
+			S3FixCalBeam(DataChain,outputfile,app,energy_select,inp.IsPresent("high"),select);
+		}else{
+			S3CalParseChain(DataChain,outputfile,app,inp.IsPresent("high"),select);
+		}
+		
 	}
 	delete DataChain;
 
@@ -19,7 +29,12 @@ int S3CalParse(int argc, char *argv[],TApplication* app){
 
 
 
-void S3CalParseChain(TChain* DataChain,string outputfile,TApplication* app,bool gain){
+void S3CalParseChain(TChain* DataChain,string outputfile,TApplication* app,bool gain,int select){
+	
+	
+	if(select>=0){
+		cout<<endl<<"Multi S3. Calibrating array position "<<select<<flush; 		
+	}
 	
 	int gn=1;
 	if(gain)gn*=10;
@@ -54,13 +69,13 @@ void S3CalParseChain(TChain* DataChain,string outputfile,TApplication* app,bool 
 	for(int i=0;i<24;i++){
 		stringstream ss;
 		ss<<"S3_ring_"<<i<<"_charge";
-		chargering[i] = new TH1F(ss.str().c_str(),ss.str().c_str(),10000,0,1000*gn);
+		chargering[i] = new TH1F(ss.str().c_str(),ss.str().c_str(),1000,0,1000*gn);
 	}
 	TH1F *chargesector[32];
 	for(int i=0;i<32;i++){
 		stringstream ss;
 		ss<<"S3_sector_"<<i<<"_charge";
-		chargesector[i] = new TH1F(ss.str().c_str(),ss.str().c_str(),10000,0,1000*gn);
+		chargesector[i] = new TH1F(ss.str().c_str(),ss.str().c_str(),1000,0,1000*gn);
 	}
 	
 	TH2F *chargechan=new TH2F("chargechan","chargechan",56,0,56,5000,0,1000*gn);
@@ -80,6 +95,9 @@ void S3CalParseChain(TChain* DataChain,string outputfile,TApplication* app,bool 
 		//Get hits (rings)
 		for(unsigned int i=0;i<s3->GetRingMultiplicity();i++){
 			TS3Hit* SR=s3->GetRingHit(i);
+			
+			if(select>=0)if(SR->GetArrayPosition()!=select)continue;
+			
 			unsigned int s=SR->GetSegment();
 			if(s<24){
 				chargering[s]->Fill(SR->GetCharge());
@@ -91,6 +109,9 @@ void S3CalParseChain(TChain* DataChain,string outputfile,TApplication* app,bool 
 		//Get hits for E S3 (sectors)
 		for(unsigned int i=0;i<s3->GetSectorMultiplicity();i++){
 			TS3Hit* SS=s3->GetSectorHit(i);
+			
+			if(select>=0)if(SS->GetArrayPosition()!=select)continue;
+			
 			unsigned int s=SS->GetSegment();
 			if(s<32){
 				chargesector[s]->Fill(SS->GetCharge());
@@ -120,6 +141,9 @@ void S3CalParseChain(TChain* DataChain,string outputfile,TApplication* app,bool 
 	for(int i=0;i<24;i++)hist[i]=chargering[i];
 	for(int i=0;i<32;i++)hist[i+24]=chargesector[i];
 	
+	
+	TCanvas* c1=new TCanvas("CalResult","CalResult",1200,400);//creating it here saves annoying popup
+	
 
 	for(int i=0;i<56;i++){
 		if(!chan[i]) continue;
@@ -131,9 +155,9 @@ void S3CalParseChain(TChain* DataChain,string outputfile,TApplication* app,bool 
 // 		Spec.Search(hist[i],3,"",0.7);
 // 		TH1F* tmp=(TH1F*)hist[i]->Clone("tmp");
 		TH1F* tmp=hist[i];
-		tmp->Rebin(10);
+// 		tmp->Rebin(10);
 		tmp->GetXaxis()->SetRangeUser(rl,ru);
-		cout<<endl<<"RANGE "<<rl<<" "<<ru<<endl;
+// 		cout<<endl<<"RANGE "<<rl<<" "<<ru<<endl;
 		Spec.Search(tmp,3,"nobackground",0.3);
 // 		delete tmp;
 		Double_t *peak_pos = Spec.GetPositionX();
@@ -143,23 +167,43 @@ void S3CalParseChain(TChain* DataChain,string outputfile,TApplication* app,bool 
 		std::sort(sort_pos.begin(), sort_pos.end());
 		
 		Double_t par_buff[12];
-		
+/*		
 		for(Int_t ip=0; ip<3; ip++){
 			TF1 fpeak(Form("ch%dpk%d",i,ip+1),"[0]*exp(-0.5*pow((x-[1])/([2]+(x-[1])*[3]*(x-[1])),2))",0.97*sort_pos[ip],1.03*sort_pos[ip]);
 			fpeak.SetParameter(1,sort_pos[ip]);
 			fpeak.SetParameter(2,0.01*sort_pos[ip]);
 			hist[i]->Fit(&fpeak,"0RQ+");
 			fpeak.GetParameters(&par_buff[ip*4]);
-		}	
+			
+			par_buff[ip*4+1]=sort_pos[ip];
+		}*/	
 		
 		TF1 ftot(Form("ch%dtot",i),"[0]*exp(-0.5*pow((x-[1])/([2]+(x<[1])*[3]*(x-[1])),2))+[4]*exp(-0.5*pow((x-[5])/([6]+(x<[5])*[7]*(x-[5])),2))+[8]*exp(-0.5*pow((x-[9])/([10]+(x<[9])*[11]*(x-[9])),2))",0.93*sort_pos[0],1.07*sort_pos[2]);
 
-		ftot.SetParameters(par_buff);
+// 		ftot.SetParameters(par_buff);
+		
+		
+		vector< double > pc;
+		for(Int_t ip=0; ip<3; ip++)pc.push_back(sort_pos[ip]);
+		std::sort(pc.begin(),pc.end());
+		
+		double max=hist[i]->GetBinContent(hist[i]->GetMaximumBin());
+		
+		for(Int_t ip=0; ip<3; ip++){
+			ftot.SetParameter(ip*4,max);
+			ftot.SetParameter(ip*4+1,pc[ip]);
+			ftot.SetParameter(ip*4+2,50/gradguess);
+			ftot.SetParameter(ip*4+3,-0.2);
+					  
+			ftot.SetParLimits(ip*4+1,pc[ip]-150/gradguess,pc[ip]+150/gradguess);
+			ftot.SetParLimits(ip*4+2,10/gradguess,500/gradguess);
+		}
+		
 		ftot.SetLineColor(3);
-		hist[i]->Fit(&ftot,"0QR+");
+		hist[i]->Fit(&ftot,"QR+");
 		
 		
-	// 		Double_t par[12];
+// 		Double_t par[12];
 // 		Double_t err[12];
 // 		for(Int_t j=0; j<12; j++){
 // 			par[j] = ftot.GetParameter(j);
@@ -183,6 +227,8 @@ void S3CalParseChain(TChain* DataChain,string outputfile,TApplication* app,bool 
 // 		float sigma=fres.GetParameter(0);
 // 		float e0=fres.GetParameter(1);	
 		
+
+		
 		TGraphErrors Grph;
 		Grph.SetPoint(0,ftot.GetParameter(1),E_MeV[2]*1000.);
 		Grph.SetPointError(0,ftot.GetParError(1),0);
@@ -199,7 +245,7 @@ void S3CalParseChain(TChain* DataChain,string outputfile,TApplication* app,bool 
 		chan[i]->AddENGCoefficient(pl.GetParameter(0));
 		chan[i]->AddENGCoefficient(pl.GetParameter(1));
 		
-		cout<<i<<" "<<flush;
+// 		cout<<i<<" "<<flush;
 	}
 	
 	
@@ -220,6 +266,9 @@ void S3CalParseChain(TChain* DataChain,string outputfile,TApplication* app,bool 
 		//Get hits (rings)
 		for(unsigned int i=0;i<s3->GetRingMultiplicity();i++){
 			TS3Hit* SR=s3->GetRingHit(i);
+			
+			if(select>=0)if(SR->GetArrayPosition()!=select)continue;
+			
 			ringtot->Fill(SR->GetEnergy());
 			energychan->Fill(SR->GetRing(),SR->GetEnergy());
 		}
@@ -227,6 +276,9 @@ void S3CalParseChain(TChain* DataChain,string outputfile,TApplication* app,bool 
 		//Get hits for E S3 (sectors)
 		for(unsigned int i=0;i<s3->GetSectorMultiplicity();i++){
 			TS3Hit* SS=s3->GetSectorHit(i);
+			
+			if(select>=0)if(SS->GetArrayPosition()!=select)continue;
+			
 			sectot->Fill(SS->GetEnergy());
 			energychan->Fill(SS->GetSector()+24,SS->GetEnergy());
 		}
@@ -238,7 +290,6 @@ void S3CalParseChain(TChain* DataChain,string outputfile,TApplication* app,bool 
 
 	TChannel::WriteCalFile("S3EnergyCalibrated.cal");
 	
-	TCanvas* c1=new TCanvas("CalResult","CalResult",1200,400);
 // 	TCanvas c1("CalResult","CalResult",1200,400);
 	c1->Divide(3,1);
 	c1->cd(1);
@@ -282,10 +333,17 @@ void MakeBlankS3cal(string mnemonic, string caloutname){
     cout<<endl<<"Sectors 1st Tig10 : "<<flush;
     cin>>tigs;
     
+    
     bool rings=true;
     string NP="N";
     int tig=tigr;
 
+    bool bam=false;
+    if(mnemonic.find("BA")==0){
+	cout<<endl<<"Bambino mapping adjust. "<<flush;
+	bam=true;
+    }
+ 
     ofstream calout(caloutname.c_str());
      
     for(int i=0;i<32;i++){
@@ -293,8 +351,34 @@ void MakeBlankS3cal(string mnemonic, string caloutname){
          
         stringstream name;
         stringstream address;
+	
+	int rs=i;
+	if(bam){
+		if(rings){
+			if(i<8)rs=7-i;
+			else if(i<16)rs=23-i;
+			else rs=39-i;
+			
+		}else{
+			rs=i;
+			
+			//Flip the connectors
+			if(rs<16)rs=15-rs;
+			else rs=47-rs;
+			
+// 			//flip rotation
+			rs=31-rs;
+// 			
+			//offset
+			rs-=7;
+			if(rs<0)rs+=32;
+
+// 			rs+=9;
+// 			if(rs>31)rs-=32;
+		}
+	}
          
-        name<<basicsettings<<NP<<std::setw(2)<<std::setfill('0')<<i<<"x";
+        name<<basicsettings<<NP<<std::setw(2)<<std::setfill('0')<<rs<<"x";
         address<<"0x"<<col<<std::setw(3)<<std::setfill('0')<<tig<<std::setw(2)<<std::setfill('0')<<(i%10);
         int number=((col-1)*12+(tig-1))*10+(i%10);
          
@@ -320,4 +404,196 @@ void MakeBlankS3cal(string mnemonic, string caloutname){
     }
      
     calout.close();
+}
+
+
+
+
+
+
+void S3FixCalBeam(TChain* DataChain,string outputfile,TApplication* app,double energyring0,bool gain,int select){
+	
+	
+	if(select>=0){
+		cout<<endl<<"Multi S3. Calibrating array position "<<select<<flush; 		
+	}
+	
+	int gn=1;
+	if(gain)gn*=10;
+	
+	TChannel::SetIntegration("BAE",125);
+	TChannel::SetIntegration("SPE",125);
+	TChannel::SetUseCalFileIntegration("SP",true);
+	TChannel::SetUseCalFileIntegration("BA",true);
+	
+	
+	TS3 *s3 = 0;
+	Int_t nentries = DataChain->GetEntries();
+
+	if(DataChain->GetBranchStatus("TS3")){
+		DataChain->SetBranchAddress("TS3",&s3);
+	}else{
+		cout<<endl<<"NO TS3 Branch in Tree "<<endl;
+		return;
+	}
+	
+	TChannel* chan[56]={0};
+	
+	gROOT->cd();
+	TFile *outfile = new TFile(outputfile.c_str(),"RECREATE");
+	
+	outfile->cd();
+		TH1F *chargering0= new TH1F("ring0","ring0",10000,0,100000*gn);
+	gROOT->cd();
+		
+	cout<<endl<<endl<<"Processing Ring 0"<<endl;
+	for(int jentry=0;jentry<nentries;jentry++){
+		DataChain->GetEntry(jentry);  //start the loop
+
+		//Get hits (rings)
+		for(unsigned int i=0;i<s3->GetRingMultiplicity();i++){
+			TS3Hit* SR=s3->GetRingHit(i);
+			
+			if(select>=0)if(SR->GetArrayPosition()!=select)continue;
+			
+			unsigned int s=SR->GetSegment();
+			if(s<24){
+				if(s==0)chargering0->Fill(SR->GetCharge());
+				if(!chan[s]&&SR->GetEnergy()>1)chan[s]=SR->GetChannel();
+			}
+		}
+		
+		if(jentry%1000 == 0) 
+		cout << setiosflags(ios::fixed) << std::setprecision(2) << 100. * (double)jentry/nentries << " % complete."<< "\r" << flush;
+	}
+	
+	
+	double XX=GetHistClickVal(chargering0,"Select Below Highest Peak",false);//Getting a click
+
+	chargering0->GetXaxis()->SetRange(chargering0->GetXaxis()->FindBin(XX),chargering0->GetNbinsX());
+	
+	cout<<endl<<"Mean Charge Ring 0 "<<chargering0->GetMean()<<endl;
+	
+	double grad0=energyring0/chargering0->GetMean();
+	
+	outfile->cd();
+	TH1F *gradsector[32];
+	for(int i=0;i<32;i++){
+		stringstream ss;
+		ss<<"S3_sector_"<<i<<"_grad";
+		gradsector[i] = new TH1F(ss.str().c_str(),ss.str().c_str(),10000,0,50);
+	}
+	gROOT->cd();	
+	
+	cout<<endl<<endl<<"Processing Sectors"<<endl;
+	for(int jentry=0;jentry<nentries;jentry++){
+		DataChain->GetEntry(jentry);  //start the loop
+
+		if(!(s3->GetRingMultiplicity()==1&&s3->GetSectorMultiplicity()==1))continue;
+		
+		TS3Hit* SR=s3->GetRingHit(0);
+		if(select>=0)if(SR->GetArrayPosition()!=select)continue;
+		if(SR->GetSegment()!=0)continue;
+		if(SR->GetCharge()<XX)continue;
+		
+		TS3Hit* SS=s3->GetSectorHit(0);
+		if(select>=0)if(SS->GetArrayPosition()!=select)continue;
+		
+		unsigned int s=SS->GetSegment();
+		if(s<32){
+			gradsector[s]->Fill((SR->GetCharge()*grad0)/SS->GetCharge());
+			if(!chan[s+24]&&SS->GetEnergy()>1)chan[s+24]=SS->GetChannel();
+		}
+		if(jentry%1000 == 0) 
+		cout << setiosflags(ios::fixed) << std::setprecision(2) << 100. * (double)jentry/nentries << " % complete."<< "\r" << flush;
+	}	
+	
+	double gradS[32];
+	for(int i=0;i<32;i++)gradS[i] = gradsector[i]->GetMean();
+		
+	outfile->cd();
+	TH1F *gradring[24];
+	for(int i=0;i<24;i++){
+		stringstream ss;
+		ss<<"S3_ring_"<<i<<"_grad";
+		gradring[i] = new TH1F(ss.str().c_str(),ss.str().c_str(),10000,0,50);
+	}
+	gROOT->cd();
+		
+	cout<<endl<<endl<<"Processing Rings"<<endl;
+	for(int jentry=0;jentry<nentries;jentry++){
+		DataChain->GetEntry(jentry);  //start the loop
+
+		if(!(s3->GetRingMultiplicity()==1&&s3->GetSectorMultiplicity()==1))continue;
+		
+		TS3Hit* SS=s3->GetSectorHit(0);
+		if(select>=0)if(SS->GetArrayPosition()!=select)continue;
+		
+		TS3Hit* SR=s3->GetRingHit(0);
+		if(select>=0)if(SR->GetArrayPosition()!=select)continue;
+		
+		unsigned int r=SR->GetSegment();
+		if(r==0)continue;
+		unsigned int s=SS->GetSegment();
+		if(r<24&&s<32){
+			gradring[r]->Fill((SS->GetCharge()*gradS[s])/SR->GetCharge());
+		}
+		if(jentry%1000 == 0) 
+		cout << setiosflags(ios::fixed) << std::setprecision(2) << 100. * (double)jentry/nentries << " % complete."<< "\r" << flush;
+	}		
+	
+	double gradR[24];
+	for(int i=1;i<24;i++)gradR[i] = gradring[i]->GetMean();
+	gradR[0]=grad0;
+	
+	for(int i=0;i<24;i++)if(chan[i]){
+		chan[i]->DestroyENGCal();
+		chan[i]->AddENGCoefficient(0);
+		chan[i]->AddENGCoefficient(gradR[i]);
+	}
+	for(int i=0;i<32;i++)if(chan[i+24]){
+		chan[i+24]->DestroyENGCal();
+		chan[i+24]->AddENGCoefficient(0);
+		chan[i+24]->AddENGCoefficient(gradS[i]);
+	}
+		
+		
+	outfile->cd();
+	TH2F *energychan=new TH2F("EnergyChan","EnergyChan",56,0,56,2000,energyring0*0.1,energyring0*1.5);
+	gROOT->cd();
+	
+	cout<<endl<<endl<<"RE-Processing files"<<endl;
+	for(int jentry=0;jentry<nentries;jentry++){
+		DataChain->GetEntry(jentry);  //start the loop
+		
+		if(!(s3->GetRingMultiplicity()==1&&s3->GetSectorMultiplicity()==1))continue;
+
+		TS3Hit* SR=s3->GetRingHit(0);
+		if(select>=0)if(SR->GetArrayPosition()!=select)continue;
+		energychan->Fill(SR->GetRing(),SR->GetEnergy());
+
+		TS3Hit* SS=s3->GetSectorHit(0);
+		if(select>=0)if(SS->GetArrayPosition()!=select)continue;
+		energychan->Fill(SS->GetSector()+24,SS->GetEnergy());
+		
+		if(jentry%1000 == 0) 
+		cout << setiosflags(ios::fixed) << std::setprecision(2) << 100. * (double)jentry/nentries << " % complete."<< "\r" << flush;
+	}
+	cout << "100 \% COMPLETE          \n";
+	
+	TChannel::WriteCalFile("S3BeamCalibrated.cal");
+	
+
+	
+	TCanvas *C1=new TCanvas();
+	C1->cd();
+	energychan->DrawCopy("colz");
+	C1->Update();
+	gPad->Update();
+	
+	outfile->cd();
+	outfile->Write();
+	outfile->Close();	
+	
+	C1->WaitPrimitive();
 }

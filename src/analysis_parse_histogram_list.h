@@ -8,7 +8,7 @@ outfile->cd();
 	TH2F *S3_theta;
 	TH1F* S3_multot;
 	
-	vector< TH1F* > front_back,front_backgate,S3_sectormult,S3_ringmult,S3_mult,S3ring_sum,S3sector_sum,S3RS_t,S3RS_tgate;
+	vector< TH1F* > front_back,front_backgate,S3_sectormult,S3_ringmult,S3_mult,S3ring_sum,S3sector_sum,S3RS_t,S3RS_tgate,chanhits;
 	vector< TH2F* > S3_map,S3_dedx,frontVback,frontVbackGated,S3flat;
 	vector< TH3F* > S3_d3dx,S3RS_t3;
 	
@@ -35,7 +35,8 @@ outfile->cd();
 				outfile->cd(tf.c_str());
 				
 			}else{i=4;}
-			
+
+			chanhits.push_back(new TH1F(("S3_chanhits"+sfx).c_str(),("S3_chanhits;Channel;Raw Counts"+sfx).c_str(),56,0,56));
 			S3_map.push_back(new TH2F(("S3_map"+sfx).c_str(),("S3_map;X [mm];Y [mm]"+sfx).c_str(),800,-40,40,800,-40,40));
 
 			if(Telescope){
@@ -146,7 +147,7 @@ outfile->cd();
 	}
 	
 	TH1F *Gamma_no_add,*Gamma_suppressed,*Gamma_singles_no_bgo,*Tig_mult;
-	TH2F *Gamma_Gamma_no_add,*Gamma_Core,*TigressHitMap,*TigressHitMapLow,*TigressETheta;
+	TH2F *Gamma_Gamma_no_add,*Gamma_Core,*Gamma_Core_Charge,*TigressHitMap,*TigressHitMapLow,*TigressETheta;
 	TH3F *TigressHitMap3,*TigressEETheta,*TigressEEdTheta;
 	
 	outfile->mkdir("Tigress");
@@ -154,9 +155,10 @@ outfile->cd();
 		Gamma_no_add= new TH1F("Gamma_no_add","Gamma_no_add",2000,6,2006);axislab(Gamma_no_add,"#gamma Energy [keV]");
 		Gamma_Gamma_no_add= new TH2F("Gamma_Gamma_no_add","Gamma_Gamma_no_add",1000,6,2006,1000,6,2006);axislab(Gamma_Gamma_no_add,"#gamma Energy [keV]","#gamma Energy [keV]");
 		Gamma_Core= new TH2F("Gamma_Core","Gamma_Core",64,0,64,2000,0,2000);axislab(Gamma_Core,"Core No.","#gamma Energy [keV]");
+		Gamma_Core_Charge= new TH2F("Gamma_Core_Charge","Gamma_Core_Charge",64,0,64,2000,0,40000);axislab(Gamma_Core,"Core No.","#gamma Charge");
 		TigressHitMap3= new TH3F("TigressHitMap3","TigressHitMap3",128,-200,200,128,-200,200,128,-200,200);axislab(TigressHitMap3,"X [mm]","Y [mm]","Z [mm]");
-		TigressHitMap= new TH2F("TigressHitMap","TigressHitMap",200,-TMath::Pi(),TMath::Pi(),200,0,TMath::Pi());axislab(TigressHitMap,"#theta [rad]","#phi [rad]");
-		TigressHitMapLow= new TH2F("TigressHitMapLow","TigressHitMapLow",100,-TMath::Pi(),TMath::Pi(),100,0,TMath::Pi());axislab(TigressHitMapLow,"#theta [rad]","#phi [rad]");
+		TigressHitMap= new TH2F("TigressHitMap","TigressHitMap",200,-TMath::Pi(),TMath::Pi(),200,0,TMath::Pi());axislab(TigressHitMap,"#phi [rad]","#theta [rad]");
+		TigressHitMapLow= new TH2F("TigressHitMapLow","TigressHitMapLow",100,-TMath::Pi(),TMath::Pi(),100,0,TMath::Pi());axislab(TigressHitMapLow,"#phi [rad]","#theta [rad]");
 		Gamma_suppressed= new TH1F("Gamma_suppressed","Gamma_suppressed",2000,0,2000);axislab(Gamma_suppressed,"#gamma Energy [keV]");
 		Gamma_singles_no_bgo= new TH1F("Gamma_singles_no_bgo","Gamma_singles_no_bgo",2000,0,2000);axislab(Gamma_singles_no_bgo,"#gamma Energy [keV]");
 

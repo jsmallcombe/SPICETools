@@ -60,8 +60,10 @@ using namespace std;
 
 int S3CalParse(int,char**,TApplication* app=0);
 
-void S3CalParseChain(TChain* DataChain,string outputcalfile,TApplication* app=0,bool=false);
+void S3CalParseChain(TChain* DataChain,string outputcalfile,TApplication* app=0,bool gain=false,int select=-1);
 
 void MakeBlankS3cal(string mnemonic, string calout);
+
+void S3FixCalBeam(TChain* DataChain,string outputfile,TApplication* app=0,double energyring0=5000,bool gain=false,int select=-1);
 
 #endif

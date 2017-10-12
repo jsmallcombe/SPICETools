@@ -15,7 +15,7 @@ To combine this, run:
 
 Now sort some midas data. Run:
 
-grsisort -laq --suppress-errors [blank.cal] [runfile.midas]
+grsisort -laq --suppress_errors [blank.cal] [runfile.midas]
 
 Then sort the resultant analysis trees to make the calibration. Run:
 

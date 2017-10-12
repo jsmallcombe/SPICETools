@@ -31,6 +31,9 @@ FirstOnly
 MultiParticles
 #Make special histograms for gamma and electron coincident with several particles.
 
+#PreferenceSectors
+#Use the S3 sector energy where possible, worse resolution but strangely more stable
+
 ### CONTROL NUMBERS ###
 
 FrontBackTime 100

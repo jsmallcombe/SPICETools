@@ -16,7 +16,7 @@ SPICEcmdline::SPICEcmdline(int argc, char *argv[]):SPICEcmdline(){
 				//while(infofile>>middle){infostream<<middle<<" ";}
 				while(getline(infofile, middle, '\n')){
 					if(!(middle[0]=='#')){//skip comments
-						if(middle.find(".info")<str.size()){
+						if(middle.find(".info")<middle.size()){
 							cmdinputs.push_back(middle);
 						}else{
 							stringstream ss;

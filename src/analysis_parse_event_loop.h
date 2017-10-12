@@ -7,7 +7,13 @@
 // 		}
 // 	}
 
-if(jentry>fileentriessum[fileiterator]&&fileiterator<=fileentriessum.size())fileiterator++;
+if(jentry>fileentriessum[fileiterator]&&fileiterator<=fileentriessum.size()){
+	fileiterator++;
+	if(GainDrift){
+		FileOffset=fileoffset[fileiterator];
+		FileGain=filegain[fileiterator];
+	}
+}
 
 DataChain->GetEntry(jentry);  //start the loop
 //tigress->ResetAddback(); // annoyingly important
@@ -131,12 +137,13 @@ for(unsigned int i=0;i<s3->GetRingMultiplicity();i++){
 	TS3Hit* SR=s3->GetRingHit(i);
 	unsigned short id=s3id(SR);
 	apmult[id]++;
+	int s=SR->GetSegment();
+	chanhits[id]->Fill(s);
 	
 	double e=SR->GetEnergy();
 	if(e>control[S3EnergyLimit]*0.004){//noise gate
 // 		double T=SH->GetCfd();
 		
-		int s=SR->GetSegment();
 // 		S3ring.push_back(e);//store energy dE
 // 		S3ring_i.push_back(s);//GetSegment == ring number 
 // 		S3ringT.push_back(T);//we're going to use the dE for time
@@ -158,9 +165,11 @@ for(unsigned int i=0;i<s3->GetSectorMultiplicity();i++){
 	unsigned short id=s3id(SS);
 	apmult[id]++;
 	
+	int s=SS->GetSegment();
+	chanhits[id]->Fill(s+24);
+	
 	double e=SS->GetEnergy();
 	if(e>control[S3EnergyLimit]*0.004){//increased noise gate
-		int s=SS->GetSegment();
 		S3sector_sum[id]->Fill(e);
 		if(s>=0&&s<32){
 			//S3sectors[s]->Fill(e);
@@ -388,6 +397,9 @@ if(DS)SiLiAdd_mult->Fill(sili->GetAddbackMultiplicity());
 if(DS){for(int i=0;i<sili->GetAddbackMultiplicity();i++){
 	sili_hit = sili->GetAddbackHit(i);
 	double e=sili_hit->GetEnergy();
+	
+	if(GainDrift)e=e*FileGain+FileOffset;
+	
 	if(e>10&&e<4000){//noise gate and common sense gate
 		double Nadd=sili_hit->GetAddbackSize();
 		if(Nadd==1){//if its a good clean hit add it
@@ -451,7 +463,8 @@ for(int i=0;i<tigress->GetMultiplicity();i++){
 	tigress->GetTigressHit(i)->ClearTransients();
 	
 	Gamma_no_add->Fill(tigress->GetTigressHit(i)->GetEnergy());
-    Gamma_Core->Fill(tigress->GetTigressHit(i)->GetArrayNumber(),tigress->GetTigressHit(i)->GetEnergy());
+	Gamma_Core->Fill(tigress->GetTigressHit(i)->GetArrayNumber(),tigress->GetTigressHit(i)->GetEnergy());
+	Gamma_Core_Charge->Fill(tigress->GetTigressHit(i)->GetArrayNumber(),tigress->GetTigressHit(i)->GetCharge());
 	for(int j=i+1;j<tigress->GetMultiplicity();j++){
 		double TT=tigress->GetTigressHit(i)->GetCfd()-tigress->GetTigressHit(j)->GetCfd();
 		if(t_gate(TT,gamma_gamma_t)){
@@ -485,14 +498,14 @@ for(int i=0;i<tigress->GetAddbackMultiplicity();i++){
 		fileN_gamma->Fill(fileiterator,e);
 		eventN_gamma->Fill(jentry,e);
 		
-		TVector3 pos=TTigress::GetPosition(*tigress_hit,0,true);
-		double theta=pos.Theta();
-		
+		TVector3 pos=TTigress::GetPosition(tigress_hit->GetDetector(), tigress_hit->GetCrystal(), 0, 0, true);
+		TigressHitMapLow->Fill(pos.Phi(),pos.Theta());
 		TigressHitMap3->Fill(pos.X(),pos.Y(),pos.Z());
-		TigressHitMap->Fill(pos.Phi(),theta);
-		TigressHitMapLow->Fill(pos.Phi(),theta);
-		TigressETheta->Fill(e,theta);
-		gammapos.push_back(tigress_hit->GetPosition());//No smear
+		
+		pos=tigress_hit->GetPosition();//No smear
+		gammapos.push_back(pos);
+		TigressHitMap->Fill(pos.Phi(),pos.Theta());
+		TigressETheta->Fill(e,pos.Theta());
 		
 		//RF check
 		double TT=tigress_hit->GetCfd()-rf_cfd;TT/=16;
@@ -698,7 +711,7 @@ for(unsigned int j=0;j<S3N;j++){
 			}
 			
 			double e;
-			if(ggate->use_beta)e=SiLiE[i];//e=SiLii[i]->GetDoppler(betal,&particlevec);
+			if(ggate->use_beta)e=SiLiE[i];//e=SiLii[i]->GetDoppler(betal,&particlevec,SiLiE[i]);
 			else e=SiLiE[i];
 			SiLiEdop[i]=e;
 			SiLiPG[g]->Fill(e);
@@ -829,9 +842,9 @@ if(MultiParticles){
 if(DoDoubleElectrons&&DS){
 if(rawsilisum>10&&SiLiN>0)silirawtotal->Fill(rawsilisum);
 for(unsigned int i=0;i<SiLiN;i++){
-	double e=SiLii[i]->GetEnergy();
+	double e=SiLiE[i];
 	for(unsigned int j=i+1;j<SiLiN;j++){
-		double ee=SiLii[j]->GetEnergy();
+		double ee=SiLiE[j];
 		double TT=SiLit[i]-SiLit[j];
 		ee_t->Fill(TT);
 		if(t_gate(TT,sili_sili_t)){

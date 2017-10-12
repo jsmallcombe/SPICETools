@@ -49,6 +49,7 @@
    KeepChargeShare - Keep rather than discard S3 charge sharing events. NOT appropriate for telescope
    FirstOnly - Only fill particle coincident gamma and electron histograms once per gate type. i.e. 2p coincident gamma ray fills the p-gamma histogram only once.
    MultiParticles - Make special histograms for gamma and electron coincident with several particles.
+   PreferenceSectors - Use the S3 sector energy where possible, worse resolution but strangely more stable
 
    -----------------------------------------------------
    Set Numbers
@@ -68,6 +69,17 @@
    MultiS3 (Give the mnemonic array position of one of the S3s when there are multiple, call for each)
 
    If an argument matches none of the above it is assumed to be a gate name.
+   
+   -----------------------------------------------------
+   Gain Drift
+   -----------------------------------------------------
+   The entire gain of SPICE can drift from run to run.
+   Ideally shift should be dealt with channel by channel, but often there is insufficient data.
+   To correct whole of SPICE energy provide a text file containing "run-number/file offset gain",
+   Where offset and gain are adjustments of the already calibrated energy.
+   File name should end "gaindrift.txt"
+   
+   e.g. newgaindrift.txt
    
    -----------------------------------------------------
    NOTES ON RF GATES
