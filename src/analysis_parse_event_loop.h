@@ -117,19 +117,47 @@ if(tstamp>0&&tstamp<timestamp_max){//If time stamp is crazy ignore
 }//tstamp=-1;
 
 //Now we have a timestamp fill some histograms
-eventrate->Fill(tstamp);
-eventratehours->Fill(tstamp/timestamp_hour);
-if(!(jentry%(nentries/10000))){
-	//Changed to "set bin content" rather than weighted fill, despite trying to make bins match, some double filling
-	runtimeraw->SetBinContent(runtimeraw->FindBin(jentry),tstampraw);
-	runtime->SetBinContent(runtimeraw->FindBin(jentry),tstamp);
-	timeadda->SetBinContent(runtimeraw->FindBin(jentry),timestamp_add);
+// eventrate->Fill(tstamp);
+
+float tstamphour=tstamp/(float)timestamp_hour;
+
+eventratehours->Fill(tstamphour);
+if(nentries>5000){//Trying to fix a segfault from very small runs
+	if(!(jentry%(nentries/10000))){
+		//Changed to "set bin content" rather than weighted fill, despite trying to make bins match, some double filling
+		int bin=runtimeraw->FindBin(jentry);
+		runtimeraw->SetBinContent(bin,tstampraw/(float)timestamp_hour);
+		runtime->SetBinContent(bin,tstamphour);
+		timeadda->SetBinContent(bin,timestamp_add/(float)timestamp_hour);
+	}
 }
 
+//// check the rawrest fragment count we can in the analysis tree
+
+S3fragrate->Fill(jentry,s3->GetRingMultiplicity()+s3->GetSectorMultiplicity());
+if(DS)silifragrate->Fill(jentry,sili->GetMultiplicity());
+gammafragrate->Fill(jentry,tigress->GetMultiplicity()+tigress->GetBGOMultiplicity());
+
+
+//////////////////////////////////////////////////////////
+//////// Do the TGenericDetector / monitor singles ///////
+//////////////////////////////////////////////////////////
+
+if(AddMonitor){
+	double sumenergy=0;//currently single clover
+	for(unsigned int i=0;i<gd->GetMultiplicity();i++){
+		sumenergy+=gd->GetHit(i)->GetEnergy();
+	}
+	if(sumenergy){
+		monitortotal->Fill(sumenergy);
+		monitor_runtime->Fill(tstamphour,sumenergy);
+	}
+}
 
 ///////////////////////////////
 //////// Do S3 singles ////////
 ///////////////////////////////
+
 
 //Get hits for rings S3 (dE in telescope)
 unsigned short apmult[4]={0,0,0,0};
@@ -155,7 +183,7 @@ for(unsigned int i=0;i<s3->GetRingMultiplicity();i++){
 
 	}
 }
-if(MultiS3)for(unsigned short i=0;i<4;i++){if(s3used[i])S3_ringmult[s3index[i]]->Fill(apmult[i]);apmult[i]=0;}
+if(MultiS3)for(unsigned short i=0;i<4;i++){if(s3used[i])S3_ringmult[s3index[i]]->Fill(apmult[s3index[i]]);apmult[s3index[i]]=0;}
 else S3_ringmult[0]->Fill(s3->GetRingMultiplicity());
 
 
@@ -190,23 +218,28 @@ for(unsigned int i=0;i<s3->GetSectorMultiplicity();i++){
 			if(re>control[S3EnergyLimit]*0.004){//noise gate
 				int r=SR->GetSegment();
 				
+				double TT=SR->GetCfd()-SS->GetCfd();
+				bool gT=(abs(TT)<control[FrontBackTime]);
+				
+				S3RS_t[id]->Fill(TT);
+				if(gT)S3RS_tgate[id]->Fill(TT);
+
 				if(!Telescope){
 					frontVback[id]->Fill(re,e);
 					front_back[id]->Fill(e-re);
 					if(e*control[FrontBackEnergy]<re&&re*control[FrontBackEnergy]<e){
-						front_backgate[id]->Fill(e-re);
+						front_backgated[id]->Fill(e-re);
 						frontVbackGated[id]->Fill(re,e);
+						fb_time[id]->Fill(TT);
+						if(gT)fb_timegated[id]->Fill(TT);
 					}
 					else continue;
 				}
 				
-				double TT=SR->GetCfd()-SS->GetCfd();
-				S3RS_t[id]->Fill(TT);
 				if(Telescope)S3RS_t3[id]->Fill(TT,re,e);
 				if(!RFfail)S3RS_RF->Fill((SR->GetCfd()-rf_cfd)/16.0,(SS->GetCfd()-rf_cfd)/16.0);
 				
-				if(abs(TT)<control[FrontBackTime]){
-					S3RS_tgate[id]->Fill(TT);
+				if(gT){
 					if(!RFfail)S3RS_RFgated->Fill((SR->GetCfd()-rf_cfd)/16.0,(SS->GetCfd()-rf_cfd)/16.0);
 					//S3sectorsout[s]->Fill(SS->GetCharge(),r);
 				}
@@ -214,7 +247,7 @@ for(unsigned int i=0;i<s3->GetSectorMultiplicity();i++){
 		}
 	}
 }
-if(MultiS3)for(unsigned short i=0;i<4;i++){if(s3used[i])S3_sectormult[s3index[i]]->Fill(apmult[i]);apmult[i]=0;}
+if(MultiS3)for(unsigned short i=0;i<4;i++){if(s3used[i])S3_sectormult[s3index[i]]->Fill(apmult[i]);apmult[s3index[i]]=0;}
 else S3_sectormult[0]->Fill(s3->GetSectorMultiplicity());
 
 //////////////////////////////////////////
@@ -222,7 +255,7 @@ else S3_sectormult[0]->Fill(s3->GetSectorMultiplicity());
 //////////////////////////////////////////
 
 
-std::vector< TVector3 > S3pos,S3posspear;
+std::vector< TVector3 > S3pos,S3possmear;
 std::vector< vector < bool > > S32D(ParticleGate.size(),vector < bool >());
 std::vector< double > S3Trf;
 std::vector< TS3Hit* > S3select;
@@ -241,16 +274,20 @@ for(unsigned int i=0;i<s3->GetPixelMultiplicity();i++){//GetPixelMultiplicity bu
 		if(t_gate(TT,rf_S3)){//RF gate
 			S3_rfgate->Fill(TT);
 		}
+		if(t_gateRFcycles(TT,rf_S3cyc)){//New RF cycle gate
+			S3_rfgatecyc->Fill(TT);
+		}
+		
 	}
 	
 	double dE=SH->GetEnergy();
 	double E=dE;
 
-	TVector3 pos = SH->GetPosition(true);
+	TVector3 pos = SH->GetPosition(true)+S3OffsetVector;
 //	TVector3 pos = TS3::GetPosition(S3ring_i[i],S3sec_i[j],-22.5*TMath::Pi()/180.,32.1,Telescope,false);//Get the hit vector with some random smoothing	
 	S3_map[id]->Fill(pos.X(),pos.Y());//This is more for online checking of hit map
 	S3_map3->Fill(pos.Z(),pos.X(),pos.Y());//This is more for online checking of hit map
-	S3posspear.push_back(pos);	
+	S3possmear.push_back(pos);	
 	
 	double theta=pos.Theta();	
 	
@@ -293,8 +330,9 @@ for(unsigned int i=0;i<s3->GetPixelMultiplicity();i++){//GetPixelMultiplicity bu
 	
 	//Check for each gate of particles
 	for(int g=0;g<ParticleGate.size();g++){
-		
 		bool goodgate=true;
+		
+		// This loop checks if (when there are multiple S3s) the gate is set for only a specific S3
 		if(MultiS3&&ParticleGate[g].s3Limit){
 			goodgate=false;
 			for(unsigned short s=0;s<ParticleGate[g].s3.size();s++){
@@ -305,10 +343,10 @@ for(unsigned int i=0;i<s3->GetPixelMultiplicity();i++){//GetPixelMultiplicity bu
 			}
 		}		
 		
+		// If this is a valid S3 check the gate
 		if(goodgate&&ParticleGate[g].gate.IsInside(E,dE)){
 			S32D[g].push_back(true);
 			S3particleGated[g]->Fill(E,dE);
-
 		}else{
 			S32D[g].push_back(false);
 		}
@@ -316,18 +354,20 @@ for(unsigned int i=0;i<s3->GetPixelMultiplicity();i++){//GetPixelMultiplicity bu
 
 	S3Trf.push_back(TT);
 	S3select.push_back(SH);
-	S3pos.push_back(SH->GetPosition(false));
+	S3pos.push_back(SH->GetPosition(false)+S3OffsetVector);
 	if(Telescope)Vdedx.push_back(dE);
 
 }
 int S3N=S3select.size();
 
+// Do the multiplicity hits for the S3 detectors separately if there is more than one.
 if(MultiS3){
-	for(unsigned short i=0;i<4;i++){if(s3used[i])S3_mult[s3index[i]]->Fill(apmult[i]);}
-	if(MultiS3)S3_multot->Fill(s3->GetPixelMultiplicity());
+	for(unsigned short i=0;i<4;i++){if(s3used[i])S3_mult[s3index[i]]->Fill(apmult[s3index[i]]);}
+	S3_multot->Fill(s3->GetPixelMultiplicity());
 }else S3_mult[0]->Fill(s3->GetPixelMultiplicity());
 
 
+// Count the multiplicity of each S3 kinematic/particle gate
 for(int g=0;g<ParticleGate.size();g++){
 	int m=0;
 	for(unsigned int i=0;i<S32D[g].size();i++){
@@ -352,44 +392,38 @@ if(DS)SiLi_mult->Fill(sili->GetMultiplicity());
 if(DS){for(int i=0;i<sili->GetMultiplicity();i++){
 	sili_hit = sili->GetSiLiHit(i);
 	double e=sili_hit->GetEnergy();
-	fileN_silinoise->Fill(fileiterator,e);
-	eventN_silinoise->Fill(jentry,e);
-	runtime_silinoise->Fill(tstamp,e);
+// 	fileN_silinoise->Fill(fileiterator,e);
+// 	eventN_silinoise->Fill(jentry,e);
+// 	runtime_silinoise->Fill(tstamphour,e);
+	
+	//Moved from addback section so noise and mess is underflow bin
+	runtime_sili->Fill(tstamphour,e);
+	fileN_sili->Fill(fileiterator,e);	
+	eventN_sili->Fill(jentry,e);	
+	
 	rawsilisum+=e;
 	if(e>10&&e<4000){//noise gate and common sense gate
-		SiLi_raw->Fill(e);
-		TVector3 pos = sili_hit->GetPosition(true);
-// 		TVector3 pos = TSiLi::GetPosition(sili_hit->GetRing(),sili_hit->GetSector(),true);
-		SiLi_map->Fill(-pos.X(),pos.Y());
-		
 		int s=sili_hit->GetSegment();
 		if(s>=0&&s<120){
+			SiLi_raw->Fill(e);
+			TVector3 pos = sili_hit->GetPosition(true);
+	// 		TVector3 pos = TSiLi::GetPosition(sili_hit->GetRing(),sili_hit->GetSector(),true);
+			SiLi_map->Fill(-pos.X(),pos.Y());
+		
 			SiLiflat->Fill(s,e);
 			SiLipreamp->Fill(sili_hit->GetPreamp(),e);
 			silienergy[s]->Fill(e);
 			int r=sili_hit->GetRing();
 			SiLiring->Fill(r,e);
 			SiLisector->Fill(sili_hit->GetSector(),e);
-			if(r>=0&&r<10)silirings[r]->Fill(e);
-			if(UseFitCharge){
-				double c=sili_hit->GetFitCharge();
-				if(c>0){silifitc[s]->Fill(c);
-					double smirn=sili_hit->GetSmirnov();
-					double sigtonoise=1./sili_hit->GetSig2Noise();
-					SiLi_smirnov->Fill(smirn,e);
-					SiLi_smirnov_C->Fill(smirn/c,e);
-					SiLi_signoise->Fill(sigtonoise,e);
-					
-					if(sigtonoise>control[SiLiNoiseLimit]||(smirn/c)>control[SiLiSmirnovLimit])sili_hit->SetEnergy(0);
-				}
-			}
+			//if(r>=0&&r<10)silirings[r]->Fill(e);
 		}
 	}
 }}
 
 std::vector< double > SiLiE,SiLiEdop,SiLit,SiLitRF;
 std::vector< TSiLiHit* > SiLii;
-std::vector< bool > SiLiRF;
+std::vector< bool > SiLiRF,SiLiRFcyc;
 
 
 //Next we do the addback selected hits that we will use for the rest
@@ -397,6 +431,35 @@ if(DS)SiLiAdd_mult->Fill(sili->GetAddbackMultiplicity());
 if(DS){for(int i=0;i<sili->GetAddbackMultiplicity();i++){
 	sili_hit = sili->GetAddbackHit(i);
 	double e=sili_hit->GetEnergy();
+	
+	// Moved here as we dont want to zero energy and before the addback neighbour check.
+	// If we every to actual addback this will need changing somehow
+	if(UseFitCharge){
+		double c=sili_hit->GetFitCharge();
+		if(c>0){
+			//silifitc[s]->Fill(c);
+			double smirn=sili_hit->GetSmirnov();
+			double sigtonoise=1./sili_hit->GetSig2Noise();
+			SiLi_smirnov->Fill(smirn,e);
+			SiLi_smirnov_C->Fill(smirn/c,e);
+			SiLi_signoise->Fill(sigtonoise,e);
+			
+			short noisegood=0;
+			if(sigtonoise<control[SiLiNoiseLimit]){
+				SiLi_signoisecut->Fill(sigtonoise,e);
+				noisegood++;
+			}
+			if((smirn/c)<control[SiLiSmirnovLimit]){
+				SiLi_smirnov_Ccut->Fill(smirn/c,e);
+				noisegood++;
+			}
+			
+			if(noisegood<2){
+				sili_hit->SetEnergy(0);
+				e=0;
+			}
+		}
+	}
 	
 	if(GainDrift)e=e*FileGain+FileOffset;
 	
@@ -407,6 +470,13 @@ if(DS){for(int i=0;i<sili->GetAddbackMultiplicity();i++){
 			if(ft>50){//garbage events have early fit time
 			
 				SiLi_addback->Fill(e);
+			
+				if(sili_hit->MagnetShadow()){
+					SiLi_magshad->Fill(e);
+				}else{
+					SiLi_nagshad->Fill(e);
+					SiLi_nagshadRing->Fill(sili_hit->GetRing(),e);
+				}
 				
 // 				double edop=sili_hit->GetDoppler(control[BetaZero]);
 				
@@ -420,15 +490,13 @@ if(DS){for(int i=0;i<sili->GetAddbackMultiplicity();i++){
 				SiLit.push_back(T);	
 				
 				SiLi_singles->Fill(e);
-				runtime_sili->Fill(tstamp,e);
-				fileN_sili->Fill(fileiterator,e);	
-				eventN_sili->Fill(jentry,e);	
 
 				//1D RF check appropriate for singles DAQ triggers 
 				double TT=ft-rf_t-100;//else{TT=((T-rf_cfd)/16)-250;}
 				
 				SiLitRF.push_back(TT);
 				SiLiRF.push_back(false);
+				SiLiRFcyc.push_back(false);
 				if(!RFfail){
 					SiLi_rf->Fill(TT);
 					SiLi_rf2->Fill(e,TT);
@@ -439,10 +507,20 @@ if(DS){for(int i=0;i<sili->GetAddbackMultiplicity();i++){
 						SiLi_rfgate->Fill(TT);
 					}else{
 						SiLi_RFantigated->Fill(e);
-					}					
+					}
+					
+					if(t_gateRFcycles(TT,rf_silicyc)){//New RF cycle gate
+						SiLi_rfgatecyc->Fill(TT);
+						SiLi_RFgatedcyc->Fill(e);
+						SiLiRFcyc[SiLiRFcyc.size()-1]=true;
+					}else{
+						SiLi_RFantigatedcyc->Fill(e);
+					}
+					
 				}
 			}
 			SiLi_fit_time->Fill(ft);
+			SiLi_fit_timeS->Fill(ft,sili_hit->GetSegment());
 			SiLi_fit_timeE->Fill(ft,e);
 			SiLi_fit_timeRF->Fill(ft,rf_t);
 		}else{
@@ -475,7 +553,8 @@ for(int i=0;i<tigress->GetMultiplicity();i++){
 }
 std::vector< TTigressHit* > gammai;
 std::vector< double > gammaE,gammaEdop,gammaTrf;
-std::vector< bool > gammaRF;
+std::vector< short > gammaAng;
+std::vector< bool > gammaRF,gammaRFcyc;
 std::vector< TVector3 > gammapos;
 
 Tig_mult->Fill(tigress->GetAddbackMultiplicity());
@@ -494,23 +573,29 @@ for(int i=0;i<tigress->GetAddbackMultiplicity();i++){
 		gammaEdop.push_back(e);
 		gammai.push_back(tigress_hit);
 		Gamma_singles->Fill(e);
-		runtime_gamma->Fill(tstamp,e);
+		runtime_gamma->Fill(tstamphour,e);
 		fileN_gamma->Fill(fileiterator,e);
 		eventN_gamma->Fill(jentry,e);
 		
 		TVector3 pos=TTigress::GetPosition(tigress_hit->GetDetector(), tigress_hit->GetCrystal(), 0, 0, true);
-		TigressHitMapLow->Fill(pos.Phi(),pos.Theta());
-		TigressHitMap3->Fill(pos.X(),pos.Y(),pos.Z());
+		if(e>200){//extra theshold for these plots
+			TigressHitMapLow->Fill(pos.Phi(),pos.Theta());
+			TigressHitMap3->Fill(pos.X(),pos.Y(),pos.Z());
+		}
 		
 		pos=tigress_hit->GetPosition();//No smear
 		gammapos.push_back(pos);
-		TigressHitMap->Fill(pos.Phi(),pos.Theta());
-		TigressETheta->Fill(e,pos.Theta());
+		if(e>200)TigressHitMap->Fill(pos.Phi(),pos.Theta());
+		
+		short tigang=TigAng(tigress_hit);
+		gammaAng.push_back(tigang);
+		TigressETheta->Fill(e,tigang);
 		
 		//RF check
 		double TT=tigress_hit->GetCfd()-rf_cfd;TT/=16;
 		gammaTrf.push_back(TT);
 		gammaRF.push_back(false);
+		gammaRFcyc.push_back(false);
 		if(!RFfail){//IF there is an RF
 			Gamma_rf->Fill(TT);
 			EGamma_rf2->Fill(e,TT);
@@ -521,6 +606,15 @@ for(int i=0;i<tigress->GetAddbackMultiplicity();i++){
 			}else{
 				Gamma_RFantigated->Fill(e);
 			}
+			
+			if(t_gateRFcycles(TT,rf_gammacyc)){//New RF cycle gate
+				Gamma_rfgatecyc->Fill(TT);
+				Gamma_RFgatedcyc->Fill(e);
+				gammaRFcyc[gammaRFcyc.size()-1]=true;
+			}else{
+				Gamma_RFantigatedcyc->Fill(e);
+			}
+			
 		}
 	}
 }
@@ -542,16 +636,17 @@ for(unsigned int i=0;i<gammaN;i++){
 		for(unsigned int j=0;j<SiLiN;j++){
 			double TT=gammai[i]->GetCfd()-SiLit[j];
 			Gamma_SiLi_t->Fill(TT);
-			Gamma_SiLi_tw->Fill(TT);
+			Gamma_SiLi_twide->Fill(TT);
 			Gamma_SiLi_t2->Fill(gammaE[i],TT);
 			Gamma_SiLi_t3->Fill(gammaE[i],SiLiE[j],TT);
 			
 			if(t_gate(TT,gamma_sili_t)){
 				Gamma_SiLi_tgate->Fill(TT);
 
-				runtime_gammasili->Fill(tstamp,gammaE[i],SiLiE[j]);
-				eventN_gammasili->Fill(jentry,gammaE[i],SiLiE[j]);
+// 				runtime_gammasili->Fill(tstamphour,gammaE[i],SiLiE[j]);
+// 				eventN_gammasili->Fill(jentry,gammaE[i],SiLiE[j]);
 				Gamma_SiLi->Fill(gammaE[i],SiLiE[j]);
+				if(!SiLii[j]->MagnetShadow())SiLiGamma_nagshad->Fill(gammaE[i],SiLiE[j]);
 				GammaSiLiPlus->Fill(gammaE[i]+SiLiE[j]);
 				GammaSiLiPlus_Gamma->Fill(gammaE[i]+SiLiE[j],gammaE[i]);
 				GammaSiLiPlus_SiLi->Fill(gammaE[i]+SiLiE[j],SiLiE[j]);
@@ -560,6 +655,10 @@ for(unsigned int i=0;i<gammaN;i++){
 				
 				if(gammaRF[i]&&SiLiRF[j]){
 					SiLiGamma__RFgated->Fill(gammaE[i],SiLiE[j]);
+				}
+				
+				if(gammaRFcyc[i]&&SiLiRFcyc[j]){
+					SiLiGamma__RFgatedcyc->Fill(gammaE[i],SiLiE[j]);
 				}
 				
 				Gamma_SiLi_RFgated->Fill(gammaTrf[i],SiLitRF[j]);
@@ -578,19 +677,26 @@ for(unsigned int i=0;i<gammaN;i++){
 			Gamma_Gamma->Fill(gammaE[i],gammaE[j]);
 			Gamma_Gamma->Fill(gammaE[j],gammaE[i]);
 			
-			TigressEETheta->Fill(gammaE[i],gammaE[j],gammapos[i].Theta());
+			
+			TigressEETheta->Fill(gammaE[i],gammaE[j],gammaAng[j]);
+			TigressEETheta->Fill(gammaE[j],gammaE[i],gammaAng[i]);
+			
 			TigressEEdTheta->Fill(gammaE[i],gammaE[j],gammapos[i].Angle(gammapos[j]));
 			TigressEEdTheta->Fill(gammaE[j],gammaE[i],gammapos[i].Angle(gammapos[j]));
 			
-			runtime_gammagamma->Fill(tstamp,gammaE[i],gammaE[j]);
-			runtime_gammagamma->Fill(tstamp,gammaE[j],gammaE[i]);
-			eventN_gammagamma->Fill(jentry,gammaE[i],gammaE[j]);
-			eventN_gammagamma->Fill(jentry,gammaE[j],gammaE[i]);	
+// 			runtime_gammagamma->Fill(tstamphour,gammaE[i],gammaE[j]);
+// 			runtime_gammagamma->Fill(tstamphour,gammaE[j],gammaE[i]);
+// 			eventN_gammagamma->Fill(jentry,gammaE[i],gammaE[j]);
+// 			eventN_gammagamma->Fill(jentry,gammaE[j],gammaE[i]);	
 			
 			if(gammaRF[i]&&gammaRF[j]){
 				GammaGamma_RFgated->Fill(gammaE[i],gammaE[j]);
 				GammaGamma_RFgated->Fill(gammaE[j],gammaE[i]);
-			}				
+			}
+			if(gammaRFcyc[i]&&gammaRFcyc[j]){
+				GammaGamma_RFgatedcyc->Fill(gammaE[i],gammaE[j]);
+				GammaGamma_RFgatedcyc->Fill(gammaE[j],gammaE[i]);
+			}					
 
 			//////// Do gammas + gammas + gammas ////////
 			for(unsigned int k=j+1;k<gammaN;k++){
@@ -613,78 +719,93 @@ for(unsigned int i=0;i<gammaN;i++){
 ////////////////// S3 and xxx //////////////////
 ////////////////////////////////////////////////////
 
-std::vector< std::vector< unsigned short > > SiLiFirstOnly;
-std::vector< std::vector< unsigned short > > GammaFirstOnly;
+
+// matrix of size: Number-of-Gammas x Number-of-S3-gates-definitions
+// store the multiplicity of the hits in the S3 particle gates coinident with each gamma ray
+// Useful for many particle evaporation channels and/or when one wants to avoid multiple filling
+
+std::vector< std::vector< unsigned short > > SiLiHitPGMulti;
+std::vector< std::vector< unsigned short > > GammaHitPGMulti;
 
 if(FirstOnly||MultiParticles){
-	SiLiFirstOnly= std::vector< std::vector< unsigned short > > (SiLiN,std::vector< unsigned short >(S32D.size(),0));
-	GammaFirstOnly= std::vector< std::vector< unsigned short > > (gammaN,std::vector< unsigned short >(S32D.size(),0));
+	SiLiHitPGMulti= std::vector< std::vector< unsigned short > > (SiLiN,std::vector< unsigned short >(S32D.size(),0));
+	GammaHitPGMulti= std::vector< std::vector< unsigned short > > (gammaN,std::vector< unsigned short >(S32D.size(),0));
 }
 
+//
+// Entire loop goes over each S3 hit only once
+// But over electrons/gammas a few times
+//
 for(unsigned int j=0;j<S3N;j++){
 	TS3Hit* SH=S3select[j];
 	
-	//Stores if Sili hits are time coincident with current S3
+	// Vector stores if SiLi hit is time-coincident with this S3 hit
 	std::vector< bool > SiLiS3loop(SiLiN,false);		
 	
-	//// Do S3 and SiLi coincidence check ////
+	// Do S3 and SiLi coincidence check
+	// Fill histograms that only depend on an S3 hit, not on particle gates
 	if(DS){for(unsigned int i=0;i<SiLiN;i++){
 		double TT=SiLit[i]-SH->GetCfd();
 		double e=SiLiE[i];
 
 		SiLi_S3_t->Fill(TT);
-		SiLi_S3_tw->Fill(TT);
+		SiLi_S3_twide->Fill(TT);
 		SiLi_S3_t2->Fill(e,TT);
 
 		bool rf2dgate=false;	
 		
-		if(!RFfail){
+		if(!RFfail){//If there is RF data
 			S3_SiLi_RF->Fill(S3Trf[j],SiLitRF[i]);
-			S3_SiLi_RFe->Fill(S3Trf[j],SiLitRF[i],e);	
-			for(int g=0;g<s3silirf2D.size();g++)rf2dgate+=s3silirf2D[g].IsInside(SiLitRF[i],S3Trf[j]);
-			if(!UseSiLiRFCoinc)rf2dgate=false;
+			S3_SiLi_RFe->Fill(S3Trf[j],SiLitRF[i],e);
+			if(UseSiLiRFCoinc){//If use sili-rf S3-rf 2D gate is turned on, check the gate(s)
+				for(int g=0;g<s3silirf2D.size();g++)rf2dgate+=s3silirf2D[g].IsInside(SiLitRF[i],S3Trf[j]);
+			}
 		}
 		
 		//Either check SiLi-S3 coincidence time OR sili-rf S3-rf 2D gate, depending on settings
 		if((t_gate(TT,s3_sili_t)&&!UseSiLiRFCoinc) || rf2dgate){
 			SiLi_S3_tgate->Fill(TT);
-			if(!RFfail)S3_SiLi_RFgated->Fill(S3Trf[j],SiLitRF[i]);
 			SiLiS3loop[i]=true;
+			if(!RFfail)S3_SiLi_RFgated->Fill(S3Trf[j],SiLitRF[i]);
 		}
 	}}
 	
-	std::vector< bool > gammaS3loop(gammaN,false);
-
+	// As SiLi
 	//// Do S3 gamma coincidence check ////
+	std::vector< bool > gammaS3loop(gammaN,false);
 	for(unsigned int i=0;i<gammaN;i++){
 		double TT=gammai[i]->GetCfd()-SH->GetCfd();
 		double e=gammaE[i];
-
 		Gamma_S3_t->Fill(TT);
 		Gamma_S3_t2->Fill(e,TT);
 		if(t_gate(TT,s3_gamma_t)){
 			Gamma_S3_tgate->Fill(TT);	
-			gammaS3loop[i]=true;			
+			gammaS3loop[i]=true;	
 			if(!RFfail)Gamma_S3_RFgated->Fill(S3Trf[j],gammaTrf[i]);
 		}
-		
-		if(!RFfail){Gamma_S3_RF->Fill(S3Trf[j],gammaTrf[i]);
-			Gamma_S3_RFe->Fill(S3Trf[j],gammaTrf[i],e);}	
+		if(!RFfail){
+			Gamma_S3_RF->Fill(S3Trf[j],gammaTrf[i]);
+			Gamma_S3_RFe->Fill(S3Trf[j],gammaTrf[i],e);
+		}	
 	}
 	
-	int mulparthist=0;
+	int mulparthist=0;//Counter for multi particle gates near the end of the next loop
 	
-	//// Iterate of S3 kinematic gates, which define a particle type ////
-	for(int g=0;g<S32D.size();g++){if(S32D[g][j]){
+	//// Iterate over all possible S3 kinematic/particle gates, for this S3 hit
+	for(int g=0;g<S32D.size();g++){
+	if(S32D[g][j]){// If S3 hit j is in particle gate g.
+		// Any complexities for multiple physical S3s are dealt with at the S3 singles stage
+		
 		TVector3 particlevec=S3pos[j];
 		
-		gate2Ddata* ggate=&ParticleGate[g];
+		gate2Ddata* ggate=&ParticleGate[g];//The gate settings (kinematics etc) for gate [g]
 		
-		//get the calculated beta value for a particle
+		// Get/Calculate beta value for a particle
+		// Depends on S3Hit and Gate, no advantage to pre-calculating
 		double betal=0;
 		if(ggate->use_beta){
 			betal=control[BetaZero];
-			if(ggate->use_rb){
+			if(ggate->UseEnergyBeta){
 				betal=calc_beta_KE(SH->GetEnergy()/1000.,ggate->mass);
 			}else if(ggate->use_rb){
 				unsigned int rrr=SH->GetRing();
@@ -694,48 +815,67 @@ for(unsigned int j=0;j<S3N;j++){
 			}
 		}
 		
-		//Convert from S3 particle to particle of interest
+		// In a binary reaction when gating on the secondary particle in the S3
+		// convert position vector from S3 particle to particle of interest
+		// beta above should already be given correctly for particle of interest
 		if(ggate->use_tt){
 			particlevec.SetMagThetaPhi(1,ggate->theta_theta.Eval(particlevec.Theta()), particlevec.Phi()+TMath::Pi());
 		}
 		
-		//Do SiLi kinematic adjust
-		if(DS){for(unsigned int i=0;i<SiLiN;i++){if(SiLiS3loop[i]){
+		///////////////////////////////////////////
+		// Do SiLi S3-Particle-Gate Coincidences //
+		///////////////////////////////////////////
+		if(DS){for(unsigned int i=0;i<SiLiN;i++){if(SiLiS3loop[i]){//If SiLiHit i is time coincident with this S3hit 
 			
+			// If we are tracking gate multiplicity
 			if(FirstOnly||MultiParticles){
-				if(FirstOnly)if(SiLiFirstOnly[i][g]){
-					SiLiS3loop[i]=false;
+				SiLiHitPGMulti[i][g]++;
+				
+				if(FirstOnly)if(SiLiHitPGMulti[i][g]>1){
+					// If FirstOnly. we are only filling histograms for each particle gate
+					// once per SiLiHit, even if following S3Hits also satisfy the gate
+					// Good for avoiding double counting, but not for multiple kinematic solutions
+					SiLiEdop[i]=0;
 					continue;
 				}
-				SiLiFirstOnly[i][g]++;
 			}
 			
+			//kinematic adjust
 			double e;
 			if(ggate->use_beta)e=SiLiE[i];//e=SiLii[i]->GetDoppler(betal,&particlevec,SiLiE[i]);
 			else e=SiLiE[i];
 			SiLiEdop[i]=e;
 			SiLiPG[g]->Fill(e);
-			if(SiLiRF[i])SiLiPGRF[g]->Fill(e);
+			if(SiLiRFcyc[i])SiLiPGRFcyc[g]->Fill(e);
 			SiLiEPG[g]->Fill(e,SH->GetEnergy());	
 		}}}
 			
 
-		//// Do kinematic adjust gammas ////
-		for(unsigned int i=0;i<gammaN;i++){if(gammaS3loop[i]){
+		////////////////////////////////////////////
+		// Do Gamma S3-Particle-Gate Coincidences //
+		////////////////////////////////////////////
+		for(unsigned int i=0;i<gammaN;i++){if(gammaS3loop[i]){//If GammaHit i is time coincident with this S3hit 
 			
+			// If we are tracking gate multiplicity
 			if(FirstOnly||MultiParticles){
-				if(FirstOnly)if(GammaFirstOnly[i][g]){
-					gammaS3loop[i]=false;
+				GammaHitPGMulti[i][g]++;
+				if(FirstOnly)if(GammaHitPGMulti[i][g]>1){
+					// If FirstOnly. we are only filling histograms for each particle gate
+					// once per SiLiHit, even if following S3Hits also satisfy the gate
+					// Good for avoiding double counting, but not for multiple kinematic solutions
+					gammaEdop[i]=0;
 					continue;
 				}
-				GammaFirstOnly[i][g]++;
 			}
 			
 			double E;
+			//kinematic adjust
 			if(ggate->use_beta)E=gammai[i]->GetDoppler(betal,&particlevec);
 			else E=gammai[i]->GetEnergy();
 			gammaEdop[i]=E;
 			
+			// Fill a specific set of histograms only in use when particle gates have
+			// Significant doppler shift for which correction must be optimised
 			if(ggate->use_beta){
 				double e=gammai[i]->GetEnergy();
 				unsigned int R=s3r(SH);//SH->GetRing();
@@ -759,76 +899,112 @@ for(unsigned int j=0;j<S3N;j++){
 
 			GammaPG[g]->Fill(E);
 			GammaEPG[g]->Fill(E,SH->GetEnergy());
-			TigressEThetaPG[g]->Fill(E,gammapos[i].Theta());
+			TigressEThetaPG[g]->Fill(E,gammaAng[i]);
+			if(gammaRFcyc[i])GammaPGRFcyc[g]->Fill(E);
 			
 			if(Telescope){GammaS3dedx->Fill(SH->GetEnergy(),Vdedx[j],E);}
 			
-			//// Do particle gated gammas + gammas ////
+			//////////////////////////////////////////////////
+			// Do Gamma-Gamma S3-Particle-Gate Coincidences //
+			//////////////////////////////////////////////////
 			
+			// Goes backward as must use the tigress events which have already been checked
+			// against this current S3Hit gate and kinematically corrected
 			for(int m=i-1;m>=0;m--){
-				if(gammaS3loop[m]){if(t_gate(gammai[i]->GetCfd()-gammai[m]->GetCfd(),gamma_gamma_t)){
+				if(gammaS3loop[m]&&gammaEdop[m]){if(t_gate(gammai[m]->GetCfd()-gammai[i]->GetCfd(),gamma_gamma_t)){
+					// check GammaHit m is also coincident with this S3Hit & valid & time valid
+					// In the case FirstOnly is being used gammaEdop[m]==0 if it was "used" 
+					// by an earlier S3Hit that also matched this gate
+					
 					GammaGammaPG[g]->Fill(gammaEdop[i],gammaEdop[m]);
 					GammaGammaPG[g]->Fill(gammaEdop[m],gammaEdop[i]);
-					TigressEEThetaPG[g]->Fill(gammaEdop[i],gammaEdop[m],gammapos[i].Theta());
-					TigressEEdThetaPG[g]->Fill(gammaEdop[i],gammaEdop[m],gammapos[i].Angle(gammapos[m]));
-					TigressEEdThetaPG[g]->Fill(gammaEdop[m],gammaEdop[i],gammapos[i].Angle(gammapos[m]));
+					
+					TigressEEThetaPG[g]->Fill(gammaEdop[i],gammaEdop[m],gammaAng[m]);
+					TigressEEThetaPG[g]->Fill(gammaEdop[m],gammaEdop[i],gammaAng[i]);
+
+					double ang=gammapos[i].Angle(gammapos[m]);
+					TigressEEdThetaPG[g]->Fill(gammaEdop[i],gammaEdop[m],ang);
+					TigressEEdThetaPG[g]->Fill(gammaEdop[m],gammaEdop[i],ang);
 				}}
 			}
 			
-			//// Do particle gated gammas + electron ////
+			/////////////////////////////////////////////////
+			// Do Gamma-SiLi S3-Particle-Gate Coincidences //
+			/////////////////////////////////////////////////
+			
 			if(DS){for(unsigned int m=0;m<SiLiN;m++){
-				if(SiLiS3loop[m]){if(t_gate(gammai[i]->GetCfd()-SiLit[m],gamma_sili_t)){
+				if(SiLiS3loop[m]&&SiLiEdop[m]){if(t_gate(gammai[i]->GetCfd()-SiLit[m],gamma_sili_t)){
 					GammaSiLiPG[g]->Fill(gammaEdop[i],SiLiEdop[m]);	
 				}}
 			}}
-		}}
-		
+		}}//End of "Gamma S3-Particle-Gate Coincidences"
+		// Still in particle-gate Loop inside S3Hit loop
 
-		//// Go Through Multi S3 gates ////
-		if(MultiParticles)for(int k=g+1;k<S32D.size();k++){{
-			for(unsigned int i=0;i<S3N;i++){
-				if(i==j)continue;
+		
+		////////////////////////////////////////////
+		// Do S3-Multi-Particle-Gate Coincidences //
+		////////////////////////////////////////////
+		if(MultiParticles)for(int k=g+1;k<S32D.size();k++){{//Iterate over all SUBSEQUENT gates
+			for(unsigned int i=0;i<S3N;i++){//Iterate over ALL S3 hits
+				if(i==j)continue;//Skip self hits
+				//This covers all S3Hit and gate combinations without double counting
 				
-				if(S32D[k][i]){
-					double thth=S3posspear[i].Theta()+S3posspear[j].Theta();
+				if(S32D[k][i]){//If other hit is in other gate
+					double thth=S3possmear[i].Theta()+S3possmear[j].Theta();//Angle difference
 					if(thth>pi)thth=2*pi-thth;
-					PhiTheta[mulparthist]->Fill(thth,S3posspear[j].DeltaPhi(S3posspear[i]));
+					PhiTheta[mulparthist]->Fill(thth,S3possmear[j].DeltaPhi(S3possmear[i]));
 				}
 			}
 			mulparthist++;
 		}}
-	}}		
-}
+	}}//End of particle-gate loop
+}//End of S3Hit loop
 
 
-
-//// Iterate double S3 kinematic gates ////
+		
+///////////////////////////////////////////////////
+// Do S3-Multi-Particle-Gate + XXXX Coincidences //
+///////////////////////////////////////////////////
 if(MultiParticles){
 	int mulparthist=0;
-	for(int g=0;g<S32D.size();g++){
-		for(int k=g+1;k<S32D.size();k++){
+	for(int g=0;g<S32D.size();g++){//iterate over particle gates
+		for(int k=g+1;k<S32D.size();k++){//iterate over other particle gates
 		
-			if(DS){for(unsigned int i=0;i<SiLiN;i++){
-				if(SiLiFirstOnly[i][g]&&SiLiFirstOnly[i][k])
+			if(DS){for(unsigned int i=0;i<SiLiN;i++){//Iterate over SiLiHits
+				if(SiLiHitPGMulti[i][g]&&SiLiHitPGMulti[i][k]){//If SiLiHit coincident with at least one S3Hit in both gates
 					MultiPartSPICE[mulparthist]->Fill(SiLiE[i]);
-					multisA[mulparthist]->Fill(SiLiFirstOnly[i][g],SiLiE[i]);
-					multisB[mulparthist]->Fill(SiLiFirstOnly[i][k],SiLiE[i]);
-			}}	
+					//multisA[mulparthist]->Fill(SiLiHitPGMulti[i][g],SiLiE[i]);
+					//multisB[mulparthist]->Fill(SiLiHitPGMulti[i][k],SiLiE[i]);
+					multisAB[mulparthist]->Fill(SiLiHitPGMulti[i][g],SiLiHitPGMulti[i][k],SiLiE[i]);
+			}}}
 			
-			for(unsigned int i=0;i<gammaN;i++){
-				if(GammaFirstOnly[i][g]&&GammaFirstOnly[i][k]){
+			// Note: We are using NON-kinematically corrected energies here, as those are dependant on a single gate.
+			
+			for(unsigned int i=0;i<gammaN;i++){//Iterate over GammaHit
+				if(GammaHitPGMulti[i][g]&&GammaHitPGMulti[i][k]){//If GammaHit coincident with at least one S3Hit in both gates
 					MultiPartTig[mulparthist]->Fill(gammaE[i]);
-					multigA[mulparthist]->Fill(GammaFirstOnly[i][g],gammaE[i]);
-					multigB[mulparthist]->Fill(GammaFirstOnly[i][k],gammaE[i]);
+					//multigA[mulparthist]->Fill(GammaHitPGMulti[i][g],gammaE[i]);
+					//multigB[mulparthist]->Fill(GammaHitPGMulti[i][k],gammaE[i]);
+					multigAB[mulparthist]->Fill(GammaHitPGMulti[i][g],GammaHitPGMulti[i][k],gammaE[i]);
 				}
 			}
 			
 			mulparthist++;
 		}
 		
+		//
+		// Only here after iterating over all S3Hits can we say how many particles of each gate
+		// A given gamma/SiLiHit was in coincidence with
+		//
+		
 		for(unsigned int i=0;i<gammaN;i++){
-			if(GammaFirstOnly[i][g])PGmultGamma[g]->Fill(GammaFirstOnly[i][g],gammaE[i]);
+			if(GammaHitPGMulti[i][g])PGmultGamma[g]->Fill(GammaHitPGMulti[i][g],gammaE[i]);
 		}
+
+		if(DS)for(unsigned int i=0;i<SiLiN;i++){
+			if(SiLiHitPGMulti[i][g])PGmultSili[g]->Fill(SiLiHitPGMulti[i][g],SiLiE[i]);
+		}
+		
 	}
 }
 

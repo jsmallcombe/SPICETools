@@ -45,6 +45,8 @@
 #include "TTigress.h"
 #include "TSiLi.h"
 #include "TS3.h"
+#include "TGenericDetector.h"
+#include "TPaces.h"
 #include "TRF.h"
 #include "TChannel.h"
 #endif

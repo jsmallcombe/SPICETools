@@ -6,6 +6,9 @@
 ///////////////////////
 ///////////////////////
 
+double TRFperiodns= 84.409;
+int TRFperiodps= 84409;
+
 typedef struct gate2Ddata{
 	TGraph gate;
 	string title;
@@ -24,8 +27,8 @@ typedef struct gate2Ddata{
 
 double pi=TMath::Pi();
 
-enum gatenames{s3_gamma_t,s3_sili_t,gamma_gamma_t,sili_sili_t,gamma_sili_t,rf_S3,rf_sili,rf_gamma};
-vector< string > gatetitles={"s3_gamma_t","s3_sili_t","gamma_gamma_t","sili_sili_t","gamma_sili_t","rf_S3","rf_sili","rf_gamma"};
+enum gatenames{s3_gamma_t,s3_sili_t,gamma_gamma_t,sili_sili_t,gamma_sili_t,rf_S3,rf_sili,rf_gamma,rf_S3cyc,rf_silicyc,rf_gammacyc};
+vector< string > gatetitles={"s3_gamma_t","s3_sili_t","gamma_gamma_t","sili_sili_t","gamma_sili_t","rf_S3","rf_sili","rf_gamma","rf_S3cyc","rf_silicyc","rf_gammacyc"};
 
 
 vector< pair<double,double> > gates;
@@ -69,10 +72,13 @@ unsigned short s3r(TS3Hit* s3hit){
 ///////////////////////
 ///////////////////////
 bool t_gate(double,gatenames);
+void t_gateRFmake(gatenames);
+bool t_gateRFcycles(double,gatenames);
 long t_stamp(TRF*,TTigress*,TSiLi*,TS3*);
 long t_stamp_fix(long &);
 TGraph* FileTGraph(string filepath);
 double calc_beta_KE(double emev,double Amass);
+short TigAng(TTigressHit*);
 
 ///////////////////////
 ///////////////////////
@@ -127,7 +133,10 @@ bool MultiParticles=inp.IsPresent("MultiParticles");
 if(MultiParticles)cout<<endl<<"Making Multi-Particle Histograms.";
 
 bool PreferenceSectors=inp.IsPresent("PreferenceSectors");
-if(MultiParticles)cout<<endl<<"Making Multi-Particle Histograms.";
+if(PreferenceSectors)cout<<endl<<"Preference S3 Sectors.";
+
+bool AddMonitor=inp.IsPresent("AddMonitor");
+if(AddMonitor)cout<<endl<<"Adding TGenericDet Monitor Histograms.";
 
 bool DS=!inp.IsPresent("NoSPICE");
 if(!DS)cout<<endl<<"Omitting SPICE Histograms.";
@@ -210,7 +219,7 @@ gROOT->cd();
 //////////////////     PROCESS GATE TYPE INPUTS      ////////////
 /////////////////////////////////////////////////////////////////
 
-
+TVector3 S3OffsetVector(0,0,0);
 inp.Rewind();
 string str;
 while(inp>>str){
@@ -221,6 +230,15 @@ while(inp>>str){
 		inp>>s;
 		if(s<4)	s3used[s]=true;
 	}
+	
+	if(str.find("S3Vector")<str.size()){
+// 		unsigned short s;
+		double x,y,z;
+		inp>>x>>y>>z;
+		S3OffsetVector=TVector3(x,y,z);
+		cout<<endl<<"Using S3 offset "<<x<<" "<<y<<" "<<z<<" mm";
+	}	
+	
 
 	//Data file loading
 	if(str.find("RingGroup")<str.size()){
@@ -384,6 +402,13 @@ for(int y=0;y<s3silirf2D.size();y++){
 }
 
 
+if(gates[rf_S3cyc].first<-1E9&&gates[rf_S3cyc].second>1E9)gates[rf_S3cyc]=gates[rf_S3];
+if(gates[rf_silicyc].first<-1E9&&gates[rf_silicyc].second>1E9)gates[rf_silicyc]=gates[rf_sili];
+if(gates[rf_gammacyc].first<-1E9&&gates[rf_gammacyc].second>1E9)gates[rf_gammacyc]=gates[rf_gamma];
+t_gateRFmake(rf_S3cyc);
+t_gateRFmake(rf_silicyc);
+t_gateRFmake(rf_gammacyc);
+
 /////////////////////////////////////////////////////////////////
 /////////////////  Check all needed inputs     //////////////////
 /////////////////////////////////////////////////////////////////
@@ -407,16 +432,21 @@ TSiLi *sili = 0;
 TTigress *tigress = 0; 
 TS3 *s3 = 0;
 TRF *rf = 0;
+TGenericDetector *gd = 0;
+// TPaces *gd = 0;
 
 if(DataChain->FindBranch("TSiLi"))DataChain->SetBranchAddress("TSiLi",&sili);else sili=new TSiLi();
 if(DataChain->FindBranch("TTigress"))DataChain->SetBranchAddress("TTigress",&tigress);else tigress=new TTigress();
 if(DataChain->FindBranch("TS3"))DataChain->SetBranchAddress("TS3",&s3);else s3=new TS3();
 if(DataChain->FindBranch("TRF"))DataChain->SetBranchAddress("TRF",&rf);else rf=new TRF();
+if(AddMonitor)if(DataChain->FindBranch("TGenericDetector"))DataChain->SetBranchAddress("TGenericDetector",&gd);else gd=new TGenericDetector();
+// if(AddMonitor)if(DataChain->FindBranch("TPaces"))DataChain->SetBranchAddress("TPaces",&gd);else gd=new TPaces();
 
 TSiLiHit *sili_hit;
 TTigressHit *tigress_hit;
 long nentries = DataChain->GetEntries();
 
+if(!nentries)return 0;
 
 if(UseFitCharge){
 	TChannel::SetIntegration("SPI",1);
@@ -424,9 +454,13 @@ if(UseFitCharge){
 }else TChannel::SetIntegration("SP",125);
 TChannel::SetIntegration("BA",125);
 TChannel::SetIntegration("TI",125);
+TChannel::SetIntegration("GD",125);
+// TChannel::SetIntegration("PA",125);
 TChannel::SetUseCalFileIntegration("BA",true);
 TChannel::SetUseCalFileIntegration("SP",true);
 TChannel::SetUseCalFileIntegration("TI",true);
+TChannel::SetUseCalFileIntegration("GD",true);
+// TChannel::SetUseCalFileIntegration("PA",true);
 
 TTigress::SetForceCrystal();
 TTigress::SetTargetOffset(control[TigressTargetOffset]);
@@ -602,7 +636,7 @@ outfile->cd("RunTime");
 	eventN_e_y_highratio->SetTitle("eventN_e_y_highratio");
 	axislab(eventN_e_y_highratio,"Event No.","e/y ratio");
 
-	TH1D* eventN_sili_noiseratio = eventN_silinoise->ProjectionX("eventN_sili_noiseratio",1,AY->FindBin(100));
+	TH1D* eventN_sili_noiseratio = eventN_sili->ProjectionX("eventN_sili_noiseratio",0,AY->FindBin(100));
 	eventN_sili_noiseratio->SetTitle("eventN_sili_noiseratio");
 	axislab(eventN_sili_noiseratio,"Event No.","noise to data ratio");
 
@@ -612,7 +646,7 @@ outfile->cd("RunTime");
 	fileN_e_y_highratio->SetTitle("fileN_e_y_highratio");
 	axislab(fileN_e_y_highratio,"Event No.","e/y ratio");
 	
-	TH1D* fileN_sili_noiseratio = fileN_silinoise->ProjectionX("fileN_sili_noiseratio",1,AYY->FindBin(100));
+	TH1D* fileN_sili_noiseratio = fileN_sili->ProjectionX("fileN_sili_noiseratio",0,AYY->FindBin(100));
 	fileN_sili_noiseratio->LabelsDeflate();
 	fileN_sili_noiseratio->SetTitle("fileN_sili_noiseratio");
 	axislab(fileN_sili_noiseratio,"Event No.","noise to data ratio");
@@ -710,10 +744,50 @@ return 0;
 ///////////////////////////////////////////////////////////////	
 
 
+
+
 bool t_gate(double t,gatenames g){
 	if(t>=gates[g].first&&t<=gates[g].second)return true;
 	return false;	
 }
+
+void t_gateRFmake(gatenames g){
+	
+	int f=gates[g].first*10000.;
+	int s=gates[g].second*10000.;
+	int w=s-f;
+	
+	if(w>TRFperiodps){
+		f+=w*0.5;
+		s=f+20000;
+	}
+	
+	f=f%TRFperiodps;
+	s=s%TRFperiodps;
+	
+	if(f<0)f+=TRFperiodps;
+	if(s<0)s+=TRFperiodps;
+	
+	gates[g].first=f;
+	gates[g].second=s;
+}
+
+//inputs in 10s ns
+bool t_gateRFcycles(double t,gatenames g){
+	
+	int T=t*10000.;
+	T=T%TRFperiodps;
+	if(T<0)T+=TRFperiodps;
+	
+	if(gates[g].first<gates[g].second){
+		if(T>=gates[g].first&&T<=gates[g].second)return true;
+	}else{
+		if(T>=gates[g].first||T<=gates[g].second)return true;
+	}
+		
+	return false;
+}
+
 
 long t_stamp(TRF *rf,TTigress *tigress,TSiLi *sili,TS3 *s3){
 	if(tigress){
@@ -722,9 +796,11 @@ long t_stamp(TRF *rf,TTigress *tigress,TSiLi *sili,TS3 *s3){
 			if(t>0)return t;
 		}
 	}
-	if(rf){
-		long t=rf->TimeStamp();
-		if(t>0)return t;
+	if(s3){
+		for(unsigned int i=0;i<s3->GetRingMultiplicity();i++){
+			long t=s3->GetRingHit(i)->GetTimeStamp();
+			if(t>0)return t;
+		}
 	}
 	if(sili){
 		for(unsigned int i=0;i<sili->GetMultiplicity();i++){
@@ -732,11 +808,9 @@ long t_stamp(TRF *rf,TTigress *tigress,TSiLi *sili,TS3 *s3){
 			if(t>0)return t;
 		}
 	}
-	if(s3){
-		for(unsigned int i=0;i<s3->GetRingMultiplicity();i++){
-			long t=s3->GetRingHit(i)->GetTimeStamp();
-			if(t>0)return t;
-		}
+	if(rf){
+		long t=rf->TimeStamp();
+		if(t>0)return t;
 	}
 	return 0;
 }
@@ -775,10 +849,31 @@ TGraph* FileTGraph(string filepath){
 }
 
 
-
 double calc_beta_KE(double emev,double Amass){//input particle KE in MeV and mass in amu
 	double mass=931.5*Amass;
 	double gamma=(emev/mass)+1;
 	return sqrt(1-pow(1/gamma,2));
 }
 
+
+short TigAng(TTigressHit* Tseg){
+	if(!Tseg)return -1;
+	
+	short det=Tseg->GetDetector();
+	short cry=Tseg->GetCrystal();
+	short seg=Tseg->GetSegment();
+	
+	short pos=0;
+	if(det<=0||det>16)return -1;
+	if(det>4)pos+=4;
+	if(det>12)pos+=4;
+	
+	if(cry==1||cry==2){
+		pos+=2;
+		if(seg==1||seg==2||seg==5||seg==6)pos++;
+	}else{//cry 0 3
+		if(seg==2||seg==3||seg==6||seg==7)pos++;
+	}
+
+	return pos;
+}

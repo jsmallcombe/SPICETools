@@ -469,12 +469,18 @@ void S3FixCalBeam(TChain* DataChain,string outputfile,TApplication* app,double e
 	
 	
 	double XX=GetHistClickVal(chargering0,"Select Below Highest Peak",false);//Getting a click
+	double XXX=GetHistClickVal(chargering0,"Select Above Highest Peak",false);//Getting a click
 
-	chargering0->GetXaxis()->SetRange(chargering0->GetXaxis()->FindBin(XX),chargering0->GetNbinsX());
+	higher_jd(XX,XXX);
 	
-	cout<<endl<<"Mean Charge Ring 0 "<<chargering0->GetMean()<<endl;
-	
+	chargering0->GetXaxis()->SetRange(chargering0->GetXaxis()->FindBin(XX),chargering0->GetXaxis()->FindBin(XXX));
+
 	double grad0=energyring0/chargering0->GetMean();
+	
+	cout<<endl<<"Energy Ring 0 "<<energyring0<<" keV"<<endl;
+	cout<<endl<<"Mean Charge Ring 0 "<<chargering0->GetMean()<<endl;
+	cout<<endl<<"grad Ring 0 "<<grad0<<endl;
+	
 	
 	outfile->cd();
 	TH1F *gradsector[32];
@@ -486,27 +492,49 @@ void S3FixCalBeam(TChain* DataChain,string outputfile,TApplication* app,double e
 	gROOT->cd();	
 	
 	cout<<endl<<endl<<"Processing Sectors"<<endl;
+	
+	outfile->cd();
+	TH2F *sectorcharge= new TH2F("sectorcharge","sectorcharge",32,0,32,10000,0,100000*gn);
+	gROOT->cd();
+	
 	for(int jentry=0;jentry<nentries;jentry++){
 		DataChain->GetEntry(jentry);  //start the loop
 
+		
 		if(!(s3->GetRingMultiplicity()==1&&s3->GetSectorMultiplicity()==1))continue;
+		
+		
+		TS3Hit* SS=s3->GetSectorHit(0);
+		if(select>=0)if(SS->GetArrayPosition()!=select)continue;
+		unsigned int s=SS->GetSegment();
+		if(s>31)continue;
+			
+		sectorcharge->Fill(s,SS->GetCharge());
 		
 		TS3Hit* SR=s3->GetRingHit(0);
 		if(select>=0)if(SR->GetArrayPosition()!=select)continue;
 		if(SR->GetSegment()!=0)continue;
 		if(SR->GetCharge()<XX)continue;
+		if(SR->GetCharge()>XXX)continue;
 		
-		TS3Hit* SS=s3->GetSectorHit(0);
-		if(select>=0)if(SS->GetArrayPosition()!=select)continue;
 		
-		unsigned int s=SS->GetSegment();
-		if(s<32){
-			gradsector[s]->Fill((SR->GetCharge()*grad0)/SS->GetCharge());
-			if(!chan[s+24]&&SS->GetEnergy()>1)chan[s+24]=SS->GetChannel();
+		gradsector[s]->Fill((SR->GetCharge()*grad0)/SS->GetCharge());
+			
+		if(!chan[s+24]&&SS->GetEnergy()>1){
+			chan[s+24]=SS->GetChannel();
 		}
 		if(jentry%1000 == 0) 
 		cout << setiosflags(ios::fixed) << std::setprecision(2) << 100. * (double)jentry/nentries << " % complete."<< "\r" << flush;
 	}	
+	
+	double sl=GetHistClickVal(sectorcharge,"Select Good Segment Range",false);//Getting a click
+	double sh=GetHistClickVal(sectorcharge,"Select Good Segment Range",false);//Getting a click
+	
+	higher_jd(sl,sh);
+	
+	unsigned int SL,SH;
+	SL=sl;
+	SH=sh;
 	
 	double gradS[32];
 	for(int i=0;i<32;i++)gradS[i] = gradsector[i]->GetMean();
@@ -535,8 +563,12 @@ void S3FixCalBeam(TChain* DataChain,string outputfile,TApplication* app,double e
 		unsigned int r=SR->GetSegment();
 		if(r==0)continue;
 		unsigned int s=SS->GetSegment();
+		
+		if(s<SL||s>SH)continue;
+		
 		if(r<24&&s<32){
-			gradring[r]->Fill((SS->GetCharge()*gradS[s])/SR->GetCharge());
+			if(chan[s+24])
+				gradring[r]->Fill((SS->GetCharge()*gradS[s])/SR->GetCharge());
 		}
 		if(jentry%1000 == 0) 
 		cout << setiosflags(ios::fixed) << std::setprecision(2) << 100. * (double)jentry/nentries << " % complete."<< "\r" << flush;

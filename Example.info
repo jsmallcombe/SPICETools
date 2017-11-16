@@ -26,13 +26,17 @@ TimeCompressOff
 #NOT appropriate for telescope
 
 FirstOnly
-#Only fill particle coincident gamma and electron histograms once per gate type. i.e. 2p coincident gamma ray fills the p-gamma histogram only once.
+# Only fill particle coincident gamma and electron histograms once per gate type.
+# i.e. 2p coincident gamma ray fills the p-gamma histogram only once.
 
 MultiParticles
 #Make special histograms for gamma and electron coincident with several particles.
 
 #PreferenceSectors
 #Use the S3 sector energy where possible, worse resolution but strangely more stable
+
+#AddMonitor
+#Show histogram of monitor detector, not correlated with experimental data. 
 
 ### CONTROL NUMBERS ###
 
@@ -42,7 +46,7 @@ FrontBackTime 100
 FrontBackEnergy 0.92
 #(S3 ring sector gate, given as a fraction =0.9)
 
-S3EnergyLimit 40000
+S3EnergyLimit 25000
 #(Total energy range in keV for heavy ions =50000)
 
 SiLiWaveTOffset 8850
@@ -64,6 +68,9 @@ SiLiSmirnovLimit 300
 #MultiS3 0
 # (Give the mnemonic array position of one of the S3s when there are multiple, call for each)
 
+S3Vector 1.0 0.5 0.0
+# X Y Z mm offset of the S3 from the nominal position
+
 ### TIME GATES ###
 
 s3_gamma_t 0 150 
@@ -71,11 +78,14 @@ s3_sili_t -100 300
 gamma_gamma_t -100 100 
 sili_sili_t -150 150 
 gamma_sili_t -200 450 
-#rf_S3 -50 0 
 
+#rf_S3 -50 0 
 rf_sili 80 91 
-#rf_sili 130 140 
 rf_gamma -6 10
+
+rf_S3cyc 9.7 11.7
+rf_silicyc 84 88
+rf_gammacyc -21 -17
 
 ### FILE INPUTS ###
 

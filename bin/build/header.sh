@@ -5,5 +5,3 @@ do
 h=${f:8:${#f}} 
 echo "#include <"$h">" >> include/smaster.h
 done
-
-echo "#include <LeeNucleus.h>" >> include/smaster.h

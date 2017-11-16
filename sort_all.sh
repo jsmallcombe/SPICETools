@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ANALDIR=newanal
-SORTDIR=sorted_files
+SORTDIR=sorted_files/runs
 INFO=info.info
 
 AFILES=$(echo $ANALDIR/analysis*.root)
