@@ -416,14 +416,25 @@ t_gateRFmake(rf_gammacyc);
 
 //Generates a list of which entry is the start of a new run
 std::vector< long > runstartentries;
-for(unsigned int i=0;i<filelist.size();i++){
+std::vector< long > runchangeentries;
+runstartentries.push_back(0);
+runchangeentries.push_back(0);
+
+string runstrprev=filelist[0].substr(filelist[0].find("analysis")+8,filelist[0].size());
+runstrprev=runstrprev.substr(0,runstrprev.find("_"));
+
+for(unsigned int i=1;i<filelist.size();i++){
+	string runstr=filelist[i].substr(filelist[i].find("analysis")+8,filelist[i].size());
+	runstr=runstr.substr(0,runstr.find("_"));
+	
 	if(filelist[i].find("_000.")<filelist[i].size()){
-		if(i==0){
-			runstartentries.push_back(0);
-		}else{
-			runstartentries.push_back(fileentriessum[i-1]);
-		}
+		runstartentries.push_back(fileentriessum[i-1]);
+		runchangeentries.push_back(fileentriessum[i-1]);
+	}else if(runstr!=runstrprev){
+		runchangeentries.push_back(fileentriessum[i-1]);
+		//Sub run 000 may be skipped for some reason (noise etc) still need to track run change
 	}
+	runstrprev=runstr;
 }
 
 ////////////////// SETUP THE TCHAIN //////////////////	
@@ -500,7 +511,7 @@ long timestamp_max=0xffffffffffff;
 double timestamp_hour=36E10;//double because used for division where sub integers expected
 long timestamp_thresh=timestamp_max*0.99;
 
-long tpgap=3E10;//equivalent to about 5 minutes
+long tpgap=1E10;//equivalent to about 1.5 minutes
 
 double tickspereven=0;
 int validtimes=0;
@@ -576,13 +587,10 @@ TFile *outfile = new TFile(outputfile.c_str(),"RECREATE");
 ///////////////////////////////////////////////////////////////	
 
 // Timestamp tracking variables
-long movelonghold[128]={0};
-long movelong=0;
+long movelonghold[128];
+for(int i=0;i<128;i++)movelonghold[i]=timestampstart;
+long movelong=(timestampstart<<7);
 unsigned int movelongi=0;
-long moveshorthold[10]={0};
-long moveshort=0;
-unsigned int moveshorti=0;
-unsigned int goodmoves=0;
 unsigned int overTlimit=0;
 long timestamp_add=-timestampstart;
 
@@ -597,6 +605,8 @@ if(onepercent<updateinterval)onepercent=updateinterval;
 TStopwatch stopper;
 
 int fileiterator=0;
+int runstartrator=0;
+int runiterator=0;
 
 ///////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////  

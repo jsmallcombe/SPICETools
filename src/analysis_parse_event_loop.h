@@ -1,14 +1,29 @@
+	
+//////////////////////////////////////
+//////// Do input file checks ////////
+//////////////////////////////////////
 
-//	//Small optional code to skip the first few events of every run which are likely garbage
-//	//Specifically the start of a RUN _000.root, NOT a FILE
-// 	for(unsigned int i=0;i<runstartentries.size();i++){
-// 		if(jentry==runstartentries[i]){
-// 			if(jentry+10<nentries)jentry+=10;
-// 		}
-// 	}
+//runstartentries && fileentriessum give the jevent before the new file
+bool newrun=false;
+if(jentry>runstartentries[runstartrator]&&runstartrator+1<runstartentries.size()){
+	runstartrator++;
+	newrun=true;
+	//Small optional code to skip the first few events of every run which are likely garbage
+	//Specifically the start of a RUN _000.root, NOT a FILE
+	//if(jentry+32<nentries)jentry+=32;
+}
+if(jentry>runchangeentries[runiterator]&&runiterator+1<runchangeentries.size()){
+	runiterator++;
+	newrun=true;
+}
 
-if(jentry>fileentriessum[fileiterator]&&fileiterator<=fileentriessum.size()){
+// if(newrun){cout<<" Event "<<jentry<<" is a new run."<<endl;}
+
+//fileentriessum is the number of events to the EOF N
+bool newfile=false;
+if(jentry>fileentriessum[fileiterator]&&fileiterator+1<fileentriessum.size()){
 	fileiterator++;
+	newfile=true;
 	if(GainDrift){
 		FileOffset=fileoffset[fileiterator];
 		FileGain=filegain[fileiterator];
@@ -41,80 +56,91 @@ if(rf){
 }
 
 
+// We wish to have a more or less continuous timestamps.
+// This means adjusting for missing time if any subruns are removed
+// and adjusting for the timestamp resets at the start of a new run.
+//
+// Additionally timestamp has (occasional) zero values and erroneously high values.
+// Problems particularly occur at start and end of runs
+//
+// The basic premiss is as follows:
+// We assume rates of >>100 per minute.
+// A long (128) moving average stores the approximate current timestamp.
+// The long average is only added to if the time stamp is "good" 
+// The long average is reset when we accept a major time stamp change.
+//
+// If latest time is far (~2 minutes) from long average this registers as a "bad" time stamp
+// 
+// Whenever the time stamp is "bad" the previous "good" time is used in its place
+//
+// If the timestamp is "bad" for several (16) events it is probably a true time change
+// The long average is reset to the new "timeadd" value is adjusted.
+//
+// We also (currently) reset the timestamp at the start of all subruns
+// This may be overkill but as the most common reset are missing subruns and new runs its easiest
+
+
 long tstampraw=tstamp;
 if(tstamp>0&&tstamp<timestamp_max){//If time stamp is crazy ignore	
-	//Do the short move averages of no matter what
-
-	//First to short average of latest values
-	moveshort+=tstamp;moveshort-=moveshorthold[moveshorti];//update average
-	moveshorthold[moveshorti]=tstamp;//Push new entry
-	moveshorti++;if(moveshorti==10)moveshorti=0;//move iterator
-			
+	
 	bool good_time=true;
-	
-// 		cout<<endl<<tstamp<<" "<<moveshort<<" "<<movelong<<" "<<goodmoves<<" "<<overTlimit;
 
-	//check the latest value
-	if(goodmoves>128){//Cant do comparisons until the long average is refilled
-		if(abs(tstamp -(movelong>>7)) > tpgap){//check if we are more than X minutes from the previous event
-			good_time=false;
-			overTlimit++;
-		}else{
+	//check if the  latest value is "good"
+	//check if we are more than X minutes from average previous events
+	if(abs(tstamp-(movelong>>7)) > tpgap){//Time IS BAD
+		good_time=false;
+		overTlimit++;
+		//Never reset near end of run, just stay in "bad" state.
+		if(jentry+128>fileentriessum[fileiterator]){
 			overTlimit=0;
 		}
-	}		
-	
-	//Fill the long average
-	if(good_time){//If its good (or we havent filled the averages yet)
-		//Fill the averages
-		movelong+=tstamp;
-		if(goodmoves>=128)movelong-=movelonghold[movelongi];//Only if long is full delete old entries
-		movelonghold[movelongi]=tstamp;//Add entry		
-		movelongi++;if(movelongi==128)movelongi=0;//move iterator		
-		goodmoves++;//If the timestamp resets within 128 events of the start, well shit
+		
+		//Just use last good value
+		tstamp=movelonghold[movelongi];
+	}else{// Time IS good
+		overTlimit=0;
+		
+		//Fill the long averages
+		movelongi++;if(movelongi==128)movelongi=0;//move iterator
+		movelong+=tstamp;movelong-=movelonghold[movelongi];//update average
+		movelonghold[movelongi]=tstamp;//Add entry
 	}
-
-	//Deal with bad values
-	if(!good_time){//We either have one crazy point or a break in the time stamp. Break could be from a glitch or a run change or clock end/reset
-		if(overTlimit>=12){//Once we reach 10 in a row its probably NOT just a blip
-			//The small moving average should now be ALL from the changed region (as length matched)
-			overTlimit=0;
+	
+	// Once we are in time "bad" state 16 times in a row its probably NOT just a blip
+	if(overTlimit>=16){
+		//A disk access intensive last ditch check to see if the time stamp REALLY changes
+		// and doesn't just glitch
+		long futurestamp=0;
+		if(jentry+128<nentries){
+			DataChain->GetEntry(jentry+128);
+			futurestamp=t_stamp(rf,tigress,sili,s3);
+			DataChain->GetEntry(jentry);
 			
-// 			cout<<endl<<"doooooom";
-// 					nentries=jentry+150;
-
-			//A disk access intensive last ditch check to see if the time stamp REALLY changes and doesn't just glitch
-			long futurestamp=0;
-			if(jentry+128<nentries){
-				DataChain->GetEntry(jentry+128);
-				futurestamp=t_stamp(rf,tigress,sili,s3);
-				DataChain->GetEntry(jentry);
-			}
-			if(!futurestamp || abs(futurestamp -(movelong>>7)) > tpgap){
-				if(((movelong>>7)>(moveshort*0.1))||RemoveTimeGaps){
-					if((movelong>>7)>timestamp_thresh)cout<<endl<<endl<<"TIME STAMP RESET"<<endl<<endl;//ERROR HANDLING
-					
-					if(goodmoves<256){//On the off chance it resets twice quickly this recovers the time
-						timestamp_add=timestamp_recover-moveshort*0.1;
-					}else{
-						timestamp_add+=(movelong>>7)-moveshort*0.1;
-						timestamp_recover=tstamp+timestamp_add;
-					}	
-				}					
-				for(int i=0;i<128;i++)movelonghold[i]=0;movelong=0;// and clear the long average
-				goodmoves=0;//reset counters for blank slate
-			}
-		}else{
-			tstamp=(movelong>>7);//The first 9 we just ignore and artificially smush over
+			if(abs(futurestamp-(movelong>>7)) < tpgap)overTlimit=0;
 		}
+	}
+	
+	// If we have been in bad for a long time or new run
+	// Accept the new times and adjust accordingly
+	if(overTlimit>=16||newfile){
+		overTlimit=0;
+		tstamp=tstampraw;
+		
+		if((movelonghold[movelongi]>tstamp)||RemoveTimeGaps){
+			timestamp_add+=movelonghold[movelongi]-tstamp;
+		}		
+		
+		//Reset the averages etc
+		for(int i=0;i<128;i++)movelonghold[i]=tstamp;
+		movelong=(tstamp<<7);
+
 	}
 	
 	tstamp+=timestamp_add;//Adjust time stamp to be continuous
-	
+
 }else{
-	if(goodmoves>128)tstamp=(movelong>>7)+timestamp_add;
-	else tstamp=(moveshort*0.1)+timestamp_add;
-}//tstamp=-1;
+	tstamp=movelonghold[movelongi];
+}
 
 //Now we have a timestamp fill some histograms
 // eventrate->Fill(tstamp);
@@ -1080,13 +1106,7 @@ for(unsigned int i=0;i<SiLiN;i++){
 if(jentry%updateinterval == 0){
 	double percent=100. * (double)jentry/nentries;
 	
-	//Current filename
-	int j=0;
-	for(unsigned int i=0;i<fileentriessum.size();i++){
-		j=i;
-		if(jentry<fileentriessum[i])break;
-	}
-	
+
 	//Estimated completion time
 	double timenow=stopper.RealTime();
 	stopper.Continue();
@@ -1108,5 +1128,5 @@ if(jentry%updateinterval == 0){
 	int seconds=round(remaining);
 	
 	//Screen update
-	cout << setiosflags(ios::fixed) << std::setprecision(2) << percent << " % complete. File "<<filelist[j]<<", Time remaining "<<setfill('0')<<setw(2)<<hours<<":"<<setfill('0')<<setw(2)<<minutes<<":"<<setfill('0')<<setw(2)<<seconds<<"\r" << flush; 
+	cout << setiosflags(ios::fixed) << std::setprecision(2) << percent << " % complete. File "<<filelist[fileiterator]<<", Time remaining "<<setfill('0')<<setw(2)<<hours<<":"<<setfill('0')<<setw(2)<<minutes<<":"<<setfill('0')<<setw(2)<<seconds<<"\r" << flush; 
 }

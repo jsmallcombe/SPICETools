@@ -352,7 +352,7 @@ outfile->cd();
 		 
 		fileentry = new TH1F("fileentry","fileentry",filelist.size(),0,filelist.size());axislab(fileentry,"","EOF Entry No.");
 		for(unsigned int i=0;i<filelist.size();i++){
-			fileentry->SetBinContent(i,fileentriessum[i]);
+			fileentry->SetBinContent(i+1,fileentriessum[i]);
 			fileentry->GetXaxis()->SetBinLabel(i+1,filelist[i].c_str());
 			if(DS) fileN_sili->GetXaxis()->SetBinLabel(i+1,filelist[i].c_str());
 // 			if(DS) fileN_silinoise->GetXaxis()->SetBinLabel(i+1,filelist[i].c_str());
