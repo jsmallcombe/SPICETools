@@ -43,7 +43,7 @@ vector< double > control={0.0,110.,0.9,75,50000,7000,-8,0.15,500};
 std::vector< string > filelist;
 std::vector< long > fileentriessum;
 std::vector< double > fileoffset,filegain;
-double FileOffset,FileGain;
+double FileOffset=0,FileGain=1;
 
 bool s3used[4]={0,0,0,0};
 short s3index[4]={0,0,0,0};
@@ -170,8 +170,6 @@ if(GainDrift){
 	string fst=inp.ReturnFind("gaindrift.txt");
 	ifstream f(fst.c_str());
 	if(f.good()){
-		FileOffset=0;
-		FileGain=1;
 		
 		string sfilen;
 		double soffset,sgain;
@@ -194,6 +192,10 @@ if(GainDrift){
 					fileoffset[i]=Soffset[j];
 					filegain[i]=Sgain[j];
 					mcount++;
+					if(i==0){
+						FileOffset=Soffset[j];
+						FileGain=Sgain[j];
+					}
 					break;
 				}
 			}
@@ -437,6 +439,9 @@ for(unsigned int i=1;i<filelist.size();i++){
 	runstrprev=runstr;
 }
 
+runstartentries.push_back(DataChain->GetEntries());
+runchangeentries.push_back(DataChain->GetEntries());
+
 ////////////////// SETUP THE TCHAIN //////////////////	
 
 TSiLi *sili = 0;
@@ -646,7 +651,7 @@ outfile->cd("RunTime");
 	eventN_e_y_highratio->SetTitle("eventN_e_y_highratio");
 	axislab(eventN_e_y_highratio,"Event No.","e/y ratio");
 
-	TH1D* eventN_sili_noiseratio = eventN_sili->ProjectionX("eventN_sili_noiseratio",0,AY->FindBin(100));
+	TH1D* eventN_sili_noiseratio = eventN_sili->ProjectionX("eventN_sili_noiseratio",1,AY->FindBin(200));
 	eventN_sili_noiseratio->SetTitle("eventN_sili_noiseratio");
 	axislab(eventN_sili_noiseratio,"Event No.","noise to data ratio");
 
@@ -656,7 +661,7 @@ outfile->cd("RunTime");
 	fileN_e_y_highratio->SetTitle("fileN_e_y_highratio");
 	axislab(fileN_e_y_highratio,"Event No.","e/y ratio");
 	
-	TH1D* fileN_sili_noiseratio = fileN_sili->ProjectionX("fileN_sili_noiseratio",0,AYY->FindBin(100));
+	TH1D* fileN_sili_noiseratio = fileN_sili->ProjectionX("fileN_sili_noiseratio",1,AYY->FindBin(200));
 	fileN_sili_noiseratio->LabelsDeflate();
 	fileN_sili_noiseratio->SetTitle("fileN_sili_noiseratio");
 	axislab(fileN_sili_noiseratio,"Event No.","noise to data ratio");

@@ -5,14 +5,14 @@
 
 //runstartentries && fileentriessum give the jevent before the new file
 bool newrun=false;
-if(jentry>runstartentries[runstartrator]&&runstartrator+1<runstartentries.size()){
+if(jentry+1>runstartentries[runstartrator]&&runstartrator+1<runstartentries.size()){
 	runstartrator++;
 	newrun=true;
 	//Small optional code to skip the first few events of every run which are likely garbage
 	//Specifically the start of a RUN _000.root, NOT a FILE
 	//if(jentry+32<nentries)jentry+=32;
 }
-if(jentry>runchangeentries[runiterator]&&runiterator+1<runchangeentries.size()){
+if(jentry+1>runchangeentries[runiterator]&&runiterator+1<runchangeentries.size()){
 	runiterator++;
 	newrun=true;
 }
@@ -21,7 +21,7 @@ if(jentry>runchangeentries[runiterator]&&runiterator+1<runchangeentries.size()){
 
 //fileentriessum is the number of events to the EOF N
 bool newfile=false;
-if(jentry>fileentriessum[fileiterator]&&fileiterator+1<fileentriessum.size()){
+if(jentry+1>fileentriessum[fileiterator]&&fileiterator+1<fileentriessum.size()){
 	fileiterator++;
 	newfile=true;
 	if(GainDrift){
@@ -30,9 +30,33 @@ if(jentry>fileentriessum[fileiterator]&&fileiterator+1<fileentriessum.size()){
 	}
 }
 
-DataChain->GetEntry(jentry);  //start the loop
-//tigress->ResetAddback(); // annoyingly important
+
+//
+//Branch check on new run
+//
+if(newrun){
+// 	DataChain->ResetBranchAddresses(); //Tried various things to get rid of the error messages, but we're stuck with them
+// 					   //At least now they dont matter
 	
+	DataChain->GetEntry(jentry);  //This is crucial to actually load the next file of the chain
+				      //Otherwise we are actually checking the previous file for the branches
+	
+	//If you only set the branch address once runs, a branch which only appears in some files could be lost entirely 
+	if(DS)if(DataChain->FindBranch("TSiLi"))DataChain->SetBranchAddress("TSiLi",&sili);else sili=new TSiLi();
+	if(DataChain->FindBranch("TTigress"))DataChain->SetBranchAddress("TTigress",&tigress);else tigress=new TTigress();
+	if(DataChain->FindBranch("TS3"))DataChain->SetBranchAddress("TS3",&s3);else s3=new TS3();
+	if(DataChain->FindBranch("TRF"))DataChain->SetBranchAddress("TRF",&rf);else rf=new TRF();
+	if(AddMonitor)if(DataChain->FindBranch("TGenericDetector"))DataChain->SetBranchAddress("TGenericDetector",&gd);else gd=new TGenericDetector();
+}
+
+
+
+/////////////////////////////////////////////////////////
+///////////// LOAD THE DATA FOR THIS LOOP ////////////////
+/////////////////////////////////////////////////////////
+DataChain->GetEntry(jentry);  
+//tigress->ResetAddback(); // Was annoyingly important
+/////////////////////////////////////////////////////////
 ///////////////////////////////////
 //////// Do timestamp & RF ////////
 ///////////////////////////////////
@@ -139,7 +163,7 @@ if(tstamp>0&&tstamp<timestamp_max){//If time stamp is crazy ignore
 	tstamp+=timestamp_add;//Adjust time stamp to be continuous
 
 }else{
-	tstamp=movelonghold[movelongi];
+	tstamp=movelonghold[movelongi]+timestamp_add;
 }
 
 //Now we have a timestamp fill some histograms
@@ -236,8 +260,8 @@ for(unsigned int i=0;i<s3->GetSectorMultiplicity();i++){
 		//
 		// Do raw compare
 		//
-		for(unsigned int i=0;i<s3->GetRingMultiplicity();i++){
-			TS3Hit* SR=s3->GetRingHit(i);
+		for(unsigned int j=0;j<s3->GetRingMultiplicity();j++){
+			TS3Hit* SR=s3->GetRingHit(j);
 			if(MultiS3)if(SS->GetArrayPosition()!=SR->GetArrayPosition())continue;
 			
 			double re=SR->GetEnergy();
@@ -483,13 +507,16 @@ if(DS){for(int i=0;i<sili->GetAddbackMultiplicity();i++){
 			if(noisegood<2){
 				sili_hit->SetEnergy(0);
 				e=0;
+				continue;
 			}
 		}
 	}
 	
-	if(GainDrift)e=e*FileGain+FileOffset;
 	
 	if(e>10&&e<4000){//noise gate and common sense gate
+		
+		if(GainDrift)e=e*FileGain+FileOffset;
+		
 		double Nadd=sili_hit->GetAddbackSize();
 		if(Nadd==1){//if its a good clean hit add it
 			double ft=sili_hit->GetTimeFit();

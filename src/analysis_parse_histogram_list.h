@@ -6,9 +6,11 @@ outfile->cd();
 
 	TH3F *S3_map3;
 	TH2F *S3_theta;
-	TH1F* S3_multot;
 	
-	vector< TH1F* > fb_time,fb_timegated,front_back,front_backgated,S3_sectormult,S3_ringmult,S3_mult,S3ring_sum,S3sector_sum,S3RS_t,S3RS_tgate,chanhits;
+	TH1D* S3_multot;//D because over max value for float hist
+	vector< TH1D* > S3_sectormult,S3_ringmult,S3_mult;
+	
+	vector< TH1F* > fb_time,fb_timegated,front_back,front_backgated,S3ring_sum,S3sector_sum,S3RS_t,S3RS_tgate,chanhits;
 	vector< TH2F* > S3_map,S3_dedx,frontVback,frontVbackGated,S3flat;
 	vector< TH3F* > S3_d3dx,S3RS_t3;
 	
@@ -54,9 +56,9 @@ outfile->cd();
 				fb_timegated.push_back( new TH1F(("frontVbackTimeGated"+sfx).c_str(),("frontVbackTimeGated"+sfx+";#Deltat [10/16 ns]").c_str(),1024,-512,512));
 			}
 
-			S3_sectormult.push_back( new TH1F(("S3_sectormult"+sfx).c_str(),("S3_sectormult"+sfx+";Sector Multiplicity;Counts").c_str(),20,0,20));
-			S3_ringmult.push_back( new TH1F(("S3_ringmult"+sfx).c_str(),("S3_ringmult"+sfx+";Ring Multiplicity;Counts").c_str(),20,0,20));
-			S3_mult.push_back( new TH1F(("S3_mult"+sfx).c_str(),("S3_mult"+sfx+"+;S3 Multiplicity;Counts").c_str(),20,0,20));
+			S3_sectormult.push_back( new TH1D(("S3_sectormult"+sfx).c_str(),("S3_sectormult"+sfx+";Sector Multiplicity;Counts").c_str(),20,0,20));
+			S3_ringmult.push_back( new TH1D(("S3_ringmult"+sfx).c_str(),("S3_ringmult"+sfx+";Ring Multiplicity;Counts").c_str(),20,0,20));
+			S3_mult.push_back( new TH1D(("S3_mult"+sfx).c_str(),("S3_mult"+sfx+"+;S3 Multiplicity;Counts").c_str(),20,0,20));
 			
 			S3flat.push_back( new TH2F(("S3flat"+sfx).c_str(),("S3flat"+sfx+";Channel;Energy [keV]").c_str(),56,0,56,1000,0,control[S3EnergyLimit]));
 			S3ring_sum.push_back( new TH1F(("S3ring_sum"+sfx).c_str(),("S3ring_sum"+sfx+";Energy [keV]").c_str(),2000,0,control[S3EnergyLimit]));
@@ -66,7 +68,7 @@ outfile->cd();
 		
 		
 		outfile->cd("S3");
-		if(MultiS3) S3_multot = new TH1F("S3_mult","S3_mult;S3 Multiplicity;Counts",20,0,20);
+		if(MultiS3) S3_multot = new TH1D("S3_mult","S3_mult;S3 Multiplicity;Counts",20,0,20);
 // 		outfile->mkdir("S3/elements");
 // 		outfile->cd("S3/elements");
 // 		
@@ -97,7 +99,7 @@ outfile->cd();
 	TH1F *silirings[10];
 	TH1F *silienergy[120];
 	TH1F *silifitc[120];
-	TH1F *SiLi_mult,*SiLiAdd_mult;
+	TH1D *SiLi_mult,*SiLiAdd_mult;
 	TH1F *SiLi_magshad,*SiLi_nagshad;
 	TH2F *SiLi_nagshadRing;
 	TH2F *SiLiGamma_nagshad;
@@ -162,12 +164,12 @@ outfile->cd();
 // 		}
 		outfile->cd("SiLi");
 		
-		SiLi_mult= new TH1F("SiLi_mult","SiLi_mult;SPICE Multiplicity;Counts",20,0,20);
-		SiLiAdd_mult= new TH1F("SiLiAdd_mult","SiLiAdd_mult;SPICE Addback Multiplicity;Counts",20,0,20);
+		SiLi_mult= new TH1D("SiLi_mult","SiLi_mult;SPICE Multiplicity;Counts",20,0,20);
+		SiLiAdd_mult= new TH1D("SiLiAdd_mult","SiLiAdd_mult;SPICE Addback Multiplicity;Counts",20,0,20);
 	outfile->cd();
 	}
 	
-	TH1F *Gamma_no_add,*Gamma_suppressed,*Gamma_singles_no_bgo,*Tig_mult;
+	TH1 *Gamma_no_add,*Gamma_suppressed,*Gamma_singles_no_bgo,*Tig_mult;
 	TH2F *Gamma_Gamma_no_add,*Gamma_Core,*Gamma_Core_Charge,*TigressHitMap,*TigressHitMapLow,*TigressETheta;
 	TH3F *TigressHitMap3,*TigressEETheta,*TigressEEdTheta;
 	
@@ -190,7 +192,7 @@ outfile->cd();
 			TigressEEdTheta= new TH3F("GammaGammaSeparation","GammaGammaSeparation",512,0,2048,512,0,2048,64,0,3.15);axislab(TigressEEdTheta,"#gamma Energy [keV]","#gamma Energy [keV]","Separation [rad]");
 		outfile->cd("Tigress");
 		
-		Tig_mult= new TH1F("Tig_mult","Tig_mult;Tigress Multiplicity;Counts",20,0,20);
+		Tig_mult= new TH1D("Tig_mult","Tig_mult;Tigress Multiplicity;Counts",20,0,20);
 	outfile->cd();
 	
 	
@@ -281,7 +283,7 @@ outfile->cd();
 			SiLi_RFantigated= new TH1F("SiLi_RFantigated","SiLi_RFantigated",2000,0,2000);axislab(SiLi_RFantigated,"Electron Energy [keV]");
 			SiLiGamma__RFgated= new TH2F("SiLiGamma__RFgated","SiLiGamma__RFgated",500,0,1000,500,0,1000);axislab(SiLiGamma__RFgated,"#gamma Energy [keV]","Electron Energy [keV]");
 		}
-		GammaGamma_RFgated= new TH2F("GammaGamma_RFgated","GammaGamma_RFgated",500,0,1000,500,0,1000);axislab(SiLi_RFgated,"#gamma Energy [keV]","#gamma Energy [keV]");
+		GammaGamma_RFgated= new TH2F("GammaGamma_RFgated","GammaGamma_RFgated",500,0,1000,500,0,1000);axislab(GammaGamma_RFgated,"#gamma Energy [keV]","#gamma Energy [keV]");
 			
 		outfile->mkdir("RFTimegates/CycleGated");
 		outfile->cd("RFTimegates/CycleGated");
@@ -367,8 +369,8 @@ outfile->cd();
 	vector< TH2F* >  S3particleGated;
 	vector< TH2F* >  GUncorrectedring,Gcorrectedring;
 	vector< TH1F* >  GammaPG,SiLiPG,GUnshifted,GUncorrected;
-	vector< TH1F* >  GammaPGRFcyc,SiLiPGRFcyc,PGmult;
-	vector< TH2F* >  GammaEPG,SiLiEPG,PGmultGamma,PGmultSili;
+	vector< TH1* >  GammaPGRFcyc,SiLiPGRFcyc,PGmult;
+	vector< TH2* >  GammaEPG,SiLiEPG,PGmultGamma,PGmultSili;
 	vector< TH2F* >  GammaSiLiPG,GammaGammaPG;
 	vector< TH2F* >  TigressEThetaPG;
 	vector< TH3F* >  TigressEEThetaPG,TigressEEdThetaPG;
@@ -437,7 +439,7 @@ outfile->cd();
 						outfile->cd((tf+"/Mult").c_str());
 					}
 					
-						TH1F* pgmult= new TH1F(("Multiplicity_"+t).c_str(),("Multiplicity_"+t+";"+t+" Multiplicity").c_str(),10,0,10);
+						TH1D* pgmult= new TH1D(("Multiplicity_"+t).c_str(),("Multiplicity_"+t+";"+t+" Multiplicity").c_str(),10,0,10);
 						PGmult.push_back(pgmult);
 						
 						if(MultiParticles){
