@@ -169,7 +169,7 @@ outfile->cd();
 	outfile->cd();
 	}
 	
-	TH1 *Gamma_no_add,*Gamma_suppressed,*Gamma_singles_no_bgo,*Tig_mult;
+	TH1 *Gamma_no_add,*Gamma_suppressed,*Gamma_singles_no_bgo,*Tig_mult,*Tig_rawmult,*Tig_bgomult;
 	TH2F *Gamma_Gamma_no_add,*Gamma_Core,*Gamma_Core_Charge,*TigressHitMap,*TigressHitMapLow,*TigressETheta;
 	TH3F *TigressHitMap3,*TigressEETheta,*TigressEEdTheta;
 	
@@ -193,6 +193,8 @@ outfile->cd();
 		outfile->cd("Tigress");
 		
 		Tig_mult= new TH1D("Tig_mult","Tig_mult;Tigress Multiplicity;Counts",20,0,20);
+		Tig_rawmult= new TH1D("Tig_rawmult","Tig_rawmult;Tigress Multiplicity;Counts",20,0,20);
+		Tig_bgomult= new TH1D("Tig_bgomult","Tig_bgomult;Tigress Multiplicity;Counts",20,0,20);
 	outfile->cd();
 	
 	
@@ -298,7 +300,7 @@ outfile->cd();
 		
 	outfile->cd();
 	
-	TH1F *eventrate,*eventratehours,*runtime,*runtimeraw,*timeadda,*fileentry; 
+	TH1F *eventrate,*eventratehours,*stampfail,*runtime,*runtimeraw,*timeadda,*fileentry,*filetime; 
 	TH2F *runtime_sili,*runtime_silinoise,*runtime_gamma,*eventN_sili,*eventN_silinoise,*eventN_gamma,*fileN_sili,*fileN_silinoise,*fileN_gamma;
 	TH3F *eventN_gammagamma ,*eventN_gammasili,*runtime_gammagamma,*runtime_gammasili;
 	TH1F *monitortotal; 
@@ -323,6 +325,7 @@ outfile->cd();
 		runtime = new TH1F("runtime","runtime",10000,0,(long)(10000*(nentries/9999)));axislab(runtime,"Entry No.","Time [hours]");
 		runtimeraw = new TH1F("runtimeraw","runtimeraw",10000,0,(long)(10000*(nentries/9999)));axislab(runtimeraw,"Entry No.","Time [hours]");
 		timeadda = new TH1F("timeadda","timeadda",10000,0,(long)(10000*(nentries/9999)));axislab(timeadda,"Entry No.","Time [hours]");
+		stampfail=new TH1F("stampfail","stampfail",10000,0,(long)(10000*(nentries/9999)));axislab(stampfail,"Entry No.","TStamp Fails/bin");
 		
 		runtime_gamma = new TH2F("runtime_gamma","runtime_gamma",1024,0,hoursrange,1024,0,2048);axislab(runtime_gamma,"Time [hours]","#gamma Energy [keV]");
 // 		runtime_gammagamma = new TH3F("runtime_gammagamma","runtime_gammagamma",128,0,hoursrange,1024,0,2048,1024,0,2048);axislab(runtime_gammagamma,"Time [hours]","#gamma Energy [keV]","#gamma Energy [keV]");
@@ -353,9 +356,11 @@ outfile->cd();
 		if(DS)silifragrate->SetBit(TH1::kIsNotW);
 		 
 		fileentry = new TH1F("fileentry","fileentry",filelist.size(),0,filelist.size());axislab(fileentry,"","EOF Entry No.");
+		filetime = new TH1F("filetime","filetime",filelist.size(),0,filelist.size());axislab(filetime,"","SOF tstamp raw");
 		for(unsigned int i=0;i<filelist.size();i++){
 			fileentry->SetBinContent(i+1,fileentriessum[i]);
 			fileentry->GetXaxis()->SetBinLabel(i+1,filelist[i].c_str());
+			filetime->GetXaxis()->SetBinLabel(i+1,filelist[i].c_str());
 			if(DS) fileN_sili->GetXaxis()->SetBinLabel(i+1,filelist[i].c_str());
 // 			if(DS) fileN_silinoise->GetXaxis()->SetBinLabel(i+1,filelist[i].c_str());
 			fileN_gamma->GetXaxis()->SetBinLabel(i+1,filelist[i].c_str());

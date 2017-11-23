@@ -45,9 +45,9 @@ int SpiceParse(int argc, char *argv[]){
 void processchain(TChain* DataChain,string outputfile,bool frag,bool UseFitCharge,bool FitShapes,bool MohRotate){
 	
 	if(UseFitCharge){
-		TChannel::SetIntegration("SPI",1);
-	}else TChannel::SetIntegration("SP",125);
-	TChannel::SetUseCalFileIntegration("SP",true);	
+		TChannel::SetIntegration("SPI",1,EPriority::kForce);
+	}else TChannel::SetIntegration("SP",125,EPriority::kForce);
+	TChannel::SetUseCalFileIntegration("SP",true,EPriority::kForce);	
 	
 	//This extra line is needed to use 2 different integrations for the 2 different charge calcs.
 	double integ=1;if(UseFitCharge)integ=125;

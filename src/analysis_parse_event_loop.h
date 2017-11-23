@@ -21,32 +21,37 @@ if(jentry+1>runchangeentries[runiterator]&&runiterator+1<runchangeentries.size()
 
 //fileentriessum is the number of events to the EOF N
 bool newfile=false;
-if(jentry+1>fileentriessum[fileiterator]&&fileiterator+1<fileentriessum.size()){
-	fileiterator++;
+if(jentry+1>fileentriessum[fileiterator]&&fileiterator<fileentriessum.size()){
+	if(fileiterator+1<fileentriessum.size())fileiterator++;
 	newfile=true;
-	if(GainDrift){
-		FileOffset=fileoffset[fileiterator];
-		FileGain=filegain[fileiterator];
-	}
 }
+if(jentry==0)newfile=true;
 
-
+if(GainDrift&&newfile){
+	FileOffset=fileoffset[fileiterator];
+	FileGain=filegain[fileiterator];
+}
 //
 //Branch check on new run
 //
 if(newrun){
+	cout<<endl;//This is just useful for the sort progress status message
+	
 // 	DataChain->ResetBranchAddresses(); //Tried various things to get rid of the error messages, but we're stuck with them
 // 					   //At least now they dont matter
 	
 	DataChain->GetEntry(jentry);  //This is crucial to actually load the next file of the chain
 				      //Otherwise we are actually checking the previous file for the branches
 	
-	//If you only set the branch address once runs, a branch which only appears in some files could be lost entirely 
+	// If you only set the branch address once runs, a branch which only appears in some files could be lost entirely
+	// Also can cause multiple filling when branch is not present so uses last values
 	if(DS)if(DataChain->FindBranch("TSiLi"))DataChain->SetBranchAddress("TSiLi",&sili);else sili=new TSiLi();
 	if(DataChain->FindBranch("TTigress"))DataChain->SetBranchAddress("TTigress",&tigress);else tigress=new TTigress();
 	if(DataChain->FindBranch("TS3"))DataChain->SetBranchAddress("TS3",&s3);else s3=new TS3();
 	if(DataChain->FindBranch("TRF"))DataChain->SetBranchAddress("TRF",&rf);else rf=new TRF();
 	if(AddMonitor)if(DataChain->FindBranch("TGenericDetector"))DataChain->SetBranchAddress("TGenericDetector",&gd);else gd=new TGenericDetector();
+	// Could possible just Reset() the TTree owned detector classes when branch is missing,
+	// but this way works and only creates a few loose ends of memory	
 }
 
 
@@ -62,20 +67,24 @@ DataChain->GetEntry(jentry);
 ///////////////////////////////////
 
 long tstamp=t_stamp(rf,tigress,sili,s3);//Fetch a time stamp from whichever of these is in the event, adjusted for the tigress high low griffin grsisort mismatch
-
+if(tstamp==-1)stampfail->Fill(jentry);
+if(newfile)filetime->SetBinContent(fileiterator+1,tstamp);
 
 bool RFfail=true;
-double trig_cfd=-1;
-double rf_cfd=-1;
+// double trig_cfd=-1;
+// double rf_cfd=-1;
+double rf_ns=-1;
 double rf_t=0;
 double rf_phase=0;
 if(rf){
 	if(abs(tstamp-rf->TimeStamp())<100000){//Had to add this because of some errors when RF only PART missing
-		rf_cfd=rf->GetTimeFitCfd();
+// 		rf_cfd=rf->GetTimeFitCfd();
+		rf_ns=rf->GetTimeFitns();
 		rf_t=rf->Time()/10.0;//ns->ticks
 		rf_phase=rf->Phase();
-		trig_cfd=rf->GetTimestampCfd()-5000;
-		if(rf_cfd>0){RFfail=false;rf_cfd-=3800;}//Manually derived offset for waveform delay
+// 		trig_cfd=rf->GetTimestampCfd()-5000;
+// 		if(rf_cfd>0){RFfail=false;rf_cfd-=3800;}//Manually derived offset for waveform delay
+		if(rf_ns>0){RFfail=false;rf_ns-=2375;}//Manually derived offset for waveform delay
 	}
 }
 
@@ -185,8 +194,17 @@ if(nentries>5000){//Trying to fix a segfault from very small runs
 //// check the rawrest fragment count we can in the analysis tree
 
 S3fragrate->Fill(jentry,s3->GetRingMultiplicity()+s3->GetSectorMultiplicity());
-if(DS)silifragrate->Fill(jentry,sili->GetMultiplicity());
+eventsS3ring+=s3->GetRingMultiplicity();
+eventsS3sector+=s3->GetSectorMultiplicity();
+
+if(DS){
+	silifragrate->Fill(jentry,sili->GetMultiplicity());
+	eventssili+=sili->GetMultiplicity();
+}
 gammafragrate->Fill(jentry,tigress->GetMultiplicity()+tigress->GetBGOMultiplicity());
+
+eventstigress+=tigress->GetMultiplicity();
+eventsbgotigress+=tigress->GetBGOMultiplicity();
 
 
 //////////////////////////////////////////////////////////
@@ -220,7 +238,7 @@ for(unsigned int i=0;i<s3->GetRingMultiplicity();i++){
 	
 	double e=SR->GetEnergy();
 	if(e>control[S3EnergyLimit]*0.004){//noise gate
-// 		double T=SH->GetCfd();
+// 		double T=SH->GetTime()*1.6;
 		
 // 		S3ring.push_back(e);//store energy dE
 // 		S3ring_i.push_back(s);//GetSegment == ring number 
@@ -268,7 +286,8 @@ for(unsigned int i=0;i<s3->GetSectorMultiplicity();i++){
 			if(re>control[S3EnergyLimit]*0.004){//noise gate
 				int r=SR->GetSegment();
 				
-				double TT=SR->GetCfd()-SS->GetCfd();
+				double TT=SR->GetTime()-SS->GetTime();
+				TT*=1.6;
 				bool gT=(abs(TT)<control[FrontBackTime]);
 				
 				S3RS_t[id]->Fill(TT);
@@ -287,10 +306,10 @@ for(unsigned int i=0;i<s3->GetSectorMultiplicity();i++){
 				}
 				
 				if(Telescope)S3RS_t3[id]->Fill(TT,re,e);
-				if(!RFfail)S3RS_RF->Fill((SR->GetCfd()-rf_cfd)/16.0,(SS->GetCfd()-rf_cfd)/16.0);
+				if(!RFfail)S3RS_RF->Fill((SR->GetTime()-rf_ns)/10.,(SS->GetTime()-rf_ns)/10.);
 				
 				if(gT){
-					if(!RFfail)S3RS_RFgated->Fill((SR->GetCfd()-rf_cfd)/16.0,(SS->GetCfd()-rf_cfd)/16.0);
+					if(!RFfail)S3RS_RFgated->Fill((SR->GetTime()-rf_ns)/10.,(SS->GetTime()-rf_ns)/10.);
 					//S3sectorsout[s]->Fill(SS->GetCharge(),r);
 				}
 			}
@@ -318,7 +337,7 @@ for(unsigned int i=0;i<s3->GetPixelMultiplicity();i++){//GetPixelMultiplicity bu
 	apmult[id]++;
 	
 	//RF gate for singles triggers
-	double TT=SH->GetCfd()-rf_cfd;TT/=16.0;		
+	double TT=SH->GetTime()-rf_ns;TT/=10.0;		
 	if(!RFfail){
 		S3_rf->Fill(TT);
 		if(t_gate(TT,rf_S3)){//RF gate
@@ -534,7 +553,8 @@ if(DS){for(int i=0;i<sili->GetAddbackMultiplicity();i++){
 // 				double edop=sili_hit->GetDoppler(control[BetaZero]);
 				
 				//Calc a "cfd" time from the fit and timestamp
-				double T=sili_hit->GetTimeFitCfd()-control[SiLiWaveTOffset];
+// 				double T=sili_hit->GetTimeFitCfd()-control[SiLiWaveTOffset];
+				double T=sili_hit->GetTimeFitns()-control[SiLiWaveTOffset]/1.6;
 				
 				SiLiE.push_back(e);
 				SiLiEdop.push_back(e);
@@ -590,6 +610,8 @@ int SiLiN=SiLii.size();
 //////////////////////////////////
 
 //Quick Addback check
+Tig_rawmult->Fill(tigress->GetMultiplicity());
+Tig_bgomult->Fill(tigress->GetBGOMultiplicity());
 for(int i=0;i<tigress->GetMultiplicity();i++){
 	tigress->GetTigressHit(i)->ClearTransients();
 	
@@ -597,7 +619,7 @@ for(int i=0;i<tigress->GetMultiplicity();i++){
 	Gamma_Core->Fill(tigress->GetTigressHit(i)->GetArrayNumber(),tigress->GetTigressHit(i)->GetEnergy());
 	Gamma_Core_Charge->Fill(tigress->GetTigressHit(i)->GetArrayNumber(),tigress->GetTigressHit(i)->GetCharge());
 	for(int j=i+1;j<tigress->GetMultiplicity();j++){
-		double TT=tigress->GetTigressHit(i)->GetCfd()-tigress->GetTigressHit(j)->GetCfd();
+		double TT=tigress->GetTigressHit(i)->GetTime()-tigress->GetTigressHit(j)->GetTime();TT*=1.6;
 		if(t_gate(TT,gamma_gamma_t)){
 			Gamma_Gamma_no_add->Fill(tigress->GetTigressHit(i)->GetEnergy(),tigress->GetTigressHit(j)->GetEnergy());
 			Gamma_Gamma_no_add->Fill(tigress->GetTigressHit(j)->GetEnergy(),tigress->GetTigressHit(i)->GetEnergy());
@@ -645,7 +667,7 @@ for(int i=0;i<tigress->GetAddbackMultiplicity();i++){
 		TigressETheta->Fill(e,tigang);
 		
 		//RF check
-		double TT=tigress_hit->GetCfd()-rf_cfd;TT/=16;
+		double TT=tigress_hit->GetTime()-rf_ns;TT/=10;
 		gammaTrf.push_back(TT);
 		gammaRF.push_back(false);
 		gammaRFcyc.push_back(false);
@@ -687,7 +709,7 @@ for(unsigned int i=0;i<gammaN;i++){
 	//////// Do gammas + SiLi ////////
 	if(DS){
 		for(unsigned int j=0;j<SiLiN;j++){
-			double TT=gammai[i]->GetCfd()-SiLit[j];
+			double TT=gammai[i]->GetTime()-SiLit[j];TT*=1.6;
 			Gamma_SiLi_t->Fill(TT);
 			Gamma_SiLi_twide->Fill(TT);
 			Gamma_SiLi_t2->Fill(gammaE[i],TT);
@@ -723,7 +745,7 @@ for(unsigned int i=0;i<gammaN;i++){
 	
 	//////// Do gammas + gammas ////////
 	for(unsigned int j=i+1;j<gammaN;j++){
-		double TT=gammai[i]->GetCfd()-gammai[j]->GetCfd();
+		double TT=gammai[i]->GetTime()-gammai[j]->GetTime();TT*=1.6;
 		GG_t->Fill(TT);
 		if(t_gate(TT,gamma_gamma_t)){
 			GG_tgate->Fill(TT);
@@ -753,7 +775,7 @@ for(unsigned int i=0;i<gammaN;i++){
 
 			//////// Do gammas + gammas + gammas ////////
 			for(unsigned int k=j+1;k<gammaN;k++){
-				double TTT=gammai[i]->GetCfd()-gammai[k]->GetCfd();
+				double TTT=gammai[i]->GetTime()-gammai[k]->GetTime();TTT*=1.6;
 				if(t_gate(TTT,gamma_gamma_t)){
 					Gamma_Gamma_Gamma->Fill(gammaE[i],gammaE[j],gammaE[k]);
 					Gamma_Gamma_Gamma->Fill(gammaE[i],gammaE[k],gammaE[j]);
@@ -798,7 +820,7 @@ for(unsigned int j=0;j<S3N;j++){
 	// Do S3 and SiLi coincidence check
 	// Fill histograms that only depend on an S3 hit, not on particle gates
 	if(DS){for(unsigned int i=0;i<SiLiN;i++){
-		double TT=SiLit[i]-SH->GetCfd();
+		double TT=SiLit[i]-SH->GetTime();TT*=1.6;
 		double e=SiLiE[i];
 
 		SiLi_S3_t->Fill(TT);
@@ -827,7 +849,7 @@ for(unsigned int j=0;j<S3N;j++){
 	//// Do S3 gamma coincidence check ////
 	std::vector< bool > gammaS3loop(gammaN,false);
 	for(unsigned int i=0;i<gammaN;i++){
-		double TT=gammai[i]->GetCfd()-SH->GetCfd();
+		double TT=gammai[i]->GetTime()-SH->GetTime();TT*=1.6;
 		double e=gammaE[i];
 		Gamma_S3_t->Fill(TT);
 		Gamma_S3_t2->Fill(e,TT);
@@ -964,7 +986,9 @@ for(unsigned int j=0;j<S3N;j++){
 			// Goes backward as must use the tigress events which have already been checked
 			// against this current S3Hit gate and kinematically corrected
 			for(int m=i-1;m>=0;m--){
-				if(gammaS3loop[m]&&gammaEdop[m]){if(t_gate(gammai[m]->GetCfd()-gammai[i]->GetCfd(),gamma_gamma_t)){
+				if(gammaS3loop[m]&&gammaEdop[m]){
+				double TT=gammai[m]->GetTime()-gammai[i]->GetTime();TT*=1.6;
+				if(t_gate(TT,gamma_gamma_t)){
 					// check GammaHit m is also coincident with this S3Hit & valid & time valid
 					// In the case FirstOnly is being used gammaEdop[m]==0 if it was "used" 
 					// by an earlier S3Hit that also matched this gate
@@ -986,7 +1010,8 @@ for(unsigned int j=0;j<S3N;j++){
 			/////////////////////////////////////////////////
 			
 			if(DS){for(unsigned int m=0;m<SiLiN;m++){
-				if(SiLiS3loop[m]&&SiLiEdop[m]){if(t_gate(gammai[i]->GetCfd()-SiLit[m],gamma_sili_t)){
+				if(SiLiS3loop[m]&&SiLiEdop[m]){
+				if(t_gate((gammai[i]->GetTime()-SiLit[m])*1.6,gamma_sili_t)){
 					GammaSiLiPG[g]->Fill(gammaEdop[i],SiLiEdop[m]);	
 				}}
 			}}
@@ -1075,6 +1100,7 @@ for(unsigned int i=0;i<SiLiN;i++){
 	for(unsigned int j=i+1;j<SiLiN;j++){
 		double ee=SiLiE[j];
 		double TT=SiLit[i]-SiLit[j];
+		TT*=1.6;
 		ee_t->Fill(TT);
 		if(t_gate(TT,sili_sili_t)){
 			ee_tgate->Fill(TT);

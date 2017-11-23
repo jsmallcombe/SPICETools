@@ -21,9 +21,9 @@ void SiLiCalParse(int argc, char *argv[]){
 	
 	if(inp.LoadCal(DataChain)){
 // 		
-		if(UseFitCharge)TChannel::SetIntegration("SPI",1);
-		else TChannel::SetIntegration("SP",125);
-		TChannel::SetUseCalFileIntegration("SP",true);
+		if(UseFitCharge)TChannel::SetIntegration("SPI",1,EPriority::kForce);
+		else TChannel::SetIntegration("SP",125,EPriority::kForce);
+		TChannel::SetUseCalFileIntegration("SP",true,EPriority::kForce);
 		
 		TH2* charge=ChargeParse(DataChain,UseFitCharge);
 		if(charge){

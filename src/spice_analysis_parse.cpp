@@ -192,10 +192,6 @@ if(GainDrift){
 					fileoffset[i]=Soffset[j];
 					filegain[i]=Sgain[j];
 					mcount++;
-					if(i==0){
-						FileOffset=Soffset[j];
-						FileGain=Sgain[j];
-					}
 					break;
 				}
 			}
@@ -465,22 +461,20 @@ long nentries = DataChain->GetEntries();
 if(!nentries)return 0;
 
 if(UseFitCharge){
-	TChannel::SetIntegration("SPI",1);
-	TChannel::SetIntegration("SPE",125);
-}else TChannel::SetIntegration("SP",125);
-TChannel::SetIntegration("BA",125);
-TChannel::SetIntegration("TI",125);
-TChannel::SetIntegration("GD",125);
-// TChannel::SetIntegration("PA",125);
-TChannel::SetUseCalFileIntegration("BA",true);
-TChannel::SetUseCalFileIntegration("SP",true);
-TChannel::SetUseCalFileIntegration("TI",true);
-TChannel::SetUseCalFileIntegration("GD",true);
-// TChannel::SetUseCalFileIntegration("PA",true);
+	TChannel::SetIntegration("SPI",1,EPriority::kForce);
+	TChannel::SetIntegration("SPE",125,EPriority::kForce);
+}else TChannel::SetIntegration("SP",125,EPriority::kForce);
+TChannel::SetIntegration("BA",125,EPriority::kForce);
+TChannel::SetIntegration("TI",125,EPriority::kForce);
+TChannel::SetIntegration("GD",125,EPriority::kForce);
+
+TChannel::SetUseCalFileIntegration("BA",true,EPriority::kForce);
+TChannel::SetUseCalFileIntegration("SP",true,EPriority::kForce);
+TChannel::SetUseCalFileIntegration("TI",true,EPriority::kForce);
+TChannel::SetUseCalFileIntegration("GD",true,EPriority::kForce);
 
 TTigress::SetForceCrystal();
 TTigress::SetTargetOffset(control[TigressTargetOffset]);
-
 
 //
 // Set the control parameters used by the S3 pixel build
@@ -619,12 +613,20 @@ int runiterator=0;
 ///////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////	
 
+long eventssili,eventsS3ring,eventsS3sector,eventstigress,eventsbgotigress;
+
 cout<<endl<<endl<<"Processing files"<<endl;
 for(long jentry=0;jentry<nentries;jentry++){
 	#include "analysis_parse_event_loop.h"
 }
 cout<<endl<< "100 \% COMPLETE          \n";
 
+// cout<<endl<<"eventssili "<<eventssili;
+// cout<<endl<<"eventsS3ring "<<eventsS3ring;
+// cout<<endl<<"eventsS3sector "<<eventsS3sector;
+// cout<<endl<<"eventstigress "<<eventstigress;
+// cout<<endl<<"eventsbgotigress "<<eventsbgotigress;
+// cout<<endl;
 
 ///////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////  
@@ -811,9 +813,17 @@ long t_stamp(TRF *rf,TTigress *tigress,TSiLi *sili,TS3 *s3){
 			if(t>0)return t;
 		}
 	}
+	if(rf){
+		long t=rf->TimeStamp();
+		if(t>0)return t;
+	}
 	if(s3){
 		for(unsigned int i=0;i<s3->GetRingMultiplicity();i++){
 			long t=s3->GetRingHit(i)->GetTimeStamp();
+			if(t>0)return t;
+		}
+		for(unsigned int i=0;i<s3->GetSectorMultiplicity();i++){
+			long t=s3->GetSectorHit(i)->GetTimeStamp();
 			if(t>0)return t;
 		}
 	}
@@ -823,11 +833,7 @@ long t_stamp(TRF *rf,TTigress *tigress,TSiLi *sili,TS3 *s3){
 			if(t>0)return t;
 		}
 	}
-	if(rf){
-		long t=rf->TimeStamp();
-		if(t>0)return t;
-	}
-	return 0;
+	return -1;
 }
 
 

@@ -39,10 +39,10 @@ void S3CalParseChain(TChain* DataChain,string outputfile,TApplication* app,bool 
 	int gn=1;
 	if(gain)gn*=10;
 	
-	TChannel::SetIntegration("BAE",125);
-	TChannel::SetIntegration("SPE",125);
-	TChannel::SetUseCalFileIntegration("SP",true);
-	TChannel::SetUseCalFileIntegration("BA",true);
+	TChannel::SetIntegration("BAE",125,EPriority::kForce);
+	TChannel::SetIntegration("SPE",125,EPriority::kForce);
+	TChannel::SetUseCalFileIntegration("SP",true,EPriority::kForce);
+	TChannel::SetUseCalFileIntegration("BA",true,EPriority::kForce);
 
 	TS3 *s3 = 0;
 	Int_t nentries = DataChain->GetEntries();
@@ -421,10 +421,10 @@ void S3FixCalBeam(TChain* DataChain,string outputfile,TApplication* app,double e
 	int gn=1;
 	if(gain)gn*=10;
 	
-	TChannel::SetIntegration("BAE",125);
-	TChannel::SetIntegration("SPE",125);
-	TChannel::SetUseCalFileIntegration("SP",true);
-	TChannel::SetUseCalFileIntegration("BA",true);
+	TChannel::SetIntegration("BAE",125,EPriority::kForce);
+	TChannel::SetIntegration("SPE",125,EPriority::kForce);
+	TChannel::SetUseCalFileIntegration("SP",true,EPriority::kForce);
+	TChannel::SetUseCalFileIntegration("BA",true,EPriority::kForce);
 	
 	
 	TS3 *s3 = 0;
