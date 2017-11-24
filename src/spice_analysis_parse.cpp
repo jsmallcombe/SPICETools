@@ -46,7 +46,7 @@ std::vector< double > fileoffset,filegain;
 double FileOffset=0,FileGain=1;
 
 bool s3used[4]={0,0,0,0};
-short s3index[4]={0,0,0,0};
+short s3index[4]={-1,-1,-1,-1};
 bool MultiS3=false;
 
 unsigned short s3id(TS3Hit* s3hit){

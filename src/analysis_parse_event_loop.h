@@ -232,6 +232,7 @@ unsigned short apmult[4]={0,0,0,0};
 for(unsigned int i=0;i<s3->GetRingMultiplicity();i++){
 	TS3Hit* SR=s3->GetRingHit(i);
 	unsigned short id=s3id(SR);
+	if(MultiS3)if(id<0)continue;
 	apmult[id]++;
 	int s=SR->GetSegment();
 	chanhits[id]->Fill(s);
@@ -251,7 +252,12 @@ for(unsigned int i=0;i<s3->GetRingMultiplicity();i++){
 
 	}
 }
-if(MultiS3)for(unsigned short i=0;i<4;i++){if(s3used[i])S3_ringmult[s3index[i]]->Fill(apmult[s3index[i]]);apmult[s3index[i]]=0;}
+if(MultiS3)for(unsigned short i=0;i<4;i++){
+	if(s3used[i]){
+		S3_ringmult[s3index[i]]->Fill(apmult[s3index[i]]);
+		apmult[s3index[i]]=0;
+	}
+}
 else S3_ringmult[0]->Fill(s3->GetRingMultiplicity());
 
 
@@ -259,6 +265,7 @@ else S3_ringmult[0]->Fill(s3->GetRingMultiplicity());
 for(unsigned int i=0;i<s3->GetSectorMultiplicity();i++){
 	TS3Hit* SS=s3->GetSectorHit(i);
 	unsigned short id=s3id(SS);
+	if(MultiS3)if(id<0)continue;
 	apmult[id]++;
 	
 	int s=SS->GetSegment();
@@ -316,7 +323,12 @@ for(unsigned int i=0;i<s3->GetSectorMultiplicity();i++){
 		}
 	}
 }
-if(MultiS3)for(unsigned short i=0;i<4;i++){if(s3used[i])S3_sectormult[s3index[i]]->Fill(apmult[i]);apmult[s3index[i]]=0;}
+if(MultiS3)for(unsigned short i=0;i<4;i++){
+	if(s3used[i]){
+		S3_sectormult[s3index[i]]->Fill(apmult[s3index[i]]);
+		apmult[s3index[i]]=0;
+	}	
+}
 else S3_sectormult[0]->Fill(s3->GetSectorMultiplicity());
 
 //////////////////////////////////////////
@@ -334,6 +346,7 @@ std::vector< double > Vdedx;
 for(unsigned int i=0;i<s3->GetPixelMultiplicity();i++){//GetPixelMultiplicity builds the events based on pre-set settings
 	TS3Hit* SH=s3->GetS3Hit(i);
 	unsigned short id=s3id(SH);
+	if(MultiS3)if(id<0)continue;
 	apmult[id]++;
 	
 	//RF gate for singles triggers
