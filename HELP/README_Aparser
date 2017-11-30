@@ -60,12 +60,14 @@
    BetaZero    (A default experimental beta value =0.0)
    TigressDistance  (Tigress face distance =110.0, see also TigressSuppressed flag)
    FrontBackEnergy  (S3 ring sector gate, given as a fraction =0.9)
+   FrontBackOffset  (S3 ring sector gate, given in keV =0)
    FrontBackTime    (S3 ring sector gate, given in ticks =75)
    S3EnergyLimit    (Total energy range in keV for heavy ions =50000)
    SiLiWaveTOffset  (Offset relative to normal trigger cfd =7000)
    TigressTargetOffset (mm between centre of target and tigress=-8)
    SiLiNoiseLimit   (cut of limit to throw away spice events =0.15)
    SiLiSmirnovLimit (cut of limit to throw away spice events =500)
+   SiLiCoincidenceT (time window in ns for electron electron coincidences =200)
    
    MultiS3 # (Give the mnemonic array position of one of the S3s when there are multiple, call for each)
 
@@ -100,7 +102,7 @@
    e.g. rf_gamma -15 15
    
    The following gates exist at the time of writing:
-   s3_gamma_t, s3_sili_t, gamma_gamma_t, sili_sili_t, gamma_sili_t, rf_S3, rf_sili, rf_gamma
+   s3_gamma_t, s3_sili_t, gamma_gamma_t, gamma_sili_t, rf_S3, rf_sili, rf_gamma
 
    -----------------------------------------------------
    2D Particle Gates

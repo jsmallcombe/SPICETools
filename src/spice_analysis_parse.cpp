@@ -27,8 +27,8 @@ typedef struct gate2Ddata{
 
 double pi=TMath::Pi();
 
-enum gatenames{s3_gamma_t,s3_sili_t,gamma_gamma_t,sili_sili_t,gamma_sili_t,rf_S3,rf_sili,rf_gamma,rf_S3cyc,rf_silicyc,rf_gammacyc};
-vector< string > gatetitles={"s3_gamma_t","s3_sili_t","gamma_gamma_t","sili_sili_t","gamma_sili_t","rf_S3","rf_sili","rf_gamma","rf_S3cyc","rf_silicyc","rf_gammacyc"};
+enum gatenames{s3_gamma_t,s3_sili_t,gamma_gamma_t,gamma_sili_t,rf_S3,rf_sili,rf_gamma,rf_S3cyc,rf_silicyc,rf_gammacyc};
+vector< string > gatetitles={"s3_gamma_t","s3_sili_t","gamma_gamma_t","gamma_sili_t","rf_S3","rf_sili","rf_gamma","rf_S3cyc","rf_silicyc","rf_gammacyc"};
 
 
 vector< pair<double,double> > gates;
@@ -36,9 +36,9 @@ vector< gate2Ddata > ParticleGate;
 vector< TGraph > s3silirf2D;
 vector< pair<unsigned int,unsigned int> > ringgroups;
 
-enum controlenum{BetaZero,TigressDistance,FrontBackEnergy,FrontBackTime,S3EnergyLimit,SiLiWaveTOffset,TigressTargetOffset,SiLiNoiseLimit,SiLiSmirnovLimit};
-vector< string > controlnames={"BetaZero","TigressDistance","FrontBackEnergy","FrontBackTime","S3EnergyLimit","SiLiWaveTOffset","TigressTargetOffset","SiLiNoiseLimit","SiLiSmirnovLimit"};
-vector< double > control={0.0,110.,0.9,75,50000,7000,-8,0.15,500};
+enum controlenum{BetaZero,TigressDistance,FrontBackEnergy,FrontBackOffset,FrontBackTime,S3EnergyLimit,SiLiWaveTOffset,TigressTargetOffset,SiLiNoiseLimit,SiLiSmirnovLimit,SiLiCoincidenceT};
+vector< string > controlnames={"BetaZero","TigressDistance","FrontBackEnergy","FrontBackOffset","FrontBackTime","S3EnergyLimit","SiLiWaveTOffset","TigressTargetOffset","SiLiNoiseLimit","SiLiSmirnovLimit","SiLiCoincidenceT"};
+vector< double > control={0.0,110.,0.9,0,75,50000,7000,-8,0.15,500,200};
 
 std::vector< string > filelist;
 std::vector< long > fileentriessum;
@@ -477,7 +477,7 @@ TTigress::SetForceCrystal();
 TTigress::SetTargetOffset(control[TigressTargetOffset]);
 
 //
-// Set the control parameters used by the S3 pixel build
+// Set the control parameters used by the S3 pixel build & some for SiLi
 //
 
 s3->SetFrontBackTime(control[FrontBackTime]);
@@ -487,10 +487,13 @@ if(Telescope){
 }else{
 	s3->SetMultiHit(true);
 	s3->SetFrontBackEnergy(control[FrontBackEnergy]);
+	s3->SetFrontBackEOffset(control[FrontBackOffset]);
 	if(PreferenceSectors)s3->PreferenceSector();//Use the sector energy mostly, worse resolution but strangely more stable
 	if(KeepChargeShare)s3->SetKeepShared();
 }
-
+if(DS){
+	sili->CoincidenceTime(control[SiLiCoincidenceT]);
+}
 ///////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////
 ////////////////// PREPARE OUTPUT FILE //////////////////

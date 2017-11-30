@@ -303,7 +303,8 @@ for(unsigned int i=0;i<s3->GetSectorMultiplicity();i++){
 				if(!Telescope){
 					frontVback[id]->Fill(re,e);
 					front_back[id]->Fill(e-re);
-					if(e*control[FrontBackEnergy]<re&&re*control[FrontBackEnergy]<e){
+					// Note this MUST mirror the constraint in GRSISort TS3.cxx BuildPixels() or these histograms are meaningless
+					if((e-control[FrontBackOffset])*control[FrontBackEnergy]<re&&(re-control[FrontBackOffset])*control[FrontBackEnergy]<e){
 						front_backgated[id]->Fill(e-re);
 						frontVbackGated[id]->Fill(re,e);
 						fb_time[id]->Fill(TT);
@@ -474,6 +475,9 @@ if(DS)SiLi_mult->Fill(sili->GetMultiplicity());
 if(DS){for(int i=0;i<sili->GetMultiplicity();i++){
 	sili_hit = sili->GetSiLiHit(i);
 	double e=sili_hit->GetEnergy();
+	if(GainDrift)e=e*FileGain+FileOffset;
+	
+	
 // 	fileN_silinoise->Fill(fileiterator,e);
 // 	eventN_silinoise->Fill(jentry,e);
 // 	runtime_silinoise->Fill(tstamphour,e);
@@ -488,6 +492,7 @@ if(DS){for(int i=0;i<sili->GetMultiplicity();i++){
 		int s=sili_hit->GetSegment();
 		if(s>=0&&s<120){
 			SiLi_raw->Fill(e);
+			if(sili->GetMultiplicity()==1)SiLi_rawm1->Fill(e);
 			TVector3 pos = sili_hit->GetPosition(true);
 	// 		TVector3 pos = TSiLi::GetPosition(sili_hit->GetRing(),sili_hit->GetSector(),true);
 			SiLi_map->Fill(-pos.X(),pos.Y());
@@ -515,7 +520,7 @@ if(DS){for(int i=0;i<sili->GetAddbackMultiplicity();i++){
 	double e=sili_hit->GetEnergy();
 	
 	// Moved here as we dont want to zero energy and before the addback neighbour check.
-	// If we every to actual addback this will need changing somehow
+	// If we every to actual addback this may need changing somehow
 	if(UseFitCharge){
 		double c=sili_hit->GetFitCharge();
 		if(c>0){
@@ -554,7 +559,6 @@ if(DS){for(int i=0;i<sili->GetAddbackMultiplicity();i++){
 			double ft=sili_hit->GetTimeFit();
 			if(ft>50){//garbage events have early fit time
 			
-				SiLi_addback->Fill(e);
 			
 				if(sili_hit->MagnetShadow()){
 					SiLi_magshad->Fill(e);
@@ -611,12 +615,23 @@ if(DS){for(int i=0;i<sili->GetAddbackMultiplicity();i++){
 			SiLi_fit_timeRF->Fill(ft,rf_t);
 		}else{
 			//For the multi hitclusters do the addback histograms
-			for(int j=0;j<Nadd;j++)SiLi_rejected->Fill(sili_hit->GetAddbackEnergy(j));
-			SiLi_rejected_sum->Fill(e);
+			for(int j=0;j<Nadd;j++)SiLi_unaddback->Fill(sili_hit->GetAddbackEnergy(j));
+			SiLi_addback->Fill(e);
 		}
 	}
 }}
 int SiLiN=SiLii.size();
+
+if(DS){
+	double rejsum=0;
+	for(int i=0;i<sili->GetRejectMultiplicity();i++){
+		sili_hit = sili->GetRejectHit(i);
+		double e=sili_hit->GetEnergy();
+		if(e>10)SiLi_rejected->Fill(e);
+		rejsum+=e;
+	}
+	if(rejsum>10)SiLi_rejected_sum->Fill(rejsum);
+}
 
 //////////////////////////////////
 //////// Do gammas singles ///////
@@ -839,6 +854,7 @@ for(unsigned int j=0;j<S3N;j++){
 		SiLi_S3_t->Fill(TT);
 		SiLi_S3_twide->Fill(TT);
 		SiLi_S3_t2->Fill(e,TT);
+		SiLiSegT->Fill(SiLii[i]->GetSegment(),TT/1.6);
 
 		bool rf2dgate=false;	
 		
@@ -1110,16 +1126,24 @@ if(DoDoubleElectrons&&DS){
 if(rawsilisum>10&&SiLiN>0)silirawtotal->Fill(rawsilisum);
 for(unsigned int i=0;i<SiLiN;i++){
 	double e=SiLiE[i];
+	int segA=SiLii[i]->GetSegment();
+	
 	for(unsigned int j=i+1;j<SiLiN;j++){
 		double ee=SiLiE[j];
 		double TT=SiLit[i]-SiLit[j];
-		TT*=1.6;
 		ee_t->Fill(TT);
-		if(t_gate(TT,sili_sili_t)){
+		if(abs(TT)<control[SiLiCoincidenceT]){
 			ee_tgate->Fill(TT);
 			int r=abs(SiLii[i]->GetRing()-SiLii[j]->GetRing());
 			int s=abs(SiLii[i]->GetSector()-SiLii[j]->GetSector());
+			
+			int segB=SiLii[j]->GetSegment();
+			
 			if(r>1||(s>1&&s<11)){//if not neighbour
+				
+				SiLieeT->Fill(segA,TT);
+				SiLieeT->Fill(segB,-TT);
+				
 				ee_singles->Fill(e);
 				ee_singles->Fill(ee);
 				ee_sum->Fill(e+ee);
@@ -1136,7 +1160,18 @@ for(unsigned int i=0;i<SiLiN;i++){
 				e_single_ring->Fill(e,SiLii[i]->GetRing());
 				e_single_ring->Fill(ee,SiLii[j]->GetRing());
 				e_single_preamp->Fill(e,SiLii[i]->GetPreamp());
-				e_single_preamp->Fill(ee,SiLii[j]->GetPreamp());					
+				e_single_preamp->Fill(ee,SiLii[j]->GetPreamp());
+				
+				
+				segseg->Fill(segA,segB);
+				segseg->Fill(segB,segA);
+				
+				double eang=atan(e/ee);
+				if(eang>pi>2)eang=pi-eang;
+				TVector3 A=SiLii[i]->GetPosition(true);
+				TVector3 B=SiLii[j]->GetPosition(true);
+				angmap->Fill(eang,A.X(),A.Y());
+				angmap->Fill(eang,B.X(),B.Y());
 				
 				TVector3 p1=TSiLi::GetPosition(SiLii[i]->GetRing(),SiLii[i]->GetSector());					
 				TVector3 p2=TSiLi::GetPosition(SiLii[j]->GetRing(),SiLii[j]->GetSector());	
