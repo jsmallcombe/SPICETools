@@ -2,7 +2,8 @@
 	TSiLi sili;
 	TChannel::ReadCalFile("CalibrationFile.cal");
 
-	
+	double walkcoef=0.002601418;// in units 10ns /keV
+
 	TFile in("silis3.root","READ");
 	if(!in.IsOpen())return;
 	gROOT->cd();
@@ -36,12 +37,13 @@
 		
 		TChannel* chan=TSiLiHit::GetSiLiHitChannel(i);
 		
-// 			cout<<endl<<i<<" "<<chan;
+// 		cout<<endl<<i<<" "<<chan;
 		if(chan){
 			cout<<endl<<i<<" "<<offset;
+			chan->DestroyTIMECal();
 			chan->AddTIMECoefficient(-offset/10.0);
-			chan->AddTIMECoefficient(0);
-			chan->AddTIMECoefficient(0);
+			chan->AddTIMECoefficient(walkcoef);
+			chan->AddTIMECoefficient(1);
 		}
  		delete seg;
 	}

@@ -61,7 +61,7 @@
    TigressDistance  (Tigress face distance =110.0, see also TigressSuppressed flag)
    FrontBackEnergy  (S3 ring sector gate, given as a fraction =0.9)
    FrontBackOffset  (S3 ring sector gate, given in keV =0)
-   FrontBackTime    (S3 ring sector gate, given in ticks =75)
+   FrontBackTime    (S3 ring sector gate, given in ns)
    S3EnergyLimit    (Total energy range in keV for heavy ions =50000)
    SiLiWaveTOffset  (Offset relative to normal trigger cfd =7000)
    TigressTargetOffset (mm between centre of target and tigress=-8)
@@ -103,6 +103,8 @@
    
    The following gates exist at the time of writing:
    s3_gamma_t, s3_sili_t, gamma_gamma_t, gamma_sili_t, rf_S3, rf_sili, rf_gamma
+   rfcyc_S3, rfcyc_sili, rfcyc_gamma - Specify 1 RF bunch and the gates will select all by rf period increment within the normal rf gate
+   All are in [ns]
 
    -----------------------------------------------------
    2D Particle Gates
@@ -120,6 +122,9 @@
    ring # # - The beta value to use for a specified S3 ring [Ring,theta]
    MS3 # - When there are multiple S3 limit this gate to only s3 with mnemonic array position #, may add multiple with repeat commands.
    UseEnergyBeta # - Calculate beta from the detected energy using the given mass #
+   gammatime # # - Upper and lower time for S3 gates, uses common gate if not set [ns,ns]
+   silitime # # - Upper and lower time for S3 gates, uses common gate if not set [ns,ns]
+
    
    e.g.
    s3_rs_2D0 title protons
@@ -165,17 +170,4 @@
    It defined in order mnemonic array position number.
    E.g. Position 2 & 3 used: First ring of 2 = 0, First ring of 3 = 24 etc.
    
-   -----------------------------------------------------
-   2D SPICE s3 RF gate
-   -----------------------------------------------------
-   
-   Lines starting "s3silirf2D" add data to a time gate for SPICE S3 coincidence with respect to the RF
-   "s3silirf2D" should be concatenated with an index starting at zero to designate the gate e.g. s3silirf2D0
-   and followed by the x & y point of the gate
 
-   e.g.
-   s3silirf2D0 -100.3 50.1
-   s3silirf2D0 -100.3 -40.9
-   s3silirf2D0 60.1 10.1
-   
-   (S3 SiLi RF time gates are only used with the UseSiLiRFCoinc flag)

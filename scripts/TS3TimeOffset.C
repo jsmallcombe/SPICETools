@@ -93,6 +93,7 @@
 // 		ringtime[i]=sect->GetXaxis()->GetBinCenter(sect->GetMaximumBin());
 		ringtime[i]=sect->GetMean();
 		if(chan[i]){
+			chan[i]->DestroyTIMECal();
 			chan[i]->AddTIMECoefficient(ringtime[i]/10.0);
 			chan[i]->AddTIMECoefficient(0);
 			chan[i]->AddTIMECoefficient(0);

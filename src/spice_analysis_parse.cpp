@@ -23,17 +23,18 @@ typedef struct gate2Ddata{
 	bool s3Limit;
 	unsigned int mass;
 	bool UseEnergyBeta;
+	int gtgate;
+	int stgate;
 } gate2Ddata;
 
 double pi=TMath::Pi();
 
-enum gatenames{s3_gamma_t,s3_sili_t,gamma_gamma_t,gamma_sili_t,rf_S3,rf_sili,rf_gamma,rf_S3cyc,rf_silicyc,rf_gammacyc};
-vector< string > gatetitles={"s3_gamma_t","s3_sili_t","gamma_gamma_t","gamma_sili_t","rf_S3","rf_sili","rf_gamma","rf_S3cyc","rf_silicyc","rf_gammacyc"};
+enum gatenames{s3_gamma_t,s3_sili_t,gamma_gamma_t,gamma_sili_t,rf_S3,rf_sili,rf_gamma,rfcyc_S3,rfcyc_sili,rfcyc_gamma};
+vector< string > gatetitles={"s3_gamma_t","s3_sili_t","gamma_gamma_t","gamma_sili_t","rf_S3","rf_sili","rf_gamma","rfcyc_S3","rfcyc_sili","rfcyc_gamma"};
 
 
 vector< pair<double,double> > gates;
 vector< gate2Ddata > ParticleGate;
-vector< TGraph > s3silirf2D;
 vector< pair<unsigned int,unsigned int> > ringgroups;
 
 enum controlenum{BetaZero,TigressDistance,FrontBackEnergy,FrontBackOffset,FrontBackTime,S3EnergyLimit,SiLiWaveTOffset,TigressTargetOffset,SiLiNoiseLimit,SiLiSmirnovLimit,SiLiCoincidenceT};
@@ -71,6 +72,7 @@ unsigned short s3r(TS3Hit* s3hit){
 //Declare subroutines//
 ///////////////////////
 ///////////////////////
+bool t_gate(double,int);
 bool t_gate(double,gatenames);
 void t_gateRFmake(gatenames);
 bool t_gateRFcycles(double,gatenames);
@@ -91,7 +93,6 @@ int analysis_parse(int argc, char *argv[]){
 	
 gates.clear();
 ParticleGate.clear();
-s3silirf2D.clear();
 ringgroups.clear();
 
 for(int z=0;z<gatetitles.size();z++)gates.push_back(pair < double,double >{-1E10,1E10});
@@ -109,10 +110,10 @@ if(!inp.LoadCal(DataChain)){
 string outputfile=OrDefault("AparserOut.root",inp.RootFile("gate"));
 
 bool RemoveTimeGaps=!inp.IsPresent("TimeCompressOff");//for decay work or to see DAQ problems you may want to false this
-if(RemoveTimeGaps)cout<<endl<<"Time Gaps Now unsuppressed.";
+if(!RemoveTimeGaps)cout<<endl<<"Time Gaps us-suppressed.";
 
 bool UseSiLiRFCoinc=inp.IsPresent("UseSiLiRFCoinc");
-if(UseSiLiRFCoinc)cout<<endl<<"Using S3-SiLi RF gate.";
+if(UseSiLiRFCoinc)cout<<endl<<"S3-SiLi RF gate functionality removed.";
 
 bool UseFitCharge=inp.IsPresent("UseFitCharge");
 if(UseFitCharge)cout<<endl<<"Using SiLi Waveform fit charge.";
@@ -185,7 +186,7 @@ if(GainDrift){
 		int mcount=0;
 		for(unsigned int i=0;i<filelist.size();i++){
 			fileoffset.push_back(0);
-			filegain.push_back(0);
+			filegain.push_back(1.);
 			
 			for(unsigned int j=0;j<Sfilen.size();j++){
 				if(filelist[i].find(Sfilen[j])<filelist[i].size()){
@@ -265,6 +266,11 @@ while(inp>>str){
 			inp>>ring>>beta;
 			while(ParticleGate[N].ring_beta.size()<=ring)ParticleGate[N].ring_beta.push_back(0);
 			ParticleGate[N].ring_beta[ring]=beta;
+		}else if(mode.find("time")<mode.size()){
+			if(mode.find("gamma")<mode.size())ParticleGate[N].gtgate=gates.size();
+			else  ParticleGate[N].stgate=gates.size();
+			double x,y;inp>>x>>y;higher_jd(x,y);
+			gates.push_back(pair < double,double >{x,y});
 		}else if(mode.find("MS3")<mode.size()){
 			short s;
 			inp>>s;
@@ -307,20 +313,6 @@ while(inp>>str){
 			}
 		}
 	}
-	
-	//2D gates and any associated kinematic data
-	strfi=str.find("s3silirf2D");
-	if(strfi<str.size()){
-		//Get the number at the end of the name
-		int X=strfi+10;
-		int N=abs(atoi(str.substr(X,str.size()-X).c_str()));
-		
-		while(s3silirf2D.size()<=N)s3silirf2D.push_back(TGraph());
-		
-		double x,y;
-		inp>>x>>y;
-		s3silirf2D[N].SetPoint(s3silirf2D[N].GetN(),x,y);
-	}
 
 }
 gROOT->cd();
@@ -347,6 +339,9 @@ for(int y=0;y<ParticleGate.size();y++){
 		continue;
 	}
 	
+	if(ParticleGate[y].gtgate==0){ParticleGate[y].gtgate=(int)s3_gamma_t;}
+	if(ParticleGate[y].stgate==0){ParticleGate[y].gtgate=(int)s3_sili_t;}
+	
 	if(ParticleGate[y].title.size()<1){
 		stringstream ss;
 		ss<<"Gate"<<y;
@@ -367,7 +362,6 @@ for(int y=0;y<ParticleGate.size();y++){
 			ParticleGate[y].theta_beta.SetTitle((t+"beta").c_str());
 		}
 	}
-	
 	
 	ParticleGate[y].use_tt=false;
 	if(ParticleGate[y].theta_theta.GetN()>1){
@@ -391,21 +385,12 @@ for(int y=0;y<ParticleGate.size();y++){
 	}else{ParticleGate[y].UseEnergyBeta=false;}
 }
 
-for(int y=0;y<s3silirf2D.size();y++){
-	if(s3silirf2D[y].GetN()<3){
-		s3silirf2D.erase(s3silirf2D.begin()+y);
-		y--;
-		continue;
-	}
-}
-
-
-if(gates[rf_S3cyc].first<-1E9&&gates[rf_S3cyc].second>1E9)gates[rf_S3cyc]=gates[rf_S3];
-if(gates[rf_silicyc].first<-1E9&&gates[rf_silicyc].second>1E9)gates[rf_silicyc]=gates[rf_sili];
-if(gates[rf_gammacyc].first<-1E9&&gates[rf_gammacyc].second>1E9)gates[rf_gammacyc]=gates[rf_gamma];
-t_gateRFmake(rf_S3cyc);
-t_gateRFmake(rf_silicyc);
-t_gateRFmake(rf_gammacyc);
+if(gates[rfcyc_S3].first<-1E9&&gates[rfcyc_S3].second>1E9)gates[rfcyc_S3]=gates[rf_S3];
+if(gates[rfcyc_sili].first<-1E9&&gates[rfcyc_sili].second>1E9)gates[rfcyc_sili]=gates[rf_sili];
+if(gates[rfcyc_gamma].first<-1E9&&gates[rfcyc_gamma].second>1E9)gates[rfcyc_gamma]=gates[rf_gamma];
+t_gateRFmake(rfcyc_S3);
+t_gateRFmake(rfcyc_sili);
+t_gateRFmake(rfcyc_gamma);
 
 /////////////////////////////////////////////////////////////////
 /////////////////  Check all needed inputs     //////////////////
@@ -480,7 +465,7 @@ TTigress::SetTargetOffset(control[TigressTargetOffset]);
 // Set the control parameters used by the S3 pixel build & some for SiLi
 //
 
-s3->SetFrontBackTime(control[FrontBackTime]);
+s3->SetFrontBackTime(control[FrontBackTime]*1.6);
 if(Telescope){
 	s3->SetMultiHit(false);
 	s3->SetFrontBackEnergy(0);
@@ -763,8 +748,10 @@ return 0;
 ///////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////	
 
-
-
+bool t_gate(double t,int g){
+	if(t>=gates[g].first&&t<=gates[g].second)return true;
+	return false;	
+}
 
 bool t_gate(double t,gatenames g){
 	if(t>=gates[g].first&&t<=gates[g].second)return true;
@@ -773,8 +760,8 @@ bool t_gate(double t,gatenames g){
 
 void t_gateRFmake(gatenames g){
 	
-	int f=gates[g].first*10000.;
-	int s=gates[g].second*10000.;
+	int f=gates[g].first*1000.;
+	int s=gates[g].second*1000.;
 	int w=s-f;
 	
 	if(w>TRFperiodps){
@@ -795,7 +782,7 @@ void t_gateRFmake(gatenames g){
 //inputs in 10s ns
 bool t_gateRFcycles(double t,gatenames g){
 	
-	int T=t*10000.;
+	int T=t*1000.;
 	T=T%TRFperiodps;
 	if(T<0)T+=TRFperiodps;
 	

@@ -89,9 +89,9 @@ gamma_sili_t -200 450
 rf_sili 80 91 
 rf_gamma -6 10
 
-rf_S3cyc 9.7 11.7
-rf_silicyc 84 88
-rf_gammacyc -21 -17
+rfcyc_S3 9.7 11.7
+rfcyc_sili 84 88
+rfcyc_gamma -21 -17
 
 ### FILE INPUTS ###
 
