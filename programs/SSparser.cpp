@@ -25,6 +25,9 @@ int main(int argc, char *argv[]){
 		SPICEenvironment* ssev= new SPICEenvironment(viewfile,path);cout<<"Showing data from file "<<outputfile<<" hist "<<path<<endl;
 		ssev->Connect("Destroyed()", "TApplication", app, "Terminate()");
 		app->Run();
+	}else{
+		if(!viewfile->IsOpen())cout<<endl<<"No sorted data file to view."<<endl;
+		else cout<<endl<<"No Calibration file."<<endl;
 	}
 
 	return 0;

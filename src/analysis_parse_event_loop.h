@@ -861,7 +861,7 @@ for(unsigned int j=0;j<S3N;j++){
 		SiLi_S3_t->Fill(TT);
 		SiLi_S3_twide->Fill(TT);
 		SiLi_S3_t2->Fill(e,TT);
-		SiLiSegT->Fill(SiLii[i]->GetSegment(),TT);
+		if(e>180)SiLiSegT->Fill(SiLii[i]->GetSegment(),TT);
 		SiLiS3loop[i]=TT;
 		
 		if(!RFfail){//If there is RF data

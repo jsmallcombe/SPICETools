@@ -1,5 +1,4 @@
 {
-	TSiLi sili;
 	TChannel::ReadCalFile("CalibrationFile.cal");
 
 	

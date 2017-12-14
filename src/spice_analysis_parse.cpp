@@ -340,7 +340,7 @@ for(int y=0;y<ParticleGate.size();y++){
 	}
 	
 	if(ParticleGate[y].gtgate==0){ParticleGate[y].gtgate=(int)s3_gamma_t;}
-	if(ParticleGate[y].stgate==0){ParticleGate[y].gtgate=(int)s3_sili_t;}
+	if(ParticleGate[y].stgate==0){ParticleGate[y].stgate=(int)s3_sili_t;}
 	
 	if(ParticleGate[y].title.size()<1){
 		stringstream ss;

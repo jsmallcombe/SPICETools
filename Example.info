@@ -75,7 +75,7 @@ S3Vector 1.0 0.5 0.0
 # X Y Z mm offset of the S3 from the nominal position
 
 
-SiLiCoincidenceT
+SiLiCoincidenceT 50
 # time window in ns for electron electron coincidences
 
 ### TIME GATES ###

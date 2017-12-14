@@ -31,8 +31,18 @@
 		for(unsigned int i=0;i<s3->GetSectorMultiplicity();i++){
 			TS3Hit* SS=s3->GetSectorHit(i);
 			
+			if(!chan[SS->GetSegment()+24]){
+				chan[SS->GetSegment()+24]=SS->GetChannel();
+				chan[SS->GetSegment()+24]->DestroyTIMECal();
+			}
+			
 			for(unsigned int j=0;j<s3->GetRingMultiplicity();j++){
 				TS3Hit* SR=s3->GetRingHit(j);
+				
+				if(!chan[SR->GetSegment()]){
+					chan[SR->GetSegment()]=SR->GetChannel();
+					chan[SR->GetSegment()]->DestroyTIMECal();
+				}
 				
 				double TT=SR->GetTime()-SS->GetTime();
 				
@@ -42,11 +52,9 @@
 				
 				Total->Fill(TT);
 				
-				if(!chan[SR->GetSegment()])chan[SR->GetSegment()]=SR->GetChannel();
 			}
 			
 			
-			if(!chan[SS->GetSegment()+24])chan[SS->GetSegment()+24]=SS->GetChannel();
 		}
 
 	}
@@ -55,13 +63,17 @@
 	double sectortime[32];
 	for(unsigned int i=0;i<32;i++){
 		TH1D* sect = SectorTimes->ProjectionX("sect",i+1,i+1);
+		
+		sect->GetXaxis()->SetRange(sect->GetMaximumBin()-10,sect->GetMaximumBin()+10);
 // 		sectortime[i]=-sect->GetXaxis()->GetBinCenter(sect->GetMaximumBin());
 		sectortime[i]=-sect->GetMean();
 		if(chan[i+24]){
 			cout<<endl<<i<<" "<<sectortime[i];
+			chan[i+24]->DestroyTIMECal();
 			chan[i+24]->AddTIMECoefficient(sectortime[i]/10.0);
 			chan[i+24]->AddTIMECoefficient(0);
 			chan[i+24]->AddTIMECoefficient(0);
+
 		}
 		delete sect;
 	}
@@ -90,6 +102,7 @@
 	double ringtime[24];
 	for(unsigned int i=0;i<24;i++){
 		TH1D* sect = RingTimes->ProjectionX("sect",i+1,i+1);
+		sect->GetXaxis()->SetRange(sect->GetMaximumBin()-10,sect->GetMaximumBin()+10);
 // 		ringtime[i]=sect->GetXaxis()->GetBinCenter(sect->GetMaximumBin());
 		ringtime[i]=sect->GetMean();
 		if(chan[i]){

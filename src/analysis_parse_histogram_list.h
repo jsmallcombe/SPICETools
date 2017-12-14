@@ -142,8 +142,8 @@ outfile->cd();
 			}
 			SiLi_fit_timeS= new TH2F("SiLi_fit_timeS","SiLi_fit_timeS",512,0,256,120,0,120);axislab(SiLi_fit_timeS,"Electron Fit Time [10 ns]","Spice Segment");
 			SiLi_fit_timeE= new TH2F("SiLi_fit_timeE","SiLi_fit_timeE",512,0,256,1000,0,2000);axislab(SiLi_fit_timeE,"Electron Fit Time [10 ns]","Electron Energy [keV]");
-			SiLiSegT= new TH2F("SiLiSegTS3","SiLiSegTS3",120,0,120,512,-256,256);axislab(SiLiSegT,"SPICE Segment","SiLi-S3 #Deltat [ns]");
-			if(DoDoubleElectrons)SiLieeT= new TH2F("SiLieeT","SiLieeT",120,0,120,1024,-512,512);axislab(SiLieeT,"SPICE Segment","SiLi-SiLi #Deltat [ns]");
+			SiLiSegT= new TH2F("SiLiSegTS3","SiLiSegTS3",120,0,120,512,-512,512);axislab(SiLiSegT,"SPICE Segment","SiLi-S3 #Deltat [ns]");
+			if(DoDoubleElectrons){SiLieeT= new TH2F("SiLieeT","SiLieeT",120,0,120,1024,-512,512);axislab(SiLieeT,"SPICE Segment","SiLi-SiLi #Deltat [ns]");}
 // 		outfile->mkdir("SiLi/rings");
 // 		outfile->cd("SiLi/rings");
 // 			for(int i=0;i<10;i++){
