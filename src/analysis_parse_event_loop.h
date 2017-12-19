@@ -561,6 +561,7 @@ if(DS){for(int i=0;i<sili->GetAddbackMultiplicity();i++){
 			
 				if(sili_hit->MagnetShadow()){
 					SiLi_magshad->Fill(e);
+					SiLi_shadRing->Fill(sili_hit->GetRing(),e);
 				}else{
 					SiLi_nagshad->Fill(e);
 					SiLi_nagshadRing->Fill(sili_hit->GetRing(),e);

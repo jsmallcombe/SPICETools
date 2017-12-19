@@ -4,20 +4,20 @@
 
 outfile->cd();
 
-	TH3F *S3_map3;
-	TH2F *S3_theta;
+	TH3 *S3_map3;
+	TH2 *S3_theta;
 	
-	TH1D* S3_multot;//D because over max value for float hist
-	vector< TH1D* > S3_sectormult,S3_ringmult,S3_mult;
+	TH1* S3_multot;//D because over max value for float hist
+	vector< TH1* > S3_sectormult,S3_ringmult,S3_mult;
 	
-	vector< TH1F* > fb_time,fb_timegated,front_back,front_backgated,S3ring_sum,S3sector_sum,S3RS_t,S3RS_tgate,chanhits;
-	vector< TH2F* > S3_map,S3_dedx,frontVback,frontVbackGated,S3flat;
-	vector< TH3F* > S3_d3dx,S3RS_t3;
+	vector< TH1* > fb_time,fb_timegated,front_back,front_backgated,S3ring_sum,S3sector_sum,S3RS_t,S3RS_tgate,chanhits;
+	vector< TH2* > S3_map,S3_dedx,frontVback,frontVbackGated,S3flat;
+	vector< TH3* > S3_d3dx,S3RS_t3;
 	
 	
 	outfile->mkdir("S3");
 	outfile->cd("S3");
-		S3_map3= new TH3F("S3_map3","S3_map3;Z [mm];X [mm];Y [mm]",80,-50,50,80,-40,40,100,-40,40);
+		S3_map3= new TH3F("S3_map3","S3_map3;Z [mm];X [mm];Y [mm]",50,-50,50,80,-40,40,80,-40,40);
 		S3_theta= new TH2F("S3_theta","S3_theta;Total Energy [keV];Theta [rad]",1024,0,control[S3EnergyLimit],200,0.2,1.2);
 		
 		int k=0;
@@ -101,7 +101,7 @@ outfile->cd();
 	TH1F *silifitc[120];
 	TH1D *SiLi_mult,*SiLiAdd_mult;
 	TH1F *SiLi_magshad,*SiLi_nagshad;
-	TH2F *SiLi_nagshadRing;
+	TH2F *SiLi_shadRing,*SiLi_nagshadRing;
 	TH2F *SiLiGamma_nagshad;
 	TH2F* SiLiSegT,*SiLieeT;
 	
@@ -118,6 +118,7 @@ outfile->cd();
 		
 		SiLi_magshad= new TH1F("SiLi_MagnetShadow","SiLi_MagnetShadow",2000,0,2000);axislab(SiLi_magshad,"Energy [keV]");
 		SiLi_nagshad= new TH1F("SiLi_NoShadow","SiLi_NoShadow",2000,0,2000);axislab(SiLi_nagshad,"Energy [keV]");
+		SiLi_shadRing= new TH2F("SiLi_ShadowRing","SiLi_ShadowRing",10,0,10,1000,0,2000);axislab(SiLi_shadRing,"Ring","Electron Energy [keV]");
 		SiLi_nagshadRing= new TH2F("SiLi_NoShadowRing","SiLi_NoShadowRing",10,0,10,1000,0,2000);axislab(SiLi_nagshadRing,"Ring","Electron Energy [keV]");
 		SiLiGamma_nagshad= new TH2F("Gamma_SiLi_NoShaddow","Gamma_SiLi_NoShaddow",1000,0,2000,1000,0,2000);axislab(SiLiGamma_nagshad,"#gamma Energy [keV]","Electron Energy [keV]");
 
@@ -571,8 +572,8 @@ outfile->cd();
 		
 
 	
-	TH1F*ee_singles,*ee_sum,*ee_sum_gtfifty,*silirawtotal;	TH2F*ee_vs,*ee_singleVsum,*ee_singleVsum_gt50,*ee_sum_distance,*ee_sum_ring,*e_single_ring,*e_single_preamp,*e_vs_rawtotal,*ee_sum_vs_rawtotal,*ee_single_gamma,*ee_sum_gamma,*segseg;
-	TH3F*e_e_y,*ee_e_y,*angmap;
+	TH1 *ee_singles,*ee_sum,*ee_sum_gtfifty,*silirawtotal;	TH2F*ee_vs,*ee_singleVsum,*ee_singleVsum_gt50,*ee_sum_distance,*ee_sum_ring,*e_single_ring,*e_single_preamp,*e_vs_rawtotal,*ee_sum_vs_rawtotal,*ee_single_gamma,*ee_sum_gamma,*segseg;
+	TH3 *e_e_y,*ee_e_y,*angmap;
 	
 	if(DoDoubleElectrons&&DS){
 		outfile->mkdir("NonNeighbourSiLiPairs");
@@ -592,30 +593,33 @@ outfile->cd();
 				silirawtotal= new TH1F("silirawtotal","silirawtotal",2000,0,2000); axislab(silirawtotal,"Raw Electron Sum Total [keV]");
 				ee_single_gamma= new TH2F("ee_single_gamma","ee_single_gamma",500,0,1500,500,0,1500);axislab(ee_single_gamma,"Electron Pair Single Energy [keV]","#gamma Energy [keV]");
 				ee_sum_gamma= new TH2F("ee_sum_gamma","ee_sum_gamma",500,0,1500,500,0,1500);axislab(ee_sum_gamma,"Electron Pair Summed Energy [keV]","#gamma Energy [keV]");
-				e_e_y= new TH3F("e_e_y","e_e_y",500,0,1500,500,0,1500,500,0,1500);axislab(e_e_y,"Electron Pair Single Energy [keV]","Electron Pair Single Energy [keV]","#gamma Energy [keV]");
-				ee_e_y= new TH3F("ee_e_y","ee_e_y",500,0,1500,500,0,1500,500,0,1500);axislab(e_e_y,"Electron Pair Summed Energy [keV]","Electron Pair Single Energy [keV]","#gamma Energy [keV]");
+				e_e_y= new TH3I("e_e_y","e_e_y",500,0,1500,500,0,1500,500,0,1500);axislab(e_e_y,"Electron Pair Single Energy [keV]","Electron Pair Single Energy [keV]","#gamma Energy [keV]");
+				ee_e_y= new TH3I("ee_e_y","ee_e_y",500,0,1500,500,0,1500,500,0,1500);axislab(e_e_y,"Electron Pair Summed Energy [keV]","Electron Pair Single Energy [keV]","#gamma Energy [keV]");
 				
 				segseg= new TH2F("SegVSeg","SegVSeg",120,0,120,120,0,120);axislab(segseg,"Electron Pair Single Energy [keV]","Raw Electron Sum Total [keV]");
-				angmap= new TH3F("Eang_map","Eang_map",200,0,pi/2,100,-50,50,100,-50,50);axislab(angmap,"Energy Ratio","X [mm]","Y [mm]");
+				angmap= new TH3I("Eang_map","Eang_map",200,0,pi/2,100,-50,50,100,-50,50);axislab(angmap,"Energy Ratio","X [mm]","Y [mm]");
 		outfile->cd();	
 	}
 
-	TH1D *SiLi_singles,*Gamma_singles,*GammaSiLiPlus;
-	TH2F *Gamma_SiLi,*Gamma_Gamma,*GammaSiLiPlus_Gamma,*GammaSiLiPlus_SiLi;
-	TH3F *Gamma_Gamma_Gamma;
+	TH1 *SiLi_singles,*Gamma_singles,*GammaSiLiPlus;
+	TH2 *Gamma_SiLi,*Gamma_Gamma,*GammaSiLiPlus_Gamma,*GammaSiLiPlus_SiLi;
+	TH3 *Gamma_Gamma_Gamma;
 	
-	Gamma_singles= new TH1D("Gamma_singles","Gamma_singles",2000,0,2000);axislab(Gamma_singles,"#gamma Energy [keV]");	
-	Gamma_Gamma= new TH2F("Gamma_Gamma","Gamma_Gamma",1000,0,2000,1000,0,2000);axislab(Gamma_Gamma,"#gamma Energy [keV]","#gamma Energy [keV]");
-	Gamma_Gamma_Gamma= new TH3F("Gamma_Gamma_Gamma","Gamma_Gamma_Gamma",500,0,2000,500,0,2000,500,0,2000);axislab(Gamma_Gamma_Gamma,"#gamma Energy [keV]","#gamma Energy [keV]","#gamma Energy [keV]");
-	if(DS){SiLi_singles= new TH1D("SiLi_singles","SiLi_singles",2000,0,2000);axislab(SiLi_singles,"Electron Energy [keV]");
-	Gamma_SiLi= new TH2F("Gamma_SiLi","Gamma_SiLi",1000,0,2000,1000,0,2000);axislab(Gamma_SiLi,"#gamma Energy [keV]","Electron Energy [keV]");}
-	
+	Gamma_singles= new TH1D("Gamma_singles","Gamma_singles",4096,0,2048);axislab(Gamma_singles,"#gamma Energy [keV]");	
+	Gamma_Gamma= new TH2F("Gamma_Gamma","Gamma_Gamma",2048,0,2048,2048,0,2048);axislab(Gamma_Gamma,"#gamma Energy [keV]","#gamma Energy [keV]");
+// 	Gamma_Gamma_Gamma= new TH3F("Gamma_Gamma_Gamma","Gamma_Gamma_Gamma",512,0,2048,512,0,2048,512,0,2048);axislab(Gamma_Gamma_Gamma,"#gamma Energy [keV]","#gamma Energy [keV]","#gamma Energy [keV]");
+	Gamma_Gamma_Gamma= new TH3S("Gamma_Gamma_Gamma","Gamma_Gamma_Gamma",1024,0,2048,512,0,2048,512,0,2048);axislab(Gamma_Gamma_Gamma,"#gamma Energy [keV]","#gamma Energy [keV]","#gamma Energy [keV]");
+	if(DS){
+		SiLi_singles= new TH1D("SiLi_singles","SiLi_singles",2048,0,2048);axislab(SiLi_singles,"Electron Energy [keV]");
+		Gamma_SiLi= new TH2F("Gamma_SiLi","Gamma_SiLi",2048,0,2048,1024,0,2048);axislab(Gamma_SiLi,"#gamma Energy [keV]","Electron Energy [keV]");
+	}
+
 	if(DS){
 		outfile->mkdir("SiLi/GammaSiLiPlus");
 		outfile->cd("SiLi/GammaSiLiPlus");
-		GammaSiLiPlus= new TH1D("GammaSiLiPlus","GammaSiLiPlus",4000,0,4000);axislab(GammaSiLiPlus,"#gamma+SiLi Energy [keV]");
-		GammaSiLiPlus_Gamma= new TH2F("GammaSiLiPlus_Gamma","GammaSiLiPlus_Gamma",2000,0,4000,1000,0,2000);axislab(GammaSiLiPlus_Gamma,"#gamma+SiLi Energy [keV]","#gamma Energy [keV]");
-		GammaSiLiPlus_SiLi= new TH2F("GammaSiLiPlus_SiLi","GammaSiLiPlus_SiLi",2000,0,4000,1000,0,2000);axislab(GammaSiLiPlus_SiLi,"#gamma+SiLi Energy [keV]","SiLi Energy [keV]");
+		GammaSiLiPlus= new TH1D("GammaSiLiPlus","GammaSiLiPlus",2048,0,4096);axislab(GammaSiLiPlus,"#gamma+SiLi Energy [keV]");
+		GammaSiLiPlus_Gamma= new TH2F("GammaSiLiPlus_Gamma","GammaSiLiPlus_Gamma",1024,0,4096,1024,0,2048);axislab(GammaSiLiPlus_Gamma,"#gamma+SiLi Energy [keV]","#gamma Energy [keV]");
+		GammaSiLiPlus_SiLi= new TH2F("GammaSiLiPlus_SiLi","GammaSiLiPlus_SiLi",1024,0,4096,1024,0,2048);axislab(GammaSiLiPlus_SiLi,"#gamma+SiLi Energy [keV]","SiLi Energy [keV]");
 	}
 	
 // 	outfile->mkdir("MeanDoppler");

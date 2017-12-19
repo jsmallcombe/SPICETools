@@ -4,9 +4,9 @@ INCLUDE = $(shell pwd)/include
 
 ROOT_LIBS = $(shell root-config --glibs)
 ROOT_GCC_FLAGS = $(shell root-config --cflags)
-#ROOT_LIBSEXTRA =  -lTreePlayer -lMathMore -lSpectrum -lMinuit -lPyROOT
+ROOT_LIBSEXTRA =  -lTreePlayer -lMathMore -lSpectrum -lMinuit -lPyROOT
 
-GRSI_LIBS = -L$(GRSISYS)/lib -lTGRSIDetector -lTDetector -lTGRSIint -lTGRSIFormat -lTGRSIint -lTGRSIFormat -lTLoops -lTKinematics -lTSRIM -lTBetaDecay -lTCal -lTReaction -lTAngularCorrelation -lTFipps -lTTigress -lTGriffin -lTBgo -lTSharc -lTTriFoil -lTSceptar -lTPaces -lTDescant -lTTip -lTCSM -lTS3 -lTGenericDetector -lTSiLi -lTRF -lTPulseAnalyzer -lTTAC -lTLaBr -lTZeroDegree -lGROOT -lTGRSIFit -lTNucleus -lTMidas -lTDataParser -lTHistogramming -lMakeAnalysisHistograms -lMakeGriffinFragmentHistograms -lMakeTigressHistograms -lXMLParser -lXMLIO -lX11 -lXpm -lProof -lGuiHtml -lMinuit -lPyROOT -lSpectrum -lMathMore $(shell grsi-config --root)
+GRSI_LIBS = -L$(GRSISYS)/libraries $(shell grsi-config --all-libs)
 GRSI_GCC_FLAGS = $(shell grsi-config --cflags)
 
 EXTERNAL_LIBS = -lJanalysistools
@@ -38,11 +38,12 @@ bin/build/%.o: src/%.cpp include/%.h
 	$(CC) $(CFLAGS) -o $@ -c $< $(LIBRS)
 	
 bin/%: programs/%.cpp $(TARG) $(OBJECTS)
-	$(CC) $(CFLAGS) -o $@ $< bin/DictOutput.cxx -I. $(OBJECTS) $(LIBRS)
+	$(CC) $(CFLAGS) -o $@ $< $(LIBRS) bin/DictOutput.cxx -I. $(OBJECTS)
 	chmod +x $@	
 
 # 	$(CC) $(CFLAGS) -o $@ $< $(LIBRS) -lspice_comp #-Wl,--verbose
 # 	chmod +x $@
+
 
 clean:
 	rm -f $(LIB)/bin/build/*.o
