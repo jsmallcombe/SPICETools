@@ -408,7 +408,8 @@ int Fit207BiCal(TH1* hist,double& offset,double& gain,TCanvas* draw){if(!hist)re
 // 		cout<<endl<<endl<<line.GetParameter(1);
 // 		cout<<endl<<endl;
 		
-		delete fitA, fitB;
+		delete fitA;
+		delete fitB;
 		return 1;
 	}
 	
@@ -691,20 +692,21 @@ void ReFitMasterPanel::ClickedCanvas(Int_t event, Int_t px, Int_t py, TObject *s
 				
 				fCanvas1->GetCanvas()->cd();
 				
-				if(proj)	
-				if(pointbin<0){
-					proj->Draw();
-					proj->SetTitle("Total Energy Projection");
-				}else{
-					TH1* pr=Ehist->ProjectionY("",pointbin+1,pointbin+1);
-					stringstream ss;
-					ss<<"Channel "<<pointbin<<" Energy";
-					pr->SetTitle(ss.str().c_str());
-					pr->SetLineColor(2);
-					pr->DrawCopy("hist");
-					TH1* tot=proj->DrawCopy("histsame");
-					tot->Scale(pr->Integral()/proj->Integral());
-					delete pr;
+				if(proj){
+					if(pointbin<0){
+						proj->Draw();
+						proj->SetTitle("Total Energy Projection");
+					}else{
+						TH1* pr=Ehist->ProjectionY("",pointbin+1,pointbin+1);
+						stringstream ss;
+						ss<<"Channel "<<pointbin<<" Energy";
+						pr->SetTitle(ss.str().c_str());
+						pr->SetLineColor(2);
+						pr->DrawCopy("hist");
+						TH1* tot=proj->DrawCopy("histsame");
+						tot->Scale(pr->Integral()/proj->Integral());
+						delete pr;
+					}
 				}
 				
 				fCanvas1->GetCanvas()->Modified();

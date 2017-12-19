@@ -597,7 +597,7 @@ outfile->cd();
 				ee_e_y= new TH3I("ee_e_y","ee_e_y",500,0,1500,500,0,1500,500,0,1500);axislab(e_e_y,"Electron Pair Summed Energy [keV]","Electron Pair Single Energy [keV]","#gamma Energy [keV]");
 				
 				segseg= new TH2F("SegVSeg","SegVSeg",120,0,120,120,0,120);axislab(segseg,"Electron Pair Single Energy [keV]","Raw Electron Sum Total [keV]");
-				angmap= new TH3I("Eang_map","Eang_map",200,0,pi/2,100,-50,50,100,-50,50);axislab(angmap,"Energy Ratio","X [mm]","Y [mm]");
+				angmap= new TH3I("Eang_map","Eang_map",200,0,pi/4.,100,-50,50,100,-50,50);axislab(angmap,"Energy Ratio","X [mm]","Y [mm]");
 		outfile->cd();	
 	}
 

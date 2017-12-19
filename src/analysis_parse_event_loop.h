@@ -45,11 +45,11 @@ if(newrun){
 	
 	// If you only set the branch address once runs, a branch which only appears in some files could be lost entirely
 	// Also can cause multiple filling when branch is not present so uses last values
-	if(DS)if(DataChain->FindBranch("TSiLi"))DataChain->SetBranchAddress("TSiLi",&sili);else sili=new TSiLi();
+	if(DS){if(DataChain->FindBranch("TSiLi"))DataChain->SetBranchAddress("TSiLi",&sili);else sili=new TSiLi();}
 	if(DataChain->FindBranch("TTigress"))DataChain->SetBranchAddress("TTigress",&tigress);else tigress=new TTigress();
 	if(DataChain->FindBranch("TS3"))DataChain->SetBranchAddress("TS3",&s3);else s3=new TS3();
 	if(DataChain->FindBranch("TRF"))DataChain->SetBranchAddress("TRF",&rf);else rf=new TRF();
-	if(AddMonitor)if(DataChain->FindBranch("TGenericDetector"))DataChain->SetBranchAddress("TGenericDetector",&gd);else gd=new TGenericDetector();
+	if(AddMonitor){if(DataChain->FindBranch("TGenericDetector"))DataChain->SetBranchAddress("TGenericDetector",&gd);else gd=new TGenericDetector();}
 	// Could possible just Reset() the TTree owned detector classes when branch is missing,
 	// but this way works and only creates a few loose ends of memory	
 }
@@ -350,7 +350,7 @@ for(unsigned int i=0;i<s3->GetPixelMultiplicity();i++){//GetPixelMultiplicity bu
 	apmult[id]++;
 	
 	//RF gate for singles triggers
-	double TT=SH->GetTime()-rf_ns;TT;		
+	double TT=SH->GetTime()-rf_ns;		
 // 	if(!RFfail){
 // 		S3_rf->Fill(TT);
 // 		if(t_gate(TT,rf_S3)){//RF gate
@@ -1182,7 +1182,7 @@ for(unsigned int i=0;i<SiLiN;i++){
 				segseg->Fill(segB,segA);
 				
 				double eang=atan(e/ee);
-				if(eang>pi>2)eang=pi-eang;
+				if(eang>(pi/4.))eang=(pi/2.)-eang;
 				TVector3 A=SiLii[i]->GetPosition(true);
 				TVector3 B=SiLii[j]->GetPosition(true);
 				angmap->Fill(eang,A.X(),A.Y());

@@ -685,7 +685,8 @@ for(int i=1;i<=fileN_e_y_highratio->GetNbinsX();i++){
 	else fileN_e_y_highratio->SetBinContent(i,0);
 }
 
-delete highgamma,highgammaF;
+	delete highgamma;
+	delete highgammaF;
 
 	eventN_e_y_highratio->SetMinimum(0);
 	eventN_sili_noiseratio->SetMinimum(0);

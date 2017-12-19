@@ -75,7 +75,7 @@ void processchain(TChain* DataChain,string outputfile,bool frag,bool UseFitCharg
 					break;
 				}
 			}
-			if(silichecked>1000);
+			if(silichecked>1000)break;
 		}
 	}else{
 		DataChain->SetBranchAddress("TSiLi",&sili);
@@ -282,7 +282,7 @@ void processchain(TChain* DataChain,string outputfile,bool frag,bool UseFitCharg
 				}
 			}
 			
-			if(s>=0&&s<120&FitShapes){
+			if((s>=0)&&(s<120)&&FitShapes){
 				TPulseAnalyzer* pulse=TSiLiHit::FitFrag(*fragment,2,s);
 				if(pulse){
 					if(pulse->Get_bflag()){
@@ -308,7 +308,7 @@ void processchain(TChain* DataChain,string outputfile,bool frag,bool UseFitCharg
 				}
 			}
 			
-			if(s>=0&&s<120&MohRotate){
+			if((s>=0)&&(s<120)&&MohRotate){
 				if(fragment->HasWave()){
 					const vector<Short_t>* wave=fragment->GetWaveform();
 					if(wave->size()>0){
