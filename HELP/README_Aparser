@@ -68,6 +68,7 @@
    SiLiNoiseLimit   (cut of limit to throw away spice events =0.15)
    SiLiSmirnovLimit (cut of limit to throw away spice events =500)
    SiLiCoincidenceT (time window in ns for electron electron coincidences =200)
+   SPICEVetoT       (Set the earliest tick of the waveform t0 is permitted =50)
    
    MultiS3 # (Give the mnemonic array position of one of the S3s when there are multiple, call for each)
 

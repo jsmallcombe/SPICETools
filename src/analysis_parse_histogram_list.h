@@ -93,7 +93,7 @@ outfile->cd();
 	outfile->cd();	
 
 	TH2F *SiLiflat,*SiLiring,*SiLisector,*SiLipreamp,*SiLi_map;
-	TH2F *SiLi_smirnov,*SiLi_smirnov_C,*SiLi_signoise,*SiLi_smirnov_Ccut,*SiLi_signoisecut;
+	TH2F *SiLi_smirnov,*SiLi_smirnov_C,*SiLi_signoiseraw,*SiLi_signoise,*SiLi_smirnov_Ccut,*SiLi_signoisecut;
 	TH1F *SiLi_raw,*SiLi_rawm1,*SiLi_addback,*SiLi_unaddback,*SiLi_rejected,*SiLi_rejected_sum,*SiLi_fit_time;
 	TH2F *SiLi_fit_timeS,*SiLi_fit_timeE;
 	TH1F *silirings[10];
@@ -135,11 +135,14 @@ outfile->cd();
  		outfile->cd("SiLi/TimeAndNoise");
 			SiLi_fit_time= new TH1F("SiLi_fit_time","SiLi_fit_time",512,0,256);axislab(SiLi_fit_time,"Electron Fit Time [10 ns]");
 			if(UseFitCharge){
+				
+				SiLi_signoiseraw= new TH2F("SiLi_signoiseraw","SiLi_signoiseraw",256,0,0.2,256,0,2048);axislab(SiLi_signoiseraw,"Wave Fit Noise/Signal","Electron Energy [keV]");
+				SiLi_signoise= new TH2F("SiLi_signoise","SiLi_signoise",512,0,0.2,512,0,2048);axislab(SiLi_signoise,"Wave Fit Noise/Signal","Electron Energy [keV]");
+				SiLi_signoisecut= new TH2F("SiLi_signoisecut","SiLi_signoisecut",512,0,0.2,256,0,2048);axislab(SiLi_signoisecut,"Wave Fit Noise/Signal","Electron Energy [keV]");
 				SiLi_smirnov= new TH2F("SiLi_smirnov","SiLi_smirnov",512,0,2E6,512,0,2048);axislab(SiLi_smirnov,"Wave Fit Smirnov parameter","Electron Energy [keV]");
 				SiLi_smirnov_C= new TH2F("SiLi_smirnov_C","SiLi_smirnov_C",512,0,5000,512,0,2048);axislab(SiLi_smirnov_C,"Wave Fit Smirnov parameter/Charge","Electron Energy [keV]");
-				SiLi_signoise= new TH2F("SiLi_signoise","SiLi_signoise",512,0,0.2,512,0,2048);axislab(SiLi_smirnov_C,"Wave Fit Noise/Signal","Electron Energy [keV]");
-				SiLi_smirnov_Ccut= new TH2F("SiLi_smirnov_Ccut","SiLi_smirnov_Ccut",512,0,5000,256,0,2048);axislab(SiLi_smirnov_C,"Wave Fit Smirnov parameter/Charge","Electron Energy [keV]");
-				SiLi_signoisecut= new TH2F("SiLi_signoisecut","SiLi_signoisecut",512,0,0.2,256,0,2048);axislab(SiLi_smirnov_C,"Wave Fit Noise/Signal","Electron Energy [keV]");
+				SiLi_smirnov_Ccut= new TH2F("SiLi_smirnov_Ccut","SiLi_smirnov_Ccut",512,0,5000,256,0,2048);axislab(SiLi_smirnov_Ccut,"Wave Fit Smirnov parameter/Charge","Electron Energy [keV]");
+				
 			}
 			SiLi_fit_timeS= new TH2F("SiLi_fit_timeS","SiLi_fit_timeS",512,0,256,120,0,120);axislab(SiLi_fit_timeS,"Electron Fit Time [10 ns]","Spice Segment");
 			SiLi_fit_timeE= new TH2F("SiLi_fit_timeE","SiLi_fit_timeE",512,0,256,1000,0,2000);axislab(SiLi_fit_timeE,"Electron Fit Time [10 ns]","Electron Energy [keV]");

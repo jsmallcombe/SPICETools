@@ -1,4 +1,4 @@
-// SPICE library master  18 Dec 2017
+// SPICE library master  08 Jan 2018
 #include <spice_analysis_parse.h>
 #include <spice_calS3.h>
 #include <spice_calSiLi.h>

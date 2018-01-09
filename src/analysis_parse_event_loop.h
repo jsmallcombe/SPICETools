@@ -226,6 +226,8 @@ if(AddMonitor){
 //////// Do S3 singles ////////
 ///////////////////////////////
 
+//Added because of swapping mnemonic in cal file post grsisort
+s3->ResetRingsSectors();
 
 //Get hits for rings S3 (dE in telescope)
 unsigned short apmult[4]={0,0,0,0};
@@ -502,6 +504,10 @@ if(DS){for(int i=0;i<sili->GetMultiplicity();i++){
 			SiLiring->Fill(r,e);
 			SiLisector->Fill(sili_hit->GetSector(),e);
 			//if(r>=0&&r<10)silirings[r]->Fill(e);
+			
+			if(UseFitCharge){
+				SiLi_signoiseraw->Fill(1./sili_hit->GetSig2Noise(),e);
+			}
 		}
 	}
 }}
@@ -518,45 +524,45 @@ if(DS){for(int i=0;i<sili->GetAddbackMultiplicity();i++){
 	sili_hit = sili->GetAddbackHit(i);
 	double e=sili_hit->GetEnergy();
 	
-	// Moved here as we dont want to zero energy and before the addback neighbour check.
-	// If we every to actual addback this may need changing somehow
-	if(UseFitCharge){
-		double c=sili_hit->GetFitCharge();
-		if(c>0){
-			//silifitc[s]->Fill(c);
+	if(e>10&&e<4000){//noise gate and common sense gate
+	
+		// Moved here as we dont want to zero energy and before the addback neighbour check.
+		// If we ever switch to actual addback this may need changing somehow
+		if(UseFitCharge){
+			double c=sili_hit->GetFitCharge();
 			double smirn=sili_hit->GetSmirnov();
 			double sigtonoise=1./sili_hit->GetSig2Noise();
-			SiLi_smirnov->Fill(smirn,e);
-			SiLi_smirnov_C->Fill(smirn/c,e);
-			SiLi_signoise->Fill(sigtonoise,e);
-			
-			short noisegood=0;
-			if(sigtonoise<control[SiLiNoiseLimit]){
-				SiLi_signoisecut->Fill(sigtonoise,e);
-				noisegood++;
-			}
-			if((smirn/c)<control[SiLiSmirnovLimit]){
-				SiLi_smirnov_Ccut->Fill(smirn/c,e);
-				noisegood++;
-			}
-			
-			if(noisegood<2){
-				sili_hit->SetEnergy(0);
-				e=0;
-				continue;
+			if(c>0&& smirn>0 &&sigtonoise>0){
+				//silifitc[s]->Fill(c);
+				SiLi_smirnov->Fill(smirn,e);
+				SiLi_smirnov_C->Fill(smirn/c,e);
+				SiLi_signoise->Fill(sigtonoise,e);
+				
+				short noisegood=0;
+				if(sigtonoise<control[SiLiNoiseLimit]){
+					SiLi_signoisecut->Fill(sigtonoise,e);
+					noisegood++;
+				}
+				if((smirn/c)<control[SiLiSmirnovLimit]){
+					SiLi_smirnov_Ccut->Fill(smirn/c,e);
+					noisegood++;
+				}
+				
+				if(noisegood<2){
+					sili_hit->SetEnergy(0);
+					e=0;
+					continue;
+				}
 			}
 		}
-	}
-	
-	
-	if(e>10&&e<4000){//noise gate and common sense gate
+		
 		
 		if(GainDrift)e=e*FileGain+FileOffset;
 		
 		double Nadd=sili_hit->GetAddbackSize();
 		if(Nadd==1){//if its a good clean hit add it
 			double ft=sili_hit->GetTimeFit();
-			if(ft>50){//garbage events have early fit time
+			if(ft>control[SPICEVetoT]){//garbage events have early fit time
 			
 			
 				if(sili_hit->MagnetShadow()){

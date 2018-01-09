@@ -18,7 +18,9 @@
 		}
 	}
 	
-
+	TH1D* tot = graph->ProjectionX("totp");
+	double totmean=tot->GetXaxis()->GetBinCenter(tot->GetMaximumBin());
+	delete tot;
 	
 	for(unsigned int i=0;i<64;i++){
 		TH1D* seg = graph->ProjectionX("sect",i+1,i+1);
@@ -51,7 +53,7 @@
 		TChannel* chanA=TChannel::FindChannelByName((ss.str()+"A").c_str());
 		TChannel* chanB=TChannel::FindChannelByName((ss.str()+"B").c_str());
 		
-		mean-=49.06;
+		mean-=totmean;
 		if(chanA){
 			cout<<endl<<i<<" A "<<mean;
 			cout<<endl<<i<<" A "<<ss.str()+"A";

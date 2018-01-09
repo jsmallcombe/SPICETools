@@ -55,6 +55,9 @@ S3EnergyLimit 25000
 SiLiWaveTOffset 8850
 #(Offset relative to normal trigger cfd =7000)
 
+#SPICEVetoT 50
+#(Set the earliest tick of the waveform t0 is permitted =50)
+
 #BetaZero 0.04
 #A default experimental beta value
 

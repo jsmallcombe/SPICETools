@@ -37,9 +37,9 @@ vector< pair<double,double> > gates;
 vector< gate2Ddata > ParticleGate;
 vector< pair<unsigned int,unsigned int> > ringgroups;
 
-enum controlenum{BetaZero,TigressDistance,FrontBackEnergy,FrontBackOffset,FrontBackTime,S3EnergyLimit,SiLiWaveTOffset,TigressTargetOffset,SiLiNoiseLimit,SiLiSmirnovLimit,SiLiCoincidenceT};
-vector< string > controlnames={"BetaZero","TigressDistance","FrontBackEnergy","FrontBackOffset","FrontBackTime","S3EnergyLimit","SiLiWaveTOffset","TigressTargetOffset","SiLiNoiseLimit","SiLiSmirnovLimit","SiLiCoincidenceT"};
-vector< double > control={0.0,110.,0.9,0,75,50000,7000,-8,0.15,500,200};
+enum controlenum{BetaZero,TigressDistance,FrontBackEnergy,FrontBackOffset,FrontBackTime,S3EnergyLimit,SiLiWaveTOffset,TigressTargetOffset,SiLiNoiseLimit,SiLiSmirnovLimit,SiLiCoincidenceT,SPICEVetoT};
+vector< string > controlnames={"BetaZero","TigressDistance","FrontBackEnergy","FrontBackOffset","FrontBackTime","S3EnergyLimit","SiLiWaveTOffset","TigressTargetOffset","SiLiNoiseLimit","SiLiSmirnovLimit","SiLiCoincidenceT","SPICEVetoT"};
+vector< double > control={0.0,110.,0.9,0,75,50000,7000,-8,0.15,500,200,50};
 
 std::vector< string > filelist;
 std::vector< long > fileentriessum;

@@ -1,4 +1,7 @@
 {
+	bool CutBottom=false;
+	//found this was needed for some experiments where there was too much noise at low values
+	
 	TSiLi sili;
 	TChannel::ReadCalFile("CalibrationFile.cal");
 
@@ -31,9 +34,15 @@
 		
 		if(seg->Integral()<100)continue;
 		double mean=seg->GetMean();
-		seg->GetXaxis()->SetRange(seg->GetXaxis()->FindBin(mean),seg->GetNbinsX());
+		
+		if(CutBottom)seg->GetXaxis()->SetRange(seg->GetXaxis()->FindBin(mean),seg->GetNbinsX());
+		
 		
 		double offset =seg->GetXaxis()->GetBinCenter(seg->GetMaximumBin());
+		
+		seg->GetXaxis()->SetRangeUser(offset-30,offset+30);
+		
+		offset = seg->GetMean();
 		
 		TChannel* chan=TSiLiHit::GetSiLiHitChannel(i);
 		
