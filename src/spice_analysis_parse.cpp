@@ -6,8 +6,12 @@
 ///////////////////////
 ///////////////////////
 
+TRandom2 rando;
+
 double TRFperiodns= 84.409;
 int TRFperiodps= 84409;
+
+TF1 TimeWalkFn("TimeWalkFn","[0]*(1-exp(-[1]/x))",0,4000);
 
 typedef struct gate2Ddata{
 	TGraph gate;
@@ -32,6 +36,7 @@ double pi=TMath::Pi();
 enum gatenames{s3_gamma_t,s3_sili_t,gamma_gamma_t,gamma_sili_t,rf_S3,rf_sili,rf_gamma,rfcyc_S3,rfcyc_sili,rfcyc_gamma};
 vector< string > gatetitles={"s3_gamma_t","s3_sili_t","gamma_gamma_t","gamma_sili_t","rf_S3","rf_sili","rf_gamma","rfcyc_S3","rfcyc_sili","rfcyc_gamma"};
 
+TGraph spicelimits[2][10];
 
 vector< pair<double,double> > gates;
 vector< gate2Ddata > ParticleGate;
@@ -72,8 +77,8 @@ unsigned short s3r(TS3Hit* s3hit){
 //Declare subroutines//
 ///////////////////////
 ///////////////////////
-bool t_gate(double,int);
-bool t_gate(double,gatenames);
+bool t_gate(double,gatenames,double=0,double=0);
+bool t_gate(double,int,double=0,double=0);
 void t_gateRFmake(gatenames);
 bool t_gateRFcycles(double,gatenames);
 long t_stamp(TRF*,TTigress*,TSiLi*,TS3*);
@@ -81,6 +86,7 @@ long t_stamp_fix(long &);
 TGraph* FileTGraph(string filepath);
 double calc_beta_KE(double emev,double Amass);
 short TigAng(TTigressHit*);
+bool LoadSPICELimits(string);
 
 ///////////////////////
 ///////////////////////
@@ -94,6 +100,7 @@ int analysis_parse(int argc, char *argv[]){
 gates.clear();
 ParticleGate.clear();
 ringgroups.clear();
+rando.SetSeed();
 
 for(int z=0;z<gatetitles.size();z++)gates.push_back(pair < double,double >{-1E10,1E10});
 
@@ -124,13 +131,20 @@ if(DoDoubleElectrons)cout<<endl<<"Performing double electron analysis.";
 bool Telescope=inp.IsPresent("Telescope");
 if(Telescope)cout<<endl<<"Using S3 Telescope.";
 
+bool TigressTimeWalk=inp.IsPresent("TigressTimeWalk");
+if(TigressTimeWalk)cout<<endl<<"Using extended time walked gates for tigress.";
+TimeWalkFn.SetParameters(700,50);
+
 bool KeepChargeShare=inp.IsPresent("KeepChargeShare");
 if(KeepChargeShare)cout<<endl<<"Keeping S3 Charge Sharing Events.";
 
 bool FirstOnly=inp.IsPresent("FirstOnly");
 if(FirstOnly)cout<<endl<<"Filling particle gates only once.";
 
-bool MultiParticles=inp.IsPresent("MultiParticles");
+bool StrictSingleParticles=inp.IsPresent("StrictSingleParticles");
+if(StrictSingleParticles)cout<<endl<<"Only using strict single S3 events.";
+
+bool MultiParticles=(inp.IsPresent("MultiParticles")&&!StrictSingleParticles);
 if(MultiParticles)cout<<endl<<"Making Multi-Particle Histograms.";
 
 bool PreferenceSectors=inp.IsPresent("PreferenceSectors");
@@ -141,6 +155,20 @@ if(AddMonitor)cout<<endl<<"Adding TGenericDet Monitor Histograms.";
 
 bool DS=!inp.IsPresent("NoSPICE");
 if(!DS)cout<<endl<<"Omitting SPICE Histograms.";
+
+bool ApplySLimits=inp.IsPresent("ApplySLimits");
+if(ApplySLimits)cout<<endl<<"Applying SPICE limits to sort.";
+
+bool debug=inp.IsPresent("Debug");
+if(debug)cout<<endl<<"Making debug histograms.";
+
+bool SPICELimits=false;
+if(inp.IsPresent("SPICELimits")){	
+	if(LoadSPICELimits(inp.NextString("SPICELimits"))){
+		cout<<endl<<"Loaded SPICE Limits.";
+		SPICELimits=true;
+	}
+}
 
 bool TigressSuppressed=inp.IsPresent("TigressSuppressed");
 if(TigressSuppressed){
@@ -749,14 +777,22 @@ return 0;
 ///////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////	
 
-bool t_gate(double t,int g){
-	if(t>=gates[g].first&&t<=gates[g].second)return true;
-	return false;	
-}
+// bool t_gate(double t,int g){
+// 	if(t>=gates[g].first&&t<=gates[g].second)return true;
+// 	return false;	
+// }
 
-bool t_gate(double t,gatenames g){
-	if(t>=gates[g].first&&t<=gates[g].second)return true;
-	return false;	
+bool t_gate(double t,gatenames g,double Eupper,double Elower){
+	t_gate(t,(int)g,Eupper,Elower);
+}
+	
+bool t_gate(double t,int g,double Eupper,double Elower){
+
+	double lower=gates[g].first-Elower;
+	double upper=gates[g].second+Eupper;
+	
+	if(t>=lower&&t<=upper)return true;
+	return false;
 }
 
 void t_gateRFmake(gatenames g){
@@ -888,4 +924,28 @@ short TigAng(TTigressHit* Tseg){
 	}
 
 	return pos;
+}
+
+
+bool LoadSPICELimits(string fname){
+	TFile limin((fname+".root").c_str(),"READ");
+	if(!limin.IsOpen()){cout<<endl<<"Failed to load SPICE limits "<<fname<<".root";return false;}
+	
+	for(unsigned int i=0;i<10;i++){
+		for(unsigned int j=0;j<2;j++){
+			stringstream name;
+			if(j)name<<"shadow";
+			else name<<"noshad";
+			name<<i<<"n";
+			TObject* get=limin.Get(name.str().c_str());
+			if(get){
+				spicelimits[j][i]=*((TGraph*)get);
+			}else{
+				cout<<endl<<"Failed to load SPICE limit graph "<<name.str();
+				limin.Close();
+				return false;
+			}
+		}
+	}
+	return true;	
 }

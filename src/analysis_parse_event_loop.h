@@ -226,6 +226,13 @@ if(AddMonitor){
 //////// Do S3 singles ////////
 ///////////////////////////////
 
+if(StrictSingleParticles){
+	if(s3->GetRingMultiplicity()!=1||s3->GetSectorMultiplicity()!=1){
+		s3->Clear();
+		//Only "perfect" singles events will be accepted 
+	}
+}
+
 //Added because of swapping mnemonic in cal file post grsisort
 s3->ResetRingsSectors();
 
@@ -371,6 +378,7 @@ for(unsigned int i=0;i<s3->GetPixelMultiplicity();i++){//GetPixelMultiplicity bu
 //	TVector3 pos = TS3::GetPosition(S3ring_i[i],S3sec_i[j],-22.5*TMath::Pi()/180.,32.1,Telescope,false);//Get the hit vector with some random smoothing	
 	S3_map[id]->Fill(pos.X(),pos.Y());//This is more for online checking of hit map
 	S3_map3->Fill(pos.Z(),pos.X(),pos.Y());//This is more for online checking of hit map
+	S3_pixmap[id]->Fill(SH->GetRing(),SH->GetSector()); //This gets the actual pixel numbers for analysis
 	S3possmear.push_back(pos);	
 	
 	double theta=pos.Theta();	
@@ -439,6 +447,7 @@ for(unsigned int i=0;i<s3->GetPixelMultiplicity();i++){//GetPixelMultiplicity bu
 	S3select.push_back(SH);
 	S3pos.push_back(SH->GetPosition(false)+S3OffsetVector);
 	if(Telescope)Vdedx.push_back(dE);
+	else Vdedx.push_back(theta);
 
 }
 int S3N=S3select.size();
@@ -563,8 +572,7 @@ if(DS){for(int i=0;i<sili->GetAddbackMultiplicity();i++){
 		if(Nadd==1){//if its a good clean hit add it
 			double ft=sili_hit->GetTimeFit();
 			if(ft>control[SPICEVetoT]){//garbage events have early fit time
-			
-			
+								
 				if(sili_hit->MagnetShadow()){
 					SiLi_magshad->Fill(e);
 					SiLi_shadRing->Fill(sili_hit->GetRing(),e);
@@ -572,7 +580,27 @@ if(DS){for(int i=0;i<sili->GetAddbackMultiplicity();i++){
 					SiLi_nagshad->Fill(e);
 					SiLi_nagshadRing->Fill(sili_hit->GetRing(),e);
 				}
-				
+							
+				if(SPICELimits){
+					double limit=spicelimits[sili_hit->MagnetShadow()][sili_hit->GetRing()].Eval(e);
+					
+					if(rando.Uniform()>limit){
+						if(ApplySLimits){
+							SiLi_singlespc->Fill(e);
+							continue;
+						}
+					}else{
+						if(sili_hit->MagnetShadow()){
+							SiLi_magshadpc->Fill(e);
+							SiLi_shadRingpc->Fill(sili_hit->GetRing(),e);
+						}else{
+							SiLi_nagshadpc->Fill(e);
+							SiLi_nagshadRingpc->Fill(sili_hit->GetRing(),e);
+						}
+						SiLi_singlespc->Fill(e);
+					}
+				}
+
 // 				double edop=sili_hit->GetDoppler(control[BetaZero]);
 				
 				//Calc a "cfd" time from the fit and timestamp
@@ -663,7 +691,7 @@ for(int i=0;i<tigress->GetMultiplicity();i++){
 	}
 }
 std::vector< TTigressHit* > gammai;
-std::vector< double > gammaE,gammaEdop,gammaTrf;
+std::vector< double > gammaE,gammaEdop,gammaTrf,gammaWalk;
 std::vector< short > gammaAng;
 // std::vector< bool > gammaRF;
 std::vector< bool > gammaRFcyc;
@@ -685,9 +713,12 @@ for(int i=0;i<tigress->GetAddbackMultiplicity();i++){
 		gammaEdop.push_back(e);
 		gammai.push_back(tigress_hit);
 		Gamma_singles->Fill(e);
+		Gamma_widerange->Fill(e);
 		runtime_gamma->Fill(tstamphour,e);
 		fileN_gamma->Fill(fileiterator,e);
 		eventN_gamma->Fill(jentry,e);
+		if(TigressTimeWalk){gammaWalk.push_back(TimeWalkFn.Eval(e));}
+		else{gammaWalk.push_back(0);}
 		
 		TVector3 pos=TTigress::GetPosition(tigress_hit->GetDetector(), tigress_hit->GetCrystal(), 0, 0, true);
 		if(e>200){//extra theshold for these plots
@@ -752,12 +783,14 @@ for(unsigned int i=0;i<gammaN;i++){
 			Gamma_SiLi_t2->Fill(gammaE[i],TT);
 			Gamma_SiLi_t3->Fill(gammaE[i],SiLiE[j],TT);
 			
-			if(t_gate(TT,gamma_sili_t)){
+			if(t_gate(TT,gamma_sili_t,gammaWalk[i])){
 				Gamma_SiLi_tgate->Fill(TT);
 
 // 				runtime_gammasili->Fill(tstamphour,gammaE[i],SiLiE[j]);
 // 				eventN_gammasili->Fill(jentry,gammaE[i],SiLiE[j]);
 				Gamma_SiLi->Fill(gammaE[i],SiLiE[j]);
+				if(debug)GammaSiLiChan->Fill(gammaE[i],SiLiE[j],SiLii[j]->GetSegment());
+				
 				if(!SiLii[j]->MagnetShadow())SiLiGamma_nagshad->Fill(gammaE[i],SiLiE[j]);
 				GammaSiLiPlus->Fill(gammaE[i]+SiLiE[j]);
 				GammaSiLiPlus_Gamma->Fill(gammaE[i]+SiLiE[j],gammaE[i]);
@@ -788,7 +821,7 @@ for(unsigned int i=0;i<gammaN;i++){
 		Gamma_Gamma_t3->Fill(gammaE[i],gammaE[j],TT);
 		Gamma_Gamma_t3->Fill(gammaE[j],gammaE[i],TT);		
 		
-		if(t_gate(TT,gamma_gamma_t)){
+		if(t_gate(TT,gamma_gamma_t,gammaWalk[i],gammaWalk[j])){
 			GG_tgate->Fill(TT);
 			
 			Gamma_Gamma->Fill(gammaE[i],gammaE[j]);
@@ -818,7 +851,7 @@ for(unsigned int i=0;i<gammaN;i++){
 			//////// Do gammas + gammas + gammas ////////
 			for(unsigned int k=j+1;k<gammaN;k++){
 				double TTT=gammai[i]->GetTime()-gammai[k]->GetTime();
-				if(t_gate(TTT,gamma_gamma_t)){
+				if(t_gate(TTT,gamma_gamma_t),gammaWalk[i],gammaWalk[k]){
 					Gamma_Gamma_Gamma->Fill(gammaE[i],gammaE[j],gammaE[k]);
 					Gamma_Gamma_Gamma->Fill(gammaE[i],gammaE[k],gammaE[j]);
 					Gamma_Gamma_Gamma->Fill(gammaE[j],gammaE[i],gammaE[k]);
@@ -855,6 +888,8 @@ if(FirstOnly||MultiParticles){
 //
 for(unsigned int j=0;j<S3N;j++){
 	TS3Hit* SH=S3select[j];
+	short Ncoingamma=0;
+	short Ncoinsili=0;
 	
 	// Vector stores if SiLi hit is time-coincident with this S3 hit
 	std::vector< double > SiLiS3loop(SiLiN,0);		
@@ -879,6 +914,7 @@ for(unsigned int j=0;j<S3N;j++){
 		if(t_gate(TT,s3_sili_t)){
 			SiLi_S3_tgate->Fill(TT);
 			if(!RFfail)S3_SiLi_RFgated->Fill(S3Trf[j],SiLitRF[i]);
+			Ncoinsili++;
 		}
 	}}
 	
@@ -896,9 +932,12 @@ for(unsigned int j=0;j<S3N;j++){
 			Gamma_S3_RF->Fill(S3Trf[j],gammaTrf[i]);
 			Gamma_S3_RFe->Fill(S3Trf[j],gammaTrf[i],e);
 		}
-		if(t_gate(TT,s3_gamma_t)){
-			Gamma_S3_tgate->Fill(TT);		
+		if(t_gate(TT,s3_gamma_t,gammaWalk[i])){
+			Gamma_S3_tgate->Fill(TT);
+			if(TigressTimeWalk)Gamma_S3_walk->Fill(e,TT);
 			if(!RFfail)Gamma_S3_RFgated->Fill(S3Trf[j],gammaTrf[i]);
+			Ncoingamma++;
+			if(debug&&Telescope)S3IDgammacoinc->Fill(Vdedx[j],SH->GetEnergy(),e);
 		}	
 	}
 	
@@ -945,7 +984,7 @@ for(unsigned int j=0;j<S3N;j++){
 		if(t_gate(TS,ggate->stgate)){//If SiLiHit i is time coincident with this S3hit 
 			SiLiGdTime[g]->Fill(TS);
 			SiLiGateGood[i]=true;
-			
+
 			// If we are tracking gate multiplicity
 			if(FirstOnly||MultiParticles){
 				SiLiHitPGMulti[i][g]++;
@@ -977,7 +1016,7 @@ for(unsigned int j=0;j<S3N;j++){
 		for(unsigned int i=0;i<gammaN;i++){
 			double TG=gammaS3loop[i];
 			GammaGTime[g]->Fill(TG);
-		if(t_gate(TG,ggate->gtgate)){//If GammaHit i is time coincident with this S3hit 
+		if(t_gate(TG,ggate->gtgate,gammaWalk[i])){//If GammaHit i is time coincident with this S3hit 
 			GammaGdTime[g]->Fill(TG);
 			GammaGateGood[i]=true;
 			
@@ -998,6 +1037,8 @@ for(unsigned int j=0;j<S3N;j++){
 			if(ggate->use_beta)E=gammai[i]->GetDoppler(betal,&particlevec);
 			else E=gammai[i]->GetEnergy();
 			gammaEdop[i]=E;
+							
+			if(debug&&!Telescope)S3IDgammacoinc->Fill(Vdedx[j],SH->GetEnergy(),E);
 			
 			// Fill a specific set of histograms only in use when particle gates have
 			// Significant doppler shift for which correction must be optimised
@@ -1008,26 +1049,34 @@ for(unsigned int j=0;j<S3N;j++){
 				Gcorrectedring[g]->Fill(E,R);
 				
 				double ang=gammapos[i].Angle(particlevec);
-				TigressDopplerAngle[g][R]->Fill(ang,e);
-
 				//Really should replace this with a precalc list
 				double usangle=2*atan(pow(1-betal,0.25)/pow(1+betal,0.25));
-				if(abs(ang-usangle)<0.01) GUnshifted[g]->Fill(e);
+				bool unshifted=(abs(ang-usangle)<0.01);
+				if(unshifted)GUnshifted[g]->Fill(e);
 				GUncorrected[g]->Fill(e);
 				GUncorrectedring[g]->Fill(e,R);
 				
 				for(unsigned int r=0;r<ringgroups.size();r++){
 					if(R>=ringgroups[r].first&&R<=ringgroups[r].second)
 						RingGroupGammaSingles[g][r]->Fill(E);
-				}	
+				}
+				
+				if(debug){
+					//TigressDopplerAngle[g][R]->Fill(ang,e);
+					TigressDopplerTheta[g]->Fill(e,ang,particlevec.Theta());
+
+					if(gammai[i]->GetNSegments()==1){
+						int cor=gammai[i]->GetArrayNumber();
+						if(unshifted)GammaCoreUnshifted[g]->Fill(cor,e);
+						GammaCoreCorrected[g]->Fill(cor,E);
+					}
+				}
 			}
 
 			GammaPG[g]->Fill(E);
 			GammaEPG[g]->Fill(E,SH->GetEnergy());
 			TigressEThetaPG[g]->Fill(E,gammaAng[i]);
 			if(gammaRFcyc[i])GammaPGRFcyc[g]->Fill(E);
-			
-			if(Telescope){GammaS3dedx->Fill(SH->GetEnergy(),Vdedx[j],E);}
 			
 			//////////////////////////////////////////////////
 			// Do Gamma-Gamma S3-Particle-Gate Coincidences //
@@ -1038,7 +1087,7 @@ for(unsigned int j=0;j<S3N;j++){
 			for(int m=i-1;m>=0;m--){
 				if(GammaGateGood[m]&&gammaEdop[m]){
 				double TT=gammai[m]->GetTime()-gammai[i]->GetTime();
-				if(t_gate(TT,gamma_gamma_t)){
+				if(t_gate(TT,gamma_gamma_t,gammaWalk[m],gammaWalk[i])){
 					// check GammaHit m is also coincident with this S3Hit & valid & time valid
 					// In the case FirstOnly is being used gammaEdop[m]==0 if it was "used" 
 					// by an earlier S3Hit that also matched this gate
@@ -1061,7 +1110,7 @@ for(unsigned int j=0;j<S3N;j++){
 			
 			if(DS){for(unsigned int m=0;m<SiLiN;m++){
 				if(SiLiGateGood[m]&&SiLiEdop[m]){
-				if(t_gate((gammai[i]->GetTime()-SiLit[m]),gamma_sili_t)){
+				if(t_gate((gammai[i]->GetTime()-SiLit[m]),gamma_sili_t,gammaWalk[i])){
 					GammaSiLiPG[g]->Fill(gammaEdop[i],SiLiEdop[m]);	
 				}}
 			}}
@@ -1086,6 +1135,15 @@ for(unsigned int j=0;j<S3N;j++){
 			mulparthist++;
 		}}
 	}}//End of particle-gate loop
+	
+	
+	
+	
+	
+	if(debug){
+		S3IDgamma->Fill(Vdedx[j],SH->GetEnergy(),Ncoingamma);
+		if(DS)S3IDsili->Fill(Vdedx[j],SH->GetEnergy(),Ncoinsili);
+	}
 }//End of S3Hit loop
 
 

@@ -37,6 +37,7 @@
 #include "TFile.h"
 #include "TDirectory.h"
 #include "TStopwatch.h"
+#include "TRandom2.h"
 
 
 #ifndef __CLING__

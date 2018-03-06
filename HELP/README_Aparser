@@ -42,15 +42,17 @@
    NoSPICE - SPICE is not used. No SPICE histograms.
    UseFitCharge - All SiLi energies will be calculated from the waveform fit charge, if waveform fitting was enabled in grsisort
    Telescope - Sort S3 as dE (rings) E (sectors) telescope, not a single detector.
-   UseSiLiRFCoinc - 2D SiLi-S3-RF time gates are used in determining SiLi-S3 coincidence.
    TigressSuppressed - Set Tigress detector positions to suppressed mode (backward)
+   TigressTimeWalk - Tigress time gates have an exponential cut to allow for time broadening of low energy events
    DoDoubleElectrons - Enable the creation and filling of double electron histograms
    TimeCompressOff - Use the absolute clock time, do not compress
    KeepChargeShare - Keep rather than discard S3 charge sharing events. NOT appropriate for telescope
    FirstOnly - Only fill particle coincident gamma and electron histograms once per gate type. i.e. 2p coincident gamma ray fills the p-gamma histogram only once.
+   StrictSingleParticles - Discard all S3 events that are not a single ring and single sector hit only.
    MultiParticles - Make special histograms for gamma and electron coincident with several particles.
    PreferenceSectors - Use the S3 sector energy where possible, worse resolution but strangely more stable
    AddMonitor - Show histogram of monitor detector, not correlated with experimental data.
+   Debug - Adds some additional histograms useful for debugging detectors over physics analysis
 
    -----------------------------------------------------
    Set Numbers
@@ -92,9 +94,27 @@
    -----------------------------------------------------
 
    As SPICE is mainly run with a coincidence trigger, RF gates are rarely useful (RF triggers are best for cleaning singles data.)
-   Coincidence triggers are better for cleaning coincidence data without losing events that were genuine but not part of the trigger pair.  This is particularly true when some runs have high SPICE noise which may effect trigger, but still contain good events. The RF gates consequently are only used to fill a few RF specific histograms
+   Coincidence triggers are better for cleaning coincidence data without losing events that were genuine but not part of the trigger pair.
+   This is particularly true when some runs have high SPICE noise which may effect trigger, but still contain good events.
+   The RF gates consequently are only used to fill a few RF specific histograms
    
-   RF coincidence MAY be used for 2D gating SiLi-S3 where it has been found to be advantageous.
+   RF cyclical gates (dependent only on phase) are now included and have been found to be advantageous.
+
+   -----------------------------------------------------
+   SPICE LIMITS
+   -----------------------------------------------------  
+   
+   SPICE events can be discarded based on segment number and energy.
+   Provide a TGraph for behind magnet & exposed segment for each of 10 the rings (10+10)
+   20 TGraphs in a file from shadow0n to noshad9n.
+   X axis energy, Y axis rejection probability. 1 always keep, 0 always discard.
+   This can reduce noise while avoiding sharp features and minimal loss of good data.
+   The command:
+   SPICELimits FilePathAndName
+   Where FilePathAndName gives the file containing TGraphs for SPICE segment energy limits
+   The .root extension should be omitted from the file name in this command.
+   By default only a few histograms are made, to apply to all data use the command:
+   ApplySLimits
    
    -----------------------------------------------------
    1D Gates

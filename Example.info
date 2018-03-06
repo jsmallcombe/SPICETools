@@ -1,47 +1,36 @@
 ### CONTROL FLAGS ###
 
-#NoSPICE 
-# SPICE is not used. No SPICE histograms.
-
-UseFitCharge
-# All SiLi energies will be calculated from the waveform fit charge, if waveform fitting was enabled in grsisort
-
-#Telescope
-# Sort S3 as dE (rings) E (sectors) telescope, not a single detector.
-
-#UseSiLiRFCoinc
-#The 2D SiLi-S3-RF gates are used in determining SiLi-S3 coincidence
-
-TigressSuppressed
-#Set Tigress detector positions to suppressed mode (backward)
-
-#DoDoubleElectrons
-#Enable the creation and filling of double electron histograms
+Debug
+#Adds some additional histograms useful for debugging detectors over physics analysis
 
 TimeCompressOff
 #Use the absolute clock time, do not compress
 
-#KeepChargeShare
-#Keep rather than discard S3 charge sharing events
-#NOT appropriate for telescope
-
-FirstOnly
-# Only fill particle coincident gamma and electron histograms once per gate type.
-# i.e. 2p coincident gamma ray fills the p-gamma histogram only once.
-
-MultiParticles
-#Make special histograms for gamma and electron coincident with several particles.
-
-#PreferenceSectors
-#Use the S3 sector energy where possible, worse resolution but strangely more stable
-
 #AddMonitor
-#Show histogram of monitor detector, not correlated with experimental data. 
+# Show histogram of monitor detector, not correlated with experimental data. 
 
-### CONTROL NUMBERS ###
+#BetaZero 0.04
+#A default experimental beta value
+
+
+### TIGRESS OPTIONS ###
+
+TigressSuppressed
+# Set Tigress detector positions to suppressed mode (backward)
+
+TigressTimeWalk
+# Tigress time gates have an exponential cut to allow for time broadening of low energy events
+
+TigressTargetOffset 0.5
+# (mm between centre of target and tigress=-8)
+
+### S3 OPTIONS ###
+
+#Telescope
+# Sort S3 as dE (rings) E (sectors) telescope, not a single detector.
 
 FrontBackTime 100
-#(S3 ring sector gate, given in ticks =75)
+#(S3 ring sector gate, given in ns =75)
 
 FrontBackEnergy 0.92
 #(S3 ring sector gate, given as a fraction =0.9)
@@ -52,17 +41,40 @@ FrontBackOffset 50
 S3EnergyLimit 25000
 #(Total energy range in keV for heavy ions =50000)
 
-SiLiWaveTOffset 8850
-#(Offset relative to normal trigger cfd =7000)
+#KeepChargeShare
+#Keep rather than discard S3 charge sharing events
+#NOT appropriate for telescope
+
+FirstOnly
+# Only fill particle coincident gamma and electron histograms once per gate type.
+# i.e. 2p coincident gamma ray fills the p-gamma histogram only once.
+
+StrictSingleParticles
+# Discard all S3 events that are not a single ring and single sector hit only.
+
+MultiParticles
+# Make special histograms for gamma and electron coincident with several particles.
+
+#PreferenceSectors
+# Use the S3 sector energy where possible, worse resolution but strangely more stable
+
+#MultiS3 1
+#MultiS3 0
+# (Give the mnemonic array position of one of the S3s when there are multiple, call for each)
+
+S3Vector 1.0 0.5 0.0
+# X Y Z mm offset of the S3 from the nominal position 
+
+### SPICE OPTIONS ###
+
+UseFitCharge
+# All SiLi energies will be calculated from the waveform fit charge, if waveform fitting was enabled in grsisort
+
+#NoSPICE 
+# SPICE is not used. No SPICE histograms.
 
 #SPICEVetoT 50
 #(Set the earliest tick of the waveform t0 is permitted =50)
-
-#BetaZero 0.04
-#A default experimental beta value
-
-TigressTargetOffset 0.5
-# (mm between centre of target and tigress=-8)
 
 SiLiNoiseLimit 0.1
 # (cut of limit to throw away spice events =0.15)
@@ -70,16 +82,20 @@ SiLiNoiseLimit 0.1
 SiLiSmirnovLimit 300
 # (cut of limit to throw away spice events =500)
 
-#MultiS3 1
-#MultiS3 0
-# (Give the mnemonic array position of one of the S3s when there are multiple, call for each)
-
-S3Vector 1.0 0.5 0.0
-# X Y Z mm offset of the S3 from the nominal position
-
-
 SiLiCoincidenceT 50
 # time window in ns for electron electron coincidences
+
+SiLiWaveTOffset 8850
+#(Offset relative to normal trigger cfd =7000)
+
+#DoDoubleElectrons
+#Enable the creation and filling of double electron histograms
+
+SPICELimits Infofiles/spicelimts
+#File containing TGraphs for SPICE segment energy limits (.root extension omitted)
+
+ApplySLimits
+#Apply the SPICELimits to the data, rather than just a few test histograms
 
 ### TIME GATES ###
 

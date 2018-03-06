@@ -11,7 +11,7 @@ outfile->cd();
 	vector< TH1* > S3_sectormult,S3_ringmult,S3_mult;
 	
 	vector< TH1* > fb_time,fb_timegated,front_back,front_backgated,S3ring_sum,S3sector_sum,S3RS_t,S3RS_tgate,chanhits;
-	vector< TH2* > S3_map,S3_dedx,frontVback,frontVbackGated,S3flat;
+	vector< TH2* > S3_map,S3_pixmap,S3_dedx,frontVback,frontVbackGated,S3flat;
 	vector< TH3* > S3_d3dx,S3RS_t3;
 	
 	
@@ -37,9 +37,10 @@ outfile->cd();
 				
 			}else{i=4;}
 
-			chanhits.push_back(new TH1F(("S3_chanhits"+sfx).c_str(),("S3_chanhits;Channel;Raw Counts"+sfx).c_str(),56,0,56));
-			S3_map.push_back(new TH2F(("S3_map"+sfx).c_str(),("S3_map;X [mm];Y [mm]"+sfx).c_str(),800,-40,40,800,-40,40));
-
+			chanhits.push_back(new TH1F(("S3_chanhits"+sfx).c_str(),("S3_chanhits"+sfx+";Channel;Raw Counts").c_str(),56,0,56));
+			S3_map.push_back(new TH2F(("S3_map"+sfx).c_str(),("S3_map"+sfx+";X [mm];Y [mm]").c_str(),800,-40,40,800,-40,40));
+			S3_pixmap.push_back(new TH2F(("S3_pixmap"+sfx).c_str(),("S3_pixmap"+sfx+";Ring;Sector").c_str(),24,0,24,32,0,32));
+			
 			S3RS_t.push_back( new TH1F(("S3RS_t"+sfx).c_str(),("S3RS_t"+sfx+";#Deltat [ns]").c_str(),1024,-512,512));
 			S3RS_tgate.push_back( new TH1F(("S3RS_tgate"+sfx).c_str(),("S3RS_tgate"+sfx+";#Deltat [ns]").c_str(),1024,-512,512));
 
@@ -105,6 +106,10 @@ outfile->cd();
 	TH2F *SiLiGamma_nagshad;
 	TH2F* SiLiSegT,*SiLieeT;
 	
+	TH1 *SiLi_singlespc;
+	TH1F *SiLi_magshadpc,*SiLi_nagshadpc;
+	TH2F *SiLi_shadRingpc,*SiLi_nagshadRingpc;
+	
 	if(DS){
 	outfile->mkdir("SiLi");
 	outfile->cd("SiLi");
@@ -115,14 +120,24 @@ outfile->cd();
 		
 		SiLi_map= new TH2F("SiLi_map","SiLi_raw_map",1000,-50,50,1000,-50,50);axislab(SiLi_map,"X [mm]","Y [mm]");
 
-		
-		SiLi_magshad= new TH1F("SiLi_MagnetShadow","SiLi_MagnetShadow",2000,0,2000);axislab(SiLi_magshad,"Energy [keV]");
-		SiLi_nagshad= new TH1F("SiLi_NoShadow","SiLi_NoShadow",2000,0,2000);axislab(SiLi_nagshad,"Energy [keV]");
-		SiLi_shadRing= new TH2F("SiLi_ShadowRing","SiLi_ShadowRing",10,0,10,1000,0,2000);axislab(SiLi_shadRing,"Ring","Electron Energy [keV]");
-		SiLi_nagshadRing= new TH2F("SiLi_NoShadowRing","SiLi_NoShadowRing",10,0,10,1000,0,2000);axislab(SiLi_nagshadRing,"Ring","Electron Energy [keV]");
-		SiLiGamma_nagshad= new TH2F("Gamma_SiLi_NoShaddow","Gamma_SiLi_NoShaddow",1000,0,2000,1000,0,2000);axislab(SiLiGamma_nagshad,"#gamma Energy [keV]","Electron Energy [keV]");
+		if(SPICELimits){
+			SiLi_singlespc= new TH1D("SiLi_singlesLimits","SiLi_singlesLimits",2048,0,2048);
+			axislab(SiLi_singlespc,"Electron Energy [keV]");
+		}
 
-		
+ 		outfile->mkdir("SiLi/Magnets");
+ 		outfile->cd("SiLi/Magnets");
+			if(SPICELimits){
+				SiLi_magshadpc= new TH1F("SiLi_MagnetShadowLimits","SiLi_MagnetShadowPreCutLimits",2000,0,2000);axislab(SiLi_magshadpc,"Energy [keV]");
+				SiLi_nagshadpc= new TH1F("SiLi_NoShadowLimits","SiLi_NoShadowLimits",2000,0,2000);axislab(SiLi_nagshadpc,"Energy [keV]");
+				SiLi_shadRingpc= new TH2F("SiLi_ShadowRingLimits","SiLi_ShadowRingLimits",10,0,10,1000,0,2000);axislab(SiLi_shadRingpc,"Ring","Electron Energy [keV]");
+				SiLi_nagshadRingpc= new TH2F("SiLi_NoShadowRingLimits","SiLi_NoShadowRingLimits",10,0,10,1000,0,2000);axislab(SiLi_nagshadRingpc,"Ring","Electron Energy [keV]");
+			}
+			SiLi_magshad= new TH1F("SiLi_MagnetShadow","SiLi_MagnetShadow",2000,0,2000);axislab(SiLi_magshad,"Energy [keV]");
+			SiLi_nagshad= new TH1F("SiLi_NoShadow","SiLi_NoShadow",2000,0,2000);axislab(SiLi_nagshad,"Energy [keV]");
+			SiLi_shadRing= new TH2F("SiLi_ShadowRing","SiLi_ShadowRing",10,0,10,1000,0,2000);axislab(SiLi_shadRing,"Ring","Electron Energy [keV]");
+			SiLi_nagshadRing= new TH2F("SiLi_NoShadowRing","SiLi_NoShadowRing",10,0,10,1000,0,2000);axislab(SiLi_nagshadRing,"Ring","Electron Energy [keV]");
+			SiLiGamma_nagshad= new TH2F("Gamma_SiLi_NoShaddow","Gamma_SiLi_NoShaddow",1000,0,2000,1000,0,2000);axislab(SiLiGamma_nagshad,"#gamma Energy [keV]","Electron Energy [keV]");
  		outfile->mkdir("SiLi/AddBack");
  		outfile->cd("SiLi/AddBack");
 			SiLi_raw= new TH1F("SiLi_raw","SiLi_raw",2000,0,2000);axislab(SiLi_raw,"Energy [keV]");
@@ -178,9 +193,12 @@ outfile->cd();
 	TH1 *Gamma_no_add,*Gamma_suppressed,*Gamma_singles_no_bgo,*Tig_mult,*Tig_rawmult,*Tig_bgomult;
 	TH2F *Gamma_Gamma_no_add,*Gamma_Core,*Gamma_Core_Charge,*TigressHitMap,*TigressHitMapLow,*TigressETheta,*Tig_S3_t;
 	TH3F *TigressHitMap3,*TigressEETheta,*TigressEEdTheta;
+	TH1 *Gamma_widerange;
+
 	
 	outfile->mkdir("Tigress");
 	outfile->cd("Tigress");
+		Gamma_widerange= new TH1D("Gamma_widerange","Gamma_widerange",8192,0,8192);axislab(Gamma_widerange,"#gamma Energy [keV]");	
 		Gamma_no_add= new TH1F("Gamma_no_add","Gamma_no_add",2000,6,2006);axislab(Gamma_no_add,"#gamma Energy [keV]");
 		Gamma_Gamma_no_add= new TH2F("Gamma_Gamma_no_add","Gamma_Gamma_no_add",512,6,2006,512,6,2006);axislab(Gamma_Gamma_no_add,"#gamma Energy [keV]","#gamma Energy [keV]");
 		Gamma_Core= new TH2F("Gamma_Core","Gamma_Core",64,0,64,2000,0,2000);axislab(Gamma_Core,"Core No.","#gamma Energy [keV]");
@@ -190,6 +208,7 @@ outfile->cd();
 		TigressHitMapLow= new TH2F("TigressHitMapLow","TigressHitMapLow",100,-TMath::Pi(),TMath::Pi(),100,0,TMath::Pi());axislab(TigressHitMapLow,"#phi [rad]","#theta [rad]");
 		Gamma_suppressed= new TH1F("Gamma_suppressed","Gamma_suppressed",2000,0,2000);axislab(Gamma_suppressed,"#gamma Energy [keV]");
 		Gamma_singles_no_bgo= new TH1F("Gamma_singles_no_bgo","Gamma_singles_no_bgo",2000,0,2000);axislab(Gamma_singles_no_bgo,"#gamma Energy [keV]");
+		
 
 		outfile->mkdir("Tigress/Angles");
 		outfile->cd("Tigress/Angles");
@@ -207,7 +226,7 @@ outfile->cd();
 	
 	TH1F *GG_t, *ee_t, *SiLi_S3_t, *SiLi_S3_twide, *Gamma_S3_t, *Gamma_SiLi_t, *Gamma_SiLi_twide, *GG_tgate, *ee_tgate, *SiLi_S3_tgate, *Gamma_S3_tgate, *Gamma_SiLi_tgate, *S3_rf, *SiLi_rf, *Gamma_rf;
 	TH1F *S3_rfgate, *SiLi_rfgate, *Gamma_rfgate, *S3_rfgatecyc, *SiLi_rfgatecyc, *Gamma_rfgatecyc;
-	TH2F *SiLi_S3_t2, *Gamma_S3_t2, *Gamma_SiLi_t2, *SiLi_rf2, *EGamma_rf2, *S3RS_RF, *S3_SiLi_RF, *Gamma_SiLi_RF, *Gamma_S3_RF, *S3RS_RFgated, *S3_SiLi_RFgated, *Gamma_SiLi_RFgated, *Gamma_S3_RFgated;
+	TH2F *SiLi_S3_t2, *Gamma_S3_t2, *Gamma_S3_walk, *Gamma_SiLi_t2, *SiLi_rf2, *EGamma_rf2, *S3RS_RF, *S3_SiLi_RF, *Gamma_SiLi_RF, *Gamma_S3_RF, *S3RS_RFgated, *S3_SiLi_RFgated, *Gamma_SiLi_RFgated, *Gamma_S3_RFgated;
 	TH3F *Gamma_Gamma_t3,*Gamma_SiLi_t3, *S3_SiLi_RFe, *Gamma_S3_RFe, *Gamma_SiLi_SiliRF;
 	
 	outfile->mkdir("CoinTimegates");
@@ -235,6 +254,7 @@ outfile->cd();
 		outfile->mkdir("CoinTimegates/TimeEnergy");
 		outfile->cd("CoinTimegates/TimeEnergy");
 			Gamma_S3_t2= new TH2F("Gamma_S3_t2","Gamma_S3_t2",2048,0,2048,1024,-512,512);axislab(Gamma_S3_t2,"#gamma Energy [keV]","#Deltat [ns]");
+			if(TigressTimeWalk){Gamma_S3_walk= new TH2F("Gamma_S3_walk","Gamma_S3_walk;#gamma Energy [keV];#Deltat [ns]",2048,0,2048,1024,-512,512);}
 			Gamma_Gamma_t3= new TH3F("Gamma_Gamma_t3","Gamma_Gamma_t3",512,0,2048,512,0,2048,64,-512,512);axislab(Gamma_Gamma_t3,"#gamma Energy [keV]","#gamma Energy [keV]","#Deltat [ns]");
 			if(DS) {SiLi_S3_t2= new TH2F("SiLi_S3_t2","SiLi_S3_t2",2048,0,2048,1024,-1024,1024);axislab(SiLi_S3_t2,"Electron Energy [keV]","#Deltat [ns]");
 			Gamma_SiLi_t2= new TH2F("Gamma_SiLi_t2","Gamma_SiLi_t2",2048,0,2048,1024,-512,512);axislab(Gamma_SiLi_t2,"#gamma Energy [keV]","#Deltat [ns]");
@@ -378,7 +398,10 @@ outfile->cd();
 		TGraph* guessend=new TGraph();
 	outfile->cd();
 
-	TH3F* GammaS3dedx;
+	TH3* S3IDgamma;
+	TH3* S3IDsili;
+	TH3* S3IDgammacoinc;
+	
 	vector< TH2F* >  S3particleGated;
 	vector< TH2F* >  GUncorrectedring,Gcorrectedring;
 	vector< TH1F* >  GammaPG,SiLiPG,GUnshifted,GUncorrected;
@@ -388,14 +411,27 @@ outfile->cd();
 	vector< TH2F* >  TigressEThetaPG;
 	vector< TH3F* >  TigressEEThetaPG,TigressEEdThetaPG;
 	vector<	vector< TH2F* > >  TigressDopplerAngle;
+	vector< TH3F* >  TigressDopplerTheta;
+	vector< TH2F* >  GammaCoreUnshifted;
+	vector< TH2F* >  GammaCoreCorrected;
+	
 	vector<	vector< TH1F* > >  RingGroupGammaSingles;
+	
 	
 	if(ParticleGate.size()>0){
 		outfile->mkdir("ParticleGates");
 		outfile->cd("ParticleGates");
 			
-			if(Telescope){
-				GammaS3dedx= new TH3F("GammaS3dedx","GammaS3dedx;Total Energy [keV];dE/dx [arb.];#gamma Energy [keV]",100,0,control[S3EnergyLimit],100,0,control[S3EnergyLimit]*.4,1000,0,2000);
+			if(debug){
+				if(Telescope){
+					S3IDgammacoinc= new TH3F("S3IDgammacoinc","S3IDgammacoinc;dE/dx [arb.];Total Energy [keV];#gamma Energy [keV]",50,0,control[S3EnergyLimit]*.4,50,0,control[S3EnergyLimit],1000,0,2000);
+					S3IDgamma= new TH3F("S3IDgamma","S3IDgamma;dE/dx [arb.];Total Energy [keV];#gamma Mult.",500,0,control[S3EnergyLimit]*.4,500,0,control[S3EnergyLimit],5,0,5);
+					if(DS){S3IDsili= new TH3F("S3IDsili","S3IDsili;dE/dx [arb.];Total Energy [keV];Electron Mult.",500,0,control[S3EnergyLimit]*.4,500,0,control[S3EnergyLimit],5,0,5);}
+				}else{
+					S3IDgammacoinc= new TH3F("S3IDgammacoinc","S3IDgammacoinc;Theta [rad.];Total Energy [keV];#gamma Energy [keV]",50,0.2,1.2,50,0,control[S3EnergyLimit],1000,0,2000);
+					S3IDgamma= new TH3F("S3IDgamma","S3IDgamma;Theta [rad.];Total Energy [keV];#gamma Mult.",500,0.2,1.2,500,0,control[S3EnergyLimit],5,0,5);
+					if(DS){S3IDsili= new TH3F("S3IDsili","S3IDsili;Theta [rad.];Total Energy [keV];Electron Mult.",500,0.2,1.2,500,0,control[S3EnergyLimit],5,0,5);}
+				}
 			}
 			
 			for(int n=0;n<ParticleGate.size();n++){
@@ -483,7 +519,12 @@ outfile->cd();
 						
 							TH1F* gshift= new TH1F(("GammaUnshifted_"+t).c_str(),("GammaUnshifted_"+t).c_str(),2500,0,2500);axislab(gshift,"#gamma Energy [keV]");
 							GUnshifted.push_back(gshift);
-						
+							
+							if(debug){
+								TH2F* gcorun= new TH2F(("Gamma_Core_Unshifted"+t).c_str(),("Gamma_Core_Unshifted"+t).c_str(),64,0,64,2000,0,2000);axislab(gcorun,"Core No.","#gamma Energy [keV]");
+								GammaCoreUnshifted.push_back(gcorun);
+							}
+							
 							TH1F* guncor= new TH1F(("GammaUncorrected_"+t).c_str(),("GammaUncorrected_"+t).c_str(),2500,0,2500);axislab(guncor,"#gamma Energy [keV]");
 							GUncorrected.push_back(guncor);
 							
@@ -495,11 +536,22 @@ outfile->cd();
 							TH2F* gcorR= new TH2F(("GammaCorrectedRing_"+t).c_str(),("GammaCorrectedRing_"+t).c_str(),1000,0,2000,24*k,0,24*k);axislab(gcorR,"#gamma Energy [keV]","S3 Ring Number");
 							Gcorrectedring.push_back(gcorR);
 						
-							for(int r=0;r<24*k;r++){
-								stringstream subname;subname<<"TigressDopplerAngle_"<<t<<"_Ring"<<r;
-								TH2F* Tigressdopplerangle= new TH2F(subname.str().c_str(),subname.str().c_str(),100,0,TMath::Pi(),2000,0,2000);axislab(Tigressdopplerangle,"#theta [rad]","#gamma Energy [keV]");
-								TigressDopplerAngle[n].push_back(Tigressdopplerangle);
+							if(debug){
+								TH2F* gcorcor= new TH2F(("Gamma_Core_Corrected"+t).c_str(),("Gamma_Core_Corrected"+t).c_str(),64,0,64,2000,0,2000);axislab(gcorcor,"Core No.","#gamma Energy [keV]");
+								GammaCoreCorrected.push_back(gcorcor);
 							}
+							
+							if(debug){
+								TH3F* theg= new TH3F(("TigressDopplerAngle_"+t).c_str(),("TigressDopplerAngle_"+t+";#gamma Energy [keV];#theta_{doppler} [rad];#theta_{recoil} [rad];").c_str(),1000,0,2000,100,0,TMath::Pi(),100,0,TMath::Pi()/2.);
+								TigressDopplerTheta.push_back(theg);
+								
+								// for(int r=0;r<24*k;r++){
+								// 	stringstream subname;subname<<"TigressDopplerAngle_"<<t<<"_Ring"<<r;
+								// 	TH2F* Tigressdopplerangle= new TH2F(subname.str().c_str(),subname.str().c_str(),100,0,TMath::Pi(),2000,0,2000);axislab(Tigressdopplerangle,"#theta [rad]","#gamma Energy [keV]");
+								// 	TigressDopplerAngle[n].push_back(Tigressdopplerangle);
+								// }
+							}
+
 
 						if(ringgroups.size()){
 							outfile->mkdir((tf+"/RingGroups").c_str());
@@ -606,7 +658,7 @@ outfile->cd();
 
 	TH1 *SiLi_singles,*Gamma_singles,*GammaSiLiPlus;
 	TH2 *Gamma_SiLi,*Gamma_Gamma,*GammaSiLiPlus_Gamma,*GammaSiLiPlus_SiLi;
-	TH3 *Gamma_Gamma_Gamma;
+	TH3 *Gamma_Gamma_Gamma,*GammaSiLiChan;
 	
 	Gamma_singles= new TH1D("Gamma_singles","Gamma_singles",4096,0,2048);axislab(Gamma_singles,"#gamma Energy [keV]");	
 	Gamma_Gamma= new TH2F("Gamma_Gamma","Gamma_Gamma",2048,0,2048,2048,0,2048);axislab(Gamma_Gamma,"#gamma Energy [keV]","#gamma Energy [keV]");
@@ -615,6 +667,7 @@ outfile->cd();
 	if(DS){
 		SiLi_singles= new TH1D("SiLi_singles","SiLi_singles",2048,0,2048);axislab(SiLi_singles,"Electron Energy [keV]");
 		Gamma_SiLi= new TH2F("Gamma_SiLi","Gamma_SiLi",2048,0,2048,1024,0,2048);axislab(Gamma_SiLi,"#gamma Energy [keV]","Electron Energy [keV]");
+		if(debug){GammaSiLiChan= new TH3S("GammaSiLiChan","GammaSiLiChan;#gamma Energy [keV];Electron Energy [keV];Channel",2048,0,2048,1024,0,2048,120,0,120);}
 	}
 
 	if(DS){
