@@ -192,3 +192,37 @@
    E.g. Position 2 & 3 used: First ring of 2 = 0, First ring of 3 = 24 etc.
    
 
+   -----------------------------------------------------
+   S3 Bad Pixels
+   -----------------------------------------------------
+
+   If you wish to disable only individual pixels not entire rings or sectors
+   You may use repeats of the following line
+   
+   BadPixel ring sector
+   
+   e.g.
+   BadPixel 23 6
+   
+   Note: Numbering convention of ring with multiple S3s is as Ring Groups. 
+
+   -----------------------------------------------------
+   Gamma Efficiency Fills
+   -----------------------------------------------------
+   
+   For kinematics correction it can be desired to correct gamma ray efficiency before filling histograms
+   This is an option for particle gated ring group histograms
+   The efficiency curve data should be saved as a TGraph in a .root file.
+   It was decided TGraphs with a reasonable number of points contain sufficient precision
+   and this does not limit the uses to present functions.
+   The error bars will be scaled accordingly so the histograms may be fit directly without subsequent adjustments required.
+
+   GammaEfficiency EfficiencyTGraph.root
+   
+   If you also provide a TGraph of the absolute error on the efficiency curve the correlated errors contribution
+   will be correctly calculated and added to the histogram error bars.
+   
+   GammaEffError EfficiencyErrorTGraph.root
+   
+   Note: The file names are unimportant (avoid other Aparser keywords) but must contain a single TGraph.
+   

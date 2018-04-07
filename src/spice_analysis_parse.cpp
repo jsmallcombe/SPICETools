@@ -33,6 +33,9 @@ typedef struct gate2Ddata{
 
 double pi=TMath::Pi();
 
+TGraph* GammaEfficiencyGraph=0;
+TGraph* GammaEfficiencyError=0;
+
 enum gatenames{s3_gamma_t,s3_sili_t,gamma_gamma_t,gamma_sili_t,rf_S3,rf_sili,rf_gamma,rfcyc_S3,rfcyc_sili,rfcyc_gamma};
 vector< string > gatetitles={"s3_gamma_t","s3_sili_t","gamma_gamma_t","gamma_sili_t","rf_S3","rf_sili","rf_gamma","rfcyc_S3","rfcyc_sili","rfcyc_gamma"};
 
@@ -41,6 +44,8 @@ TGraph spicelimits[2][10];
 vector< pair<double,double> > gates;
 vector< gate2Ddata > ParticleGate;
 vector< pair<unsigned int,unsigned int> > ringgroups;
+
+vector< pair<int,int> > BadPixelVec;
 
 enum controlenum{BetaZero,TigressDistance,FrontBackEnergy,FrontBackOffset,FrontBackTime,S3EnergyLimit,SiLiWaveTOffset,TigressTargetOffset,SiLiNoiseLimit,SiLiSmirnovLimit,SiLiCoincidenceT,SPICEVetoT};
 vector< string > controlnames={"BetaZero","TigressDistance","FrontBackEnergy","FrontBackOffset","FrontBackTime","S3EnergyLimit","SiLiWaveTOffset","TigressTargetOffset","SiLiNoiseLimit","SiLiSmirnovLimit","SiLiCoincidenceT","SPICEVetoT"};
@@ -170,6 +175,25 @@ if(inp.IsPresent("SPICELimits")){
 	}
 }
 
+bool GammaEfficiency=false;
+bool GammaError=false;
+if(inp.IsPresent("GammaEfficiency")){
+	GammaEfficiencyGraph=FileTGraph(inp.NextString("GammaEfficiency"));
+	if(GammaEfficiencyGraph){
+		GammaEfficiency=true;	
+		cout<<endl<<"Loaded Gamma Efficiency.";
+
+		if(inp.IsPresent("GammaEffError")){
+			GammaEfficiencyError=FileTGraph(inp.NextString("GammaEffError"));
+			if(GammaEfficiencyError){
+				GammaError=true;	
+				cout<<endl<<"Loaded Gamma Efficiency Error.";
+			}
+		}
+	}
+}
+
+
 bool TigressSuppressed=inp.IsPresent("TigressSuppressed");
 if(TigressSuppressed){
 	cout<<endl<<"Tigress Suppressed Position.";
@@ -246,6 +270,9 @@ gROOT->cd();
 //////////////////     PROCESS GATE TYPE INPUTS      ////////////
 /////////////////////////////////////////////////////////////////
 
+bool BadPixel=false;
+bool DoRingGroups=false;
+
 TVector3 S3OffsetVector(0,0,0);
 inp.Rewind();
 string str;
@@ -269,11 +296,21 @@ while(inp>>str){
 
 	//Data file loading
 	if(str.find("RingGroup")<str.size()){
-			pair<unsigned int,unsigned int> rg;
-			inp>>rg.first>>rg.second;
-			ringgroups.push_back(rg);
-			cout<<endl<<"New Ring Group "<<rg.first<<"-"<<rg.second<<flush;
+		DoRingGroups=true;
+		pair<unsigned int,unsigned int> rg;
+		inp>>rg.first>>rg.second;
+		ringgroups.push_back(rg);
+		cout<<endl<<"New Ring Group "<<rg.first<<"-"<<rg.second<<flush;
 	}
+	
+	if(str.find("BadPixel")<str.size()){
+		BadPixel=true;
+		pair<unsigned int,unsigned int> bp;
+		inp>>bp.first>>bp.second;
+		BadPixelVec.push_back(bp);
+		cout<<endl<<"New Bad Pixel "<<bp.first<<" "<<bp.second<<flush;
+	}
+	
 	
 	//2D gates and any associated kinematic data
 	int strfi=str.find("s3_rs_2D");
@@ -378,7 +415,7 @@ for(int y=0;y<ParticleGate.size();y++){
 	string t=ParticleGate[y].title;
 	ParticleGate[y].gate.SetTitle(t.c_str());
 	
-	ParticleGate[y].use_beta=false;
+	ParticleGate[y].use_beta=true;
 	ParticleGate[y].use_rb=true;
 	ParticleGate[y].use_tb=false;
 	if(ParticleGate[y].ring_beta.size()==0){
@@ -755,8 +792,17 @@ for(int g=0;g<ParticleGate.size();g++){
 		}
 }
 
+if(GammaEfficiency){
+	outfile->cd("Tigress");
+	GammaEfficiencyGraph->Write("GammaEfficiency");
+	if(GammaError){
+		GammaEfficiencyError->Write("GammaEfficiencyError");
+	}
+}
+
+cout<<endl<<"SAVED"<<endl;
 outfile->Close();
-cout<<endl<<"SAVED"<<endl<<endl;
+cout<<endl<<"CLOSED"<<endl<<endl;
 
 delete DataChain;
 return 0;

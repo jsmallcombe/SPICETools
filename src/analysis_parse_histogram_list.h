@@ -14,6 +14,7 @@ outfile->cd();
 	vector< TH2* > S3_map,S3_pixmap,S3_dedx,frontVback,frontVbackGated,S3flat;
 	vector< TH3* > S3_d3dx,S3RS_t3;
 	
+	vector< TH2* > RingGrpThetaPhi;
 	
 	outfile->mkdir("S3");
 	outfile->cd("S3");
@@ -66,7 +67,15 @@ outfile->cd();
 			S3sector_sum.push_back( new TH1F(("S3sector_sum"+sfx).c_str(),("S3sector_sum"+sfx+";Energy [keV]").c_str(),2000,0,control[S3EnergyLimit]));
 		}
 		
-		
+		if(DoRingGroups){
+			outfile->mkdir("S3/RingGrpTheta");
+			outfile->cd("S3/RingGrpTheta");
+			for(unsigned int r=0;r<ringgroups.size();r++){
+				stringstream histname;
+				histname<<"RingsGrp_"<<ringgroups[r].first<<"-"<<ringgroups[r].second<<"_ThetaPhi";
+				RingGrpThetaPhi.push_back(new TH2F(histname.str().c_str(),(histname.str()+";Theta (rad);Phi (rad)").c_str(),360,0,TMath::Pi(),720,-TMath::Pi(),TMath::Pi()));
+			}
+		}
 		
 		outfile->cd("S3");
 		if(MultiS3) S3_multot = new TH1D("S3_mult","S3_mult;S3 Multiplicity;Counts",20,0,20);
@@ -202,7 +211,7 @@ outfile->cd();
 		Gamma_no_add= new TH1F("Gamma_no_add","Gamma_no_add",2000,6,2006);axislab(Gamma_no_add,"#gamma Energy [keV]");
 		Gamma_Gamma_no_add= new TH2F("Gamma_Gamma_no_add","Gamma_Gamma_no_add",512,6,2006,512,6,2006);axislab(Gamma_Gamma_no_add,"#gamma Energy [keV]","#gamma Energy [keV]");
 		Gamma_Core= new TH2F("Gamma_Core","Gamma_Core",64,0,64,2000,0,2000);axislab(Gamma_Core,"Core No.","#gamma Energy [keV]");
-		Gamma_Core_Charge= new TH2F("Gamma_Core_Charge","Gamma_Core_Charge",64,0,64,4096,0,40000);axislab(Gamma_Core,"Core No.","#gamma Charge");
+		Gamma_Core_Charge= new TH2F("Gamma_Core_Charge","Gamma_Core_Charge",64,0,64,4096,0,40000);axislab(Gamma_Core_Charge,"Core No.","#gamma Charge");
 		TigressHitMap3= new TH3F("TigressHitMap3","TigressHitMap3",128,-200,200,128,-200,200,128,-200,200);axislab(TigressHitMap3,"X [mm]","Y [mm]","Z [mm]");
 		TigressHitMap= new TH2F("TigressHitMap","TigressHitMap",200,-TMath::Pi(),TMath::Pi(),200,0,TMath::Pi());axislab(TigressHitMap,"#phi [rad]","#theta [rad]");
 		TigressHitMapLow= new TH2F("TigressHitMapLow","TigressHitMapLow",100,-TMath::Pi(),TMath::Pi(),100,0,TMath::Pi());axislab(TigressHitMapLow,"#phi [rad]","#theta [rad]");
@@ -224,7 +233,7 @@ outfile->cd();
 	outfile->cd();
 	
 	
-	TH1F *GG_t, *ee_t, *SiLi_S3_t, *SiLi_S3_twide, *Gamma_S3_t, *Gamma_SiLi_t, *Gamma_SiLi_twide, *GG_tgate, *ee_tgate, *SiLi_S3_tgate, *Gamma_S3_tgate, *Gamma_SiLi_tgate, *S3_rf, *SiLi_rf, *Gamma_rf;
+	TH1F *GG_t, *ee_t, *SiLi_S3_t, *SiLi_S3_twide, *Gamma_S3_t, *Gamma_S3_twide, *Gamma_SiLi_t, *Gamma_SiLi_twide, *GG_tgate, *ee_tgate, *SiLi_S3_tgate, *Gamma_S3_tgate, *Gamma_SiLi_tgate, *S3_rf, *SiLi_rf, *Gamma_rf;
 	TH1F *S3_rfgate, *SiLi_rfgate, *Gamma_rfgate, *S3_rfgatecyc, *SiLi_rfgatecyc, *Gamma_rfgatecyc;
 	TH2F *SiLi_S3_t2, *Gamma_S3_t2, *Gamma_S3_walk, *Gamma_SiLi_t2, *SiLi_rf2, *EGamma_rf2, *S3RS_RF, *S3_SiLi_RF, *Gamma_SiLi_RF, *Gamma_S3_RF, *S3RS_RFgated, *S3_SiLi_RFgated, *Gamma_SiLi_RFgated, *Gamma_S3_RFgated;
 	TH3F *Gamma_Gamma_t3,*Gamma_SiLi_t3, *S3_SiLi_RFe, *Gamma_S3_RFe, *Gamma_SiLi_SiliRF;
@@ -235,6 +244,7 @@ outfile->cd();
 		outfile->cd("CoinTimegates/Time1D");
 			 GG_t = new TH1F("GG_t","GG_t",1024,-512,512);axislab(GG_t,"#Deltat [ns]");
 			 Gamma_S3_t= new TH1F("Gamma_S3_t","Gamma_S3_t",1024,-512,512);axislab(Gamma_S3_t,"#Deltat [ns]");
+			 Gamma_S3_twide= new TH1F("Gamma_S3_twide","Gamma_S3_twide",2048,-10240,10240);axislab(Gamma_S3_twide,"#Deltat [ns]");
 			if(DS){
 				if(DoDoubleElectrons){ee_t = new TH1F("ee_t","ee_t",1024,-1024,1024);axislab(ee_t,"#Deltat [ns]");}
 				SiLi_S3_t= new TH1F("SiLi_S3_t","SiLi_S3_t",1024,-1024,1024);axislab(SiLi_S3_t,"#Deltat [ns]");
@@ -253,8 +263,8 @@ outfile->cd();
 			}
 		outfile->mkdir("CoinTimegates/TimeEnergy");
 		outfile->cd("CoinTimegates/TimeEnergy");
-			Gamma_S3_t2= new TH2F("Gamma_S3_t2","Gamma_S3_t2",2048,0,2048,1024,-512,512);axislab(Gamma_S3_t2,"#gamma Energy [keV]","#Deltat [ns]");
-			if(TigressTimeWalk){Gamma_S3_walk= new TH2F("Gamma_S3_walk","Gamma_S3_walk;#gamma Energy [keV];#Deltat [ns]",2048,0,2048,1024,-512,512);}
+			Gamma_S3_t2= new TH2F("Gamma_S3_t2","Gamma_S3_t2",2048,0,2048,1024,-2048,2048);axislab(Gamma_S3_t2,"#gamma Energy [keV]","#Deltat [ns]");
+			if(TigressTimeWalk){Gamma_S3_walk= new TH2F("Gamma_S3_walk","Gamma_S3_walk;#gamma Energy [keV];#Deltat [ns]",2048,0,2048,1024,-2048,2048);}
 			Gamma_Gamma_t3= new TH3F("Gamma_Gamma_t3","Gamma_Gamma_t3",512,0,2048,512,0,2048,64,-512,512);axislab(Gamma_Gamma_t3,"#gamma Energy [keV]","#gamma Energy [keV]","#Deltat [ns]");
 			if(DS) {SiLi_S3_t2= new TH2F("SiLi_S3_t2","SiLi_S3_t2",2048,0,2048,1024,-1024,1024);axislab(SiLi_S3_t2,"Electron Energy [keV]","#Deltat [ns]");
 			Gamma_SiLi_t2= new TH2F("Gamma_SiLi_t2","Gamma_SiLi_t2",2048,0,2048,1024,-512,512);axislab(Gamma_SiLi_t2,"#gamma Energy [keV]","#Deltat [ns]");
@@ -416,6 +426,7 @@ outfile->cd();
 	vector< TH2F* >  GammaCoreCorrected;
 	
 	vector<	vector< TH1F* > >  RingGroupGammaSingles;
+	vector<	vector< TH1Efficiency* > >  RingGroupGammaEff;
 	
 	
 	if(ParticleGate.size()>0){
@@ -553,7 +564,7 @@ outfile->cd();
 							}
 
 
-						if(ringgroups.size()){
+						if(DoRingGroups){
 							outfile->mkdir((tf+"/RingGroups").c_str());
 							outfile->cd((tf+"/RingGroups").c_str());
 							
@@ -565,6 +576,16 @@ outfile->cd();
 								axislab(rggs[r],"#gamma Energy [keV]");
 							}
 							RingGroupGammaSingles.push_back(rggs);
+							
+							if(GammaEfficiency){
+								vector< TH1Efficiency* > rgge;
+								for(unsigned int r=0;r<ringgroups.size();r++){
+									stringstream histname;
+									histname<<"GammaEfficiency_Rings_"<<ringgroups[r].first<<"-"<<ringgroups[r].second<<t;
+									rgge.push_back(new TH1Efficiency(histname.str().c_str(),(histname.str()+";#gamma Energy [keV];Counts/keV").c_str(),2500,0,2500,GammaEfficiencyGraph,GammaEfficiencyError));
+								}
+								RingGroupGammaEff.push_back(rgge);
+							}
 						}
 						
 						outfile->cd(tf.c_str());

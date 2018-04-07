@@ -355,7 +355,24 @@ std::vector< double > Vdedx;
 for(unsigned int i=0;i<s3->GetPixelMultiplicity();i++){//GetPixelMultiplicity builds the events based on pre-set settings
 	TS3Hit* SH=s3->GetS3Hit(i);
 	unsigned short id=s3id(SH);
+	
 	if(MultiS3)if(id<0)continue;
+	
+	unsigned int RR=s3r(SH);//GetRing adjusting for multiple S3s
+	
+	if(BadPixel){
+		bool BPskip=false;
+		unsigned int SS=SH->GetSector();
+
+		for(unsigned int b=0;b<BadPixelVec.size();b++){
+			if(RR==BadPixelVec[b].first&&SS==BadPixelVec[b].second){
+				BPskip=true;
+				break;
+			}
+		}
+		if(BPskip)continue;
+	}
+	
 	apmult[id]++;
 	
 	//RF gate for singles triggers
@@ -381,6 +398,12 @@ for(unsigned int i=0;i<s3->GetPixelMultiplicity();i++){//GetPixelMultiplicity bu
 	S3_pixmap[id]->Fill(SH->GetRing(),SH->GetSector()); //This gets the actual pixel numbers for analysis
 	S3possmear.push_back(pos);	
 	
+	for(unsigned int r=0;r<ringgroups.size();r++){
+		if(RR>=ringgroups[r].first&&RR<=ringgroups[r].second){
+			RingGrpThetaPhi[r]->Fill(pos.Theta(),pos.Phi());
+		}
+	}
+	
 	double theta=pos.Theta();	
 	
 	//cout<<endl<<pos.Phi();
@@ -389,8 +412,9 @@ for(unsigned int i=0;i<s3->GetPixelMultiplicity();i++){//GetPixelMultiplicity bu
 	//cout<<" "<<pos.Phi();
 	
 	if(Telescope){
-		//In telescope mode need the sector energy too
-		//But we use SetMultiHit(false) for Telescope so sector number can appear only once
+		// In telescope mode need the sector energy too (2 different detectors)
+		// But we use SetMultiHit(false) for Telescope, so sector number can appear only once
+		// Hence we can recover sector energy from the un-built sector-hit list 
 		for(unsigned int j=0;j<s3->GetSectorMultiplicity();j++){
 			TS3Hit* SS=s3->GetSectorHit(j);
 			if(SS->GetSector()==SH->GetSector()){
@@ -926,6 +950,7 @@ for(unsigned int j=0;j<S3N;j++){
 		Tig_S3_t->Fill(TT,gammai[i]->GetArrayNumber());
 		double e=gammaE[i];
 		Gamma_S3_t->Fill(TT);
+		Gamma_S3_twide->Fill(TT);
 		Gamma_S3_t2->Fill(e,TT);
 		gammaS3loop[i]=TT;
 		if(!RFfail){
@@ -1057,8 +1082,13 @@ for(unsigned int j=0;j<S3N;j++){
 				GUncorrectedring[g]->Fill(e,R);
 				
 				for(unsigned int r=0;r<ringgroups.size();r++){
-					if(R>=ringgroups[r].first&&R<=ringgroups[r].second)
+					if(R>=ringgroups[r].first&&R<=ringgroups[r].second){
 						RingGroupGammaSingles[g][r]->Fill(E);
+					
+						if(GammaEfficiency){
+							RingGroupGammaEff[g][r]->Fill(E,e);
+						}
+					}
 				}
 				
 				if(debug){

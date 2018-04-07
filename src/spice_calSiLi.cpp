@@ -361,8 +361,8 @@ int Fit207BiCal(TH1* hist,double& offset,double& gain,TCanvas* draw){if(!hist)re
 	stringstream ss;
 	ss<<1./gain<<"+"<<0.9/gain;
 
-	FullFitHolder* fitA=Ultrapeak::PeakFit(hist,AA-50./gain,AA+(BiPeaks[2]-BiPeaks[0]+50)/gain,fInput,1,0,ss.str());
-	FullFitHolder* fitB=Ultrapeak::PeakFit(hist,BB-50./gain,BB+(BiPeaks[5]-BiPeaks[3]+50)/gain,fInputB,1,0,ss.str());
+	FullFitHolder* fitA=Ultrapeak::PeakFit(hist,AA-50./gain,AA+(BiPeaks[2]-BiPeaks[0]+50)/gain,fInput,4,0,ss.str());
+	FullFitHolder* fitB=Ultrapeak::PeakFit(hist,BB-50./gain,BB+(BiPeaks[5]-BiPeaks[3]+50)/gain,fInputB,4,0,ss.str());
 	
 
 	if(fitA&&fitB){

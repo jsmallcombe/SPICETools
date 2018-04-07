@@ -116,18 +116,28 @@ rfcyc_gamma -21 -17
 
 CalibrationFile.cal
 
+### S3 Selections ###
+
+RingGroup 0 4
+RingGroup 5 8
+
+### Gamma Efficiency Options ###
+
+GammaEfficiency Infofiles/RelGammaEff.root
+GammaEffError Infofiles/RelGammaError.root
+
 
 ### PARTICLE GATE INPUTS ###
 
 s3_rs_2D0 title protons
-s3_rs_2D0 gatefile infofiles/protongate.root
+s3_rs_2D0 gatefile Infofiles/protongate.root
 #s3_rs_2D0 gate 0 0
 #s3_rs_2D0 gate 0 5000
 #s3_rs_2D0 gate 5000 0
 #s3_rs_2D0 s3 1
 
 s3_rs_2D1 title alpha
-s3_rs_2D1 gatefile infofiles/alphagate.root
+s3_rs_2D1 gatefile Infofiles/alphagate.root
 #s3_rs_2D1 UseEnergyBeta 15
    
 
