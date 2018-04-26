@@ -48,5 +48,6 @@ clean:
 	rm -f $(LIB)/bin/build/*.o
 	rm -f $(LIB)/bin/build/Linkdef.h
 	rm -f $(LIB)/bin/DictOutput*
+	rm -f $(LIB)/bin/*.sh
 	rm -f $(PROGRAMS)
 	rm -f $(TARG)

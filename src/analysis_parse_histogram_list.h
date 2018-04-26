@@ -28,6 +28,7 @@ outfile->cd();
 			if(MultiS3){
 				if(!s3used[i])continue;
 				s3index[i]=k;
+				S3OffsetVector[k]=S3OffsetTmp[i];//nothing to do with histograms but want to use s3index
 				k++;
 				stringstream ss;
 				ss<<i;

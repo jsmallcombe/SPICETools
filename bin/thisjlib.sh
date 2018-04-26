@@ -1,5 +1,0 @@
-export SPICELIB=/home/jsmallcombe/codes/SPICETools
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$SPICELIB/bin:$SPICELIB/bin/build:$SPICELIB
-export CPATH=$CPATH:$SPICELIB/include
-export PATH=$PATH:$SPICELIB/include:$SPICELIB/src:$SPICELIB/bin:$SPICELIB/bin/build
-export LIBRARY_PATH=$LIBRARY_PATH:$SPICELIB/bin:$SPICELIB/bin/build:$SPICELIB/src:$SPICELIB/include:$SPICELIB

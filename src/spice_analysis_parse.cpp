@@ -63,7 +63,7 @@ bool MultiS3=false;
 unsigned short s3id(TS3Hit* s3hit){
 	if(MultiS3){
 		unsigned short i=s3hit->GetArrayPosition();
-		if(i<4)return s3index[i];
+		if(i<4&&i>=0)return s3index[i];
 	}
 	return 0;
 }
@@ -71,7 +71,7 @@ unsigned short s3r(TS3Hit* s3hit){
 	int r=s3hit->GetRing();
 	if(MultiS3){
 		unsigned short i=s3hit->GetArrayPosition();
-		if(i<4)return s3index[i]*24+r;
+		if(i<4&&i>=0)return s3index[i]*24+r;
 	}
 	return r;
 }
@@ -273,8 +273,9 @@ gROOT->cd();
 bool BadPixel=false;
 bool DoRingGroups=false;
 
-TVector3 S3OffsetVector(0,0,0);
-inp.Rewind();
+TVector3 S3OffsetVector[4];
+TVector3 S3OffsetTmp[4];
+
 string str;
 while(inp>>str){
 	
@@ -286,12 +287,21 @@ while(inp>>str){
 	}
 	
 	if(str.find("S3Vector")<str.size()){
-// 		unsigned short s;
 		double x,y,z;
 		inp>>x>>y>>z;
-		S3OffsetVector=TVector3(x,y,z);
+		for(int i=0;i<4;i++)S3OffsetVector[i]=TVector3(x,y,z);
 		cout<<endl<<"Using S3 offset "<<x<<" "<<y<<" "<<z<<" mm";
-	}	
+	}
+	
+	if(str.find("S3VecI")<str.size()){
+		unsigned short i;
+		double x,y,z;
+		inp>>i>>x>>y>>z;
+		if(i<4){
+			S3OffsetTmp[i]=TVector3(x,y,z);
+			cout<<endl<<"For S3 Det "<<i<<" using offset "<<x<<" "<<y<<" "<<z<<" mm";
+		}
+	}
 	
 
 	//Data file loading

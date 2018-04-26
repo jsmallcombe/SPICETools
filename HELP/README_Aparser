@@ -75,6 +75,7 @@
    MultiS3 # (Give the mnemonic array position of one of the S3s when there are multiple, call for each)
 
    S3Vector # # # (X Y Z mm offset of the S3 from the nominal position)
+   S3VecI # # # # (I X Y Z mm offset of S3 mnemonic array position I) (should be afted MultiS3)
    
    If an argument matches none of the above it is assumed to be a gate name.
    

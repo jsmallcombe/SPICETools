@@ -241,7 +241,7 @@ unsigned short apmult[4]={0,0,0,0};
 for(unsigned int i=0;i<s3->GetRingMultiplicity();i++){
 	TS3Hit* SR=s3->GetRingHit(i);
 	unsigned short id=s3id(SR);
-	if(MultiS3)if(id<0)continue;
+	if(id<0)continue;
 	apmult[id]++;
 	int s=SR->GetSegment();
 	chanhits[id]->Fill(s);
@@ -274,7 +274,7 @@ else S3_ringmult[0]->Fill(s3->GetRingMultiplicity());
 for(unsigned int i=0;i<s3->GetSectorMultiplicity();i++){
 	TS3Hit* SS=s3->GetSectorHit(i);
 	unsigned short id=s3id(SS);
-	if(MultiS3)if(id<0)continue;
+	if(id<0)continue;
 	apmult[id]++;
 	
 	int s=SS->GetSegment();
@@ -355,8 +355,7 @@ std::vector< double > Vdedx;
 for(unsigned int i=0;i<s3->GetPixelMultiplicity();i++){//GetPixelMultiplicity builds the events based on pre-set settings
 	TS3Hit* SH=s3->GetS3Hit(i);
 	unsigned short id=s3id(SH);
-	
-	if(MultiS3)if(id<0)continue;
+	if(id<0)continue;
 	
 	unsigned int RR=s3r(SH);//GetRing adjusting for multiple S3s
 	
@@ -391,7 +390,7 @@ for(unsigned int i=0;i<s3->GetPixelMultiplicity();i++){//GetPixelMultiplicity bu
 	double dE=SH->GetEnergy();
 	double E=dE;
 
-	TVector3 pos = SH->GetPosition(true)+S3OffsetVector;
+	TVector3 pos = SH->GetPosition(true)+S3OffsetVector[id];
 //	TVector3 pos = TS3::GetPosition(S3ring_i[i],S3sec_i[j],-22.5*TMath::Pi()/180.,32.1,Telescope,false);//Get the hit vector with some random smoothing	
 	S3_map[id]->Fill(pos.X(),pos.Y());//This is more for online checking of hit map
 	S3_map3->Fill(pos.Z(),pos.X(),pos.Y());//This is more for online checking of hit map
@@ -469,7 +468,7 @@ for(unsigned int i=0;i<s3->GetPixelMultiplicity();i++){//GetPixelMultiplicity bu
 	}	
 
 	S3select.push_back(SH);
-	S3pos.push_back(SH->GetPosition(false)+S3OffsetVector);
+	S3pos.push_back(SH->GetPosition(false)+S3OffsetVector[id]);
 	if(Telescope)Vdedx.push_back(dE);
 	else Vdedx.push_back(theta);
 
@@ -1095,7 +1094,7 @@ for(unsigned int j=0;j<S3N;j++){
 					//TigressDopplerAngle[g][R]->Fill(ang,e);
 					TigressDopplerTheta[g]->Fill(e,ang,particlevec.Theta());
 
-					if(gammai[i]->GetNSegments()==1){
+					if(gammai[i]->GetNSegments()==0||gammai[i]->GetNSegments()==8){
 						int cor=gammai[i]->GetArrayNumber();
 						if(unshifted)GammaCoreUnshifted[g]->Fill(cor,e);
 						GammaCoreCorrected[g]->Fill(cor,E);

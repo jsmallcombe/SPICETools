@@ -65,6 +65,9 @@ MultiParticles
 S3Vector 1.0 0.5 0.0
 # X Y Z mm offset of the S3 from the nominal position 
 
+S3VecI 3 1.0 0.5 0.0
+# I X Y Z mm offset of a given S3 when using multiple
+
 ### SPICE OPTIONS ###
 
 UseFitCharge
@@ -120,6 +123,8 @@ CalibrationFile.cal
 
 RingGroup 0 4
 RingGroup 5 8
+
+BadPixel 0 31
 
 ### Gamma Efficiency Options ###
 
