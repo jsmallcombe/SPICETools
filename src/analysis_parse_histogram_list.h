@@ -22,7 +22,7 @@ outfile->cd();
 		S3_theta= new TH2F("S3_theta","S3_theta;Total Energy [keV];Theta [rad]",1024,0,control[S3EnergyLimit],200,0.2,1.2);
 		
 		int k=0;
-		for(unsigned short i=0;i<4;i++){
+		for(unsigned short i=0;i<MAXS3;i++){
 			
 			string sfx="";
 			if(MultiS3){
@@ -37,7 +37,7 @@ outfile->cd();
 				outfile->mkdir(tf.c_str());
 				outfile->cd(tf.c_str());
 				
-			}else{i=4;}
+			}else{i=MAXS3;}
 
 			chanhits.push_back(new TH1F(("S3_chanhits"+sfx).c_str(),("S3_chanhits"+sfx+";Channel;Raw Counts").c_str(),56,0,56));
 			S3_map.push_back(new TH2F(("S3_map"+sfx).c_str(),("S3_map"+sfx+";X [mm];Y [mm]").c_str(),800,-40,40,800,-40,40));
@@ -426,11 +426,12 @@ outfile->cd();
 	vector< TH2F* >  GammaCoreUnshifted;
 	vector< TH2F* >  GammaCoreCorrected;
 	
+	vector< TH2* >  RingGammaSingles;
 	vector<	vector< TH1F* > >  RingGroupGammaSingles;
 	vector<	vector< TH1Efficiency* > >  RingGroupGammaEff;
 	
 	
-	if(ParticleGate.size()>0){
+	if(ParticleGate.size()>0||debug){
 		outfile->mkdir("ParticleGates");
 		outfile->cd("ParticleGates");
 			
@@ -578,6 +579,17 @@ outfile->cd();
 							}
 							RingGroupGammaSingles.push_back(rggs);
 							
+
+							if(debug){
+								int ringC=24;		
+								if(MultiS3){
+									ringC=0;
+									for(int s=0;s<4;s++)if(s3used[s])ringC++;
+									ringC*=24;
+								}
+								
+								if(ringC)RingGammaSingles.push_back(new TH2F(("GammaCorrectRings_"+t).c_str(),("GammaCorrectRings_"+t+";#gamma Energy [keV];RingNumber").c_str(),1024,0,2048,ringC,0,ringC));
+							}
 							if(GammaEfficiency){
 								vector< TH1Efficiency* > rgge;
 								for(unsigned int r=0;r<ringgroups.size();r++){
@@ -680,7 +692,7 @@ outfile->cd();
 
 	TH1 *SiLi_singles,*Gamma_singles,*GammaSiLiPlus;
 	TH2 *Gamma_SiLi,*Gamma_Gamma,*GammaSiLiPlus_Gamma,*GammaSiLiPlus_SiLi;
-	TH3 *Gamma_Gamma_Gamma,*GammaSiLiChan;
+	TH3 *Gamma_Gamma_Gamma,*GammaSiLiChan,*Gamma_Gamma_SiLi;
 	
 	Gamma_singles= new TH1D("Gamma_singles","Gamma_singles",4096,0,2048);axislab(Gamma_singles,"#gamma Energy [keV]");	
 	Gamma_Gamma= new TH2F("Gamma_Gamma","Gamma_Gamma",2048,0,2048,2048,0,2048);axislab(Gamma_Gamma,"#gamma Energy [keV]","#gamma Energy [keV]");
@@ -689,15 +701,18 @@ outfile->cd();
 	if(DS){
 		SiLi_singles= new TH1D("SiLi_singles","SiLi_singles",2048,0,2048);axislab(SiLi_singles,"Electron Energy [keV]");
 		Gamma_SiLi= new TH2F("Gamma_SiLi","Gamma_SiLi",2048,0,2048,1024,0,2048);axislab(Gamma_SiLi,"#gamma Energy [keV]","Electron Energy [keV]");
-		if(debug){GammaSiLiChan= new TH3S("GammaSiLiChan","GammaSiLiChan;#gamma Energy [keV];Electron Energy [keV];Channel",2048,0,2048,1024,0,2048,120,0,120);}
-	}
+		
+		if(debug){
+			Gamma_Gamma_SiLi= new TH3S("Gamma_Gamma_SiLi","Gamma_Gamma_SiLi",1024,0,2048,512,0,2048,512,0,1024);axislab(Gamma_Gamma_Gamma,"#gamma Energy [keV]","#gamma Energy [keV]","Electron Energy [keV]");
 
-	if(DS){
-		outfile->mkdir("SiLi/GammaSiLiPlus");
-		outfile->cd("SiLi/GammaSiLiPlus");
-		GammaSiLiPlus= new TH1D("GammaSiLiPlus","GammaSiLiPlus",2048,0,4096);axislab(GammaSiLiPlus,"#gamma+SiLi Energy [keV]");
-		GammaSiLiPlus_Gamma= new TH2F("GammaSiLiPlus_Gamma","GammaSiLiPlus_Gamma",1024,0,4096,1024,0,2048);axislab(GammaSiLiPlus_Gamma,"#gamma+SiLi Energy [keV]","#gamma Energy [keV]");
-		GammaSiLiPlus_SiLi= new TH2F("GammaSiLiPlus_SiLi","GammaSiLiPlus_SiLi",1024,0,4096,1024,0,2048);axislab(GammaSiLiPlus_SiLi,"#gamma+SiLi Energy [keV]","SiLi Energy [keV]");
+			GammaSiLiChan= new TH3S("GammaSiLiChan","GammaSiLiChan;#gamma Energy [keV];Electron Energy [keV];Channel",2048,0,2048,1024,0,2048,120,0,120);
+			
+			outfile->mkdir("SiLi/GammaSiLiPlus");
+			outfile->cd("SiLi/GammaSiLiPlus");
+			GammaSiLiPlus= new TH1D("GammaSiLiPlus","GammaSiLiPlus",2048,0,4096);axislab(GammaSiLiPlus,"#gamma+SiLi Energy [keV]");
+			GammaSiLiPlus_Gamma= new TH2F("GammaSiLiPlus_Gamma","GammaSiLiPlus_Gamma",1024,0,4096,1024,0,2048);axislab(GammaSiLiPlus_Gamma,"#gamma+SiLi Energy [keV]","#gamma Energy [keV]");
+			GammaSiLiPlus_SiLi= new TH2F("GammaSiLiPlus_SiLi","GammaSiLiPlus_SiLi",1024,0,4096,1024,0,2048);axislab(GammaSiLiPlus_SiLi,"#gamma+SiLi Energy [keV]","SiLi Energy [keV]");
+		}
 	}
 	
 // 	outfile->mkdir("MeanDoppler");

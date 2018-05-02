@@ -52,7 +52,7 @@
    MultiParticles - Make special histograms for gamma and electron coincident with several particles.
    PreferenceSectors - Use the S3 sector energy where possible, worse resolution but strangely more stable
    AddMonitor - Show histogram of monitor detector, not correlated with experimental data.
-   Debug - Adds some additional histograms useful for debugging detectors over physics analysis
+   Debug - Adds some additional histograms useful for debugging detectors over physics analysis (LIST AT BOTTOM)
 
    -----------------------------------------------------
    Set Numbers
@@ -226,4 +226,8 @@
    GammaEffError EfficiencyErrorTGraph.root
    
    Note: The file names are unimportant (avoid other Aparser keywords) but must contain a single TGraph.
+   
+   -----------------------------------------------------
+   Debug Histogram
+   -----------------------------------------------------
    

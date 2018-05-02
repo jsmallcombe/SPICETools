@@ -237,10 +237,11 @@ if(StrictSingleParticles){
 s3->ResetRingsSectors();
 
 //Get hits for rings S3 (dE in telescope)
-unsigned short apmult[4]={0,0,0,0};
+vector<unsigned short> apmult(MAXS3,0);
 for(unsigned int i=0;i<s3->GetRingMultiplicity();i++){
 	TS3Hit* SR=s3->GetRingHit(i);
-	unsigned short id=s3id(SR);
+	short id=s3id(SR);
+	
 	if(id<0)continue;
 	apmult[id]++;
 	int s=SR->GetSegment();
@@ -261,7 +262,7 @@ for(unsigned int i=0;i<s3->GetRingMultiplicity();i++){
 
 	}
 }
-if(MultiS3)for(unsigned short i=0;i<4;i++){
+if(MultiS3)for(unsigned short i=0;i<MAXS3;i++){
 	if(s3used[i]){
 		S3_ringmult[s3index[i]]->Fill(apmult[s3index[i]]);
 		apmult[s3index[i]]=0;
@@ -273,7 +274,7 @@ else S3_ringmult[0]->Fill(s3->GetRingMultiplicity());
 //Get hits for E S3 (sectors)
 for(unsigned int i=0;i<s3->GetSectorMultiplicity();i++){
 	TS3Hit* SS=s3->GetSectorHit(i);
-	unsigned short id=s3id(SS);
+	short id=s3id(SS);
 	if(id<0)continue;
 	apmult[id]++;
 	
@@ -332,7 +333,7 @@ for(unsigned int i=0;i<s3->GetSectorMultiplicity();i++){
 		}
 	}
 }
-if(MultiS3)for(unsigned short i=0;i<4;i++){
+if(MultiS3)for(unsigned short i=0;i<MAXS3;i++){
 	if(s3used[i]){
 		S3_sectormult[s3index[i]]->Fill(apmult[s3index[i]]);
 		apmult[s3index[i]]=0;
@@ -354,7 +355,7 @@ std::vector< double > Vdedx;
 // Build the combined hits we will use for coincidences
 for(unsigned int i=0;i<s3->GetPixelMultiplicity();i++){//GetPixelMultiplicity builds the events based on pre-set settings
 	TS3Hit* SH=s3->GetS3Hit(i);
-	unsigned short id=s3id(SH);
+	short id=s3id(SH);
 	if(id<0)continue;
 	
 	unsigned int RR=s3r(SH);//GetRing adjusting for multiple S3s
@@ -477,7 +478,7 @@ int S3N=S3select.size();
 
 // Do the multiplicity hits for the S3 detectors separately if there is more than one.
 if(MultiS3){
-	for(unsigned short i=0;i<4;i++){if(s3used[i])S3_mult[s3index[i]]->Fill(apmult[s3index[i]]);}
+	for(unsigned short i=0;i<MAXS3;i++){if(s3used[i])S3_mult[s3index[i]]->Fill(apmult[s3index[i]]);}
 	S3_multot->Fill(s3->GetPixelMultiplicity());
 }else S3_mult[0]->Fill(s3->GetPixelMultiplicity());
 
@@ -830,6 +831,15 @@ for(unsigned int i=0;i<gammaN;i++){
 				}
 				
 				Gamma_SiLi_RFgated->Fill(gammaTrf[i],SiLitRF[j]);
+				
+				if(debug){//Gamma gamma sili loop
+					for(unsigned int k=i+1;k<gammaN;k++){
+						double tt=gammai[i]->GetTime()-gammai[k]->GetTime();
+						if(t_gate(tt,gamma_gamma_t,gammaWalk[i],gammaWalk[k])){
+							Gamma_Gamma_SiLi->Fill(gammaE[i],gammaE[k],SiLiE[j]);
+						}
+					}
+				}
 			}
 			
 			Gamma_SiLi_RF->Fill(gammaTrf[i],SiLitRF[j]);
@@ -1080,12 +1090,16 @@ for(unsigned int j=0;j<S3N;j++){
 				GUncorrected[g]->Fill(e);
 				GUncorrectedring[g]->Fill(e,R);
 				
-				for(unsigned int r=0;r<ringgroups.size();r++){
-					if(R>=ringgroups[r].first&&R<=ringgroups[r].second){
-						RingGroupGammaSingles[g][r]->Fill(E);
+				if(DoRingGroups){
+					if(debug)RingGammaSingles[g]->Fill(E,R);
 					
-						if(GammaEfficiency){
-							RingGroupGammaEff[g][r]->Fill(E,e);
+					for(unsigned int r=0;r<ringgroups.size();r++){
+						if(R>=ringgroups[r].first&&R<=ringgroups[r].second){
+							RingGroupGammaSingles[g][r]->Fill(E);
+						
+							if(GammaEfficiency){
+								RingGroupGammaEff[g][r]->Fill(E,e);
+							}
 						}
 					}
 				}
@@ -1164,8 +1178,6 @@ for(unsigned int j=0;j<S3N;j++){
 			mulparthist++;
 		}}
 	}}//End of particle-gate loop
-	
-	
 	
 	
 	

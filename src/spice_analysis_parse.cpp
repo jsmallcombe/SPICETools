@@ -6,6 +6,8 @@
 ///////////////////////
 ///////////////////////
 
+const unsigned int MAXS3=6;
+
 TRandom2 rando;
 
 double TRFperiodns= 84.409;
@@ -56,14 +58,14 @@ std::vector< long > fileentriessum;
 std::vector< double > fileoffset,filegain;
 double FileOffset=0,FileGain=1;
 
-bool s3used[4]={0,0,0,0};
-short s3index[4]={-1,-1,-1,-1};
+vector<bool> s3used(MAXS3,0);
+vector<short> s3index(MAXS3,-1);
 bool MultiS3=false;
 
 unsigned short s3id(TS3Hit* s3hit){
 	if(MultiS3){
 		unsigned short i=s3hit->GetArrayPosition();
-		if(i<4&&i>=0)return s3index[i];
+		if(i<MAXS3&&i>=0)return s3index[i];
 	}
 	return 0;
 }
@@ -71,7 +73,7 @@ unsigned short s3r(TS3Hit* s3hit){
 	int r=s3hit->GetRing();
 	if(MultiS3){
 		unsigned short i=s3hit->GetArrayPosition();
-		if(i<4&&i>=0)return s3index[i]*24+r;
+		if(i<MAXS3&&i>=0)return s3index[i]*24+r;
 	}
 	return r;
 }
@@ -273,8 +275,8 @@ gROOT->cd();
 bool BadPixel=false;
 bool DoRingGroups=false;
 
-TVector3 S3OffsetVector[4];
-TVector3 S3OffsetTmp[4];
+vector<TVector3> S3OffsetVector(MAXS3);
+vector<TVector3> S3OffsetTmp(MAXS3);
 
 string str;
 while(inp>>str){
@@ -283,13 +285,13 @@ while(inp>>str){
 	if(str.find("MultiS3")<str.size()){
 		unsigned short s;
 		inp>>s;
-		if(s<4)	s3used[s]=true;
+		if(s<MAXS3)	s3used[s]=true;
 	}
 	
 	if(str.find("S3Vector")<str.size()){
 		double x,y,z;
 		inp>>x>>y>>z;
-		for(int i=0;i<4;i++)S3OffsetVector[i]=TVector3(x,y,z);
+		for(int i=0;i<MAXS3;i++)S3OffsetVector[i]=TVector3(x,y,z);
 		cout<<endl<<"Using S3 offset "<<x<<" "<<y<<" "<<z<<" mm";
 	}
 	
@@ -297,7 +299,7 @@ while(inp>>str){
 		unsigned short i;
 		double x,y,z;
 		inp>>i>>x>>y>>z;
-		if(i<4){
+		if(i<MAXS3){
 			S3OffsetTmp[i]=TVector3(x,y,z);
 			cout<<endl<<"For S3 Det "<<i<<" using offset "<<x<<" "<<y<<" "<<z<<" mm";
 		}
@@ -395,7 +397,7 @@ gROOT->cd();
 int c=0;
 stringstream cc;
 cc<<"Multiple S3s position ";
-for(int i=0;i<4;i++)if(s3used[i]){
+for(int i=0;i<MAXS3;i++)if(s3used[i]){
 	c++;cc<<i<<" ";
 }
 
