@@ -49,8 +49,8 @@ vector< pair<unsigned int,unsigned int> > ringgroups;
 
 vector< pair<int,int> > BadPixelVec;
 
-enum controlenum{BetaZero,TigressDistance,FrontBackEnergy,FrontBackOffset,FrontBackTime,S3EnergyLimit,SiLiWaveTOffset,TigressTargetOffset,SiLiNoiseLimit,SiLiSmirnovLimit,SiLiCoincidenceT,SPICEVetoT};
-vector< string > controlnames={"BetaZero","TigressDistance","FrontBackEnergy","FrontBackOffset","FrontBackTime","S3EnergyLimit","SiLiWaveTOffset","TigressTargetOffset","SiLiNoiseLimit","SiLiSmirnovLimit","SiLiCoincidenceT","SPICEVetoT"};
+enum controlenum{BetaZero,TigressDistance,FrontBackEnergy,FrontBackOffset,FrontBackTime,S3EnergyLimit,SiLiWaveTOffset,TigressTargetOffset,TigressRadialOffset,SiLiNoiseLimit,SiLiSmirnovLimit,SiLiCoincidenceT,SPICEVetoT};
+vector< string > controlnames={"BetaZero","TigressDistance","FrontBackEnergy","FrontBackOffset","FrontBackTime","S3EnergyLimit","SiLiWaveTOffset","TigressTargetOffset","TigressRadialOffset","SiLiNoiseLimit","SiLiSmirnovLimit","SiLiCoincidenceT","SPICEVetoT"};
 vector< double > control={0.0,110.,0.9,0,75,50000,7000,-8,0.15,500,200,50};
 
 std::vector< string > filelist;
@@ -201,7 +201,6 @@ if(TigressSuppressed){
 	cout<<endl<<"Tigress Suppressed Position.";
 	control[TigressDistance]=145.0;
 }
-TTigress::SetArrayBackPos(!TigressSuppressed);
 
 //Single number control parameters
 for(int z=0;z<controlnames.size();z++)
@@ -537,6 +536,9 @@ TChannel::SetUseCalFileIntegration("GD",true,EPriority::kForce);
 
 TTigress::SetForceCrystal();
 TTigress::SetTargetOffset(control[TigressTargetOffset]);
+TTigress::SetRadialOffset(control[TigressRadialOffset]);
+
+TTigress::SetArrayBackPos(TigressSuppressed);
 
 //
 // Set the control parameters used by the S3 pixel build & some for SiLi

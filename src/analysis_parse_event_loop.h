@@ -517,7 +517,6 @@ if(DS){for(int i=0;i<sili->GetMultiplicity();i++){
 	
 	//Moved from addback section so noise and mess is underflow bin
 	runtime_sili->Fill(tstamphour,e);
-	fileN_sili->Fill(fileiterator,e);	
 	eventN_sili->Fill(jentry,e);	
 	
 	rawsilisum+=e;
@@ -526,17 +525,10 @@ if(DS){for(int i=0;i<sili->GetMultiplicity();i++){
 		if(s>=0&&s<120){
 			SiLi_raw->Fill(e);
 			if(sili->GetMultiplicity()==1)SiLi_rawm1->Fill(e);
-			TVector3 pos = sili_hit->GetPosition(true);
-	// 		TVector3 pos = TSiLi::GetPosition(sili_hit->GetRing(),sili_hit->GetSector(),true);
-			SiLi_map->Fill(-pos.X(),pos.Y());
-		
-			SiLiflat->Fill(s,e);
-			SiLipreamp->Fill(sili_hit->GetPreamp(),e);
 			silienergy[s]->Fill(e);
-			int r=sili_hit->GetRing();
-			SiLiring->Fill(r,e);
-			SiLisector->Fill(sili_hit->GetSector(),e);
+
 			//if(r>=0&&r<10)silirings[r]->Fill(e);
+			// // // TVector3 pos = TSiLi::GetPosition(sili_hit->GetRing(),sili_hit->GetSector(),true);
 			
 			if(UseFitCharge){
 				SiLi_signoiseraw->Fill(1./sili_hit->GetSig2Noise(),e);
@@ -596,17 +588,28 @@ if(DS){for(int i=0;i<sili->GetAddbackMultiplicity();i++){
 		if(Nadd==1){//if its a good clean hit add it
 			double ft=sili_hit->GetTimeFit();
 			if(ft>control[SPICEVetoT]){//garbage events have early fit time
-								
+				
+				fileN_sili->Fill(fileiterator,e);
+				
+				TVector3 pos = sili_hit->GetPosition(true);
+				SiLi_map->Fill(-pos.X(),pos.Y());
+				SiLiflat->Fill(sili_hit->GetSegment(),e);
+				SiLipreamp->Fill(sili_hit->GetPreamp(),e);
+				int r=sili_hit->GetRing();
+				SiLiring->Fill(r,e);
+				SiLisector->Fill(sili_hit->GetSector(),e);				
+				
+				
 				if(sili_hit->MagnetShadow()){
 					SiLi_magshad->Fill(e);
-					SiLi_shadRing->Fill(sili_hit->GetRing(),e);
+					SiLi_shadRing->Fill(r,e);
 				}else{
 					SiLi_nagshad->Fill(e);
-					SiLi_nagshadRing->Fill(sili_hit->GetRing(),e);
+					SiLi_nagshadRing->Fill(r,e);
 				}
 							
 				if(SPICELimits){
-					double limit=spicelimits[sili_hit->MagnetShadow()][sili_hit->GetRing()].Eval(e);
+					double limit=spicelimits[sili_hit->MagnetShadow()][r].Eval(e);
 					
 					if(rando.Uniform()>limit){
 						if(ApplySLimits){
@@ -616,10 +619,10 @@ if(DS){for(int i=0;i<sili->GetAddbackMultiplicity();i++){
 					}else{
 						if(sili_hit->MagnetShadow()){
 							SiLi_magshadpc->Fill(e);
-							SiLi_shadRingpc->Fill(sili_hit->GetRing(),e);
+							SiLi_shadRingpc->Fill(r,e);
 						}else{
 							SiLi_nagshadpc->Fill(e);
-							SiLi_nagshadRingpc->Fill(sili_hit->GetRing(),e);
+							SiLi_nagshadRingpc->Fill(r,e);
 						}
 						SiLi_singlespc->Fill(e);
 					}
@@ -813,12 +816,14 @@ for(unsigned int i=0;i<gammaN;i++){
 // 				runtime_gammasili->Fill(tstamphour,gammaE[i],SiLiE[j]);
 // 				eventN_gammasili->Fill(jentry,gammaE[i],SiLiE[j]);
 				Gamma_SiLi->Fill(gammaE[i],SiLiE[j]);
-				if(debug)GammaSiLiChan->Fill(gammaE[i],SiLiE[j],SiLii[j]->GetSegment());
-				
+				if(debug){
+					GammaSiLiChan->Fill(gammaE[i],SiLiE[j],SiLii[j]->GetSegment());
+					GammaSiLiPlus->Fill(gammaE[i]+SiLiE[j]);
+					GammaSiLiPlus_Gamma->Fill(gammaE[i]+SiLiE[j],gammaE[i]);
+					GammaSiLiPlus_SiLi->Fill(gammaE[i]+SiLiE[j],SiLiE[j]);
+				}
+					
 				if(!SiLii[j]->MagnetShadow())SiLiGamma_nagshad->Fill(gammaE[i],SiLiE[j]);
-				GammaSiLiPlus->Fill(gammaE[i]+SiLiE[j]);
-				GammaSiLiPlus_Gamma->Fill(gammaE[i]+SiLiE[j],gammaE[i]);
-				GammaSiLiPlus_SiLi->Fill(gammaE[i]+SiLiE[j],SiLiE[j]);
 				
 				if(!RFfail)Gamma_SiLi_SiliRF->Fill(gammaE[i],SiLiE[j],SiLitRF[j]);
 				
@@ -983,6 +988,7 @@ for(unsigned int j=0;j<S3N;j++){
 		// Any complexities for multiple physical S3s are dealt with at the S3 singles stage
 		
 		TVector3 particlevec=S3pos[j];
+		double thetedet=particlevec.Theta();//For debug to keep original when using ggate->use_tt
 		
 		gate2Ddata* ggate=&ParticleGate[g];//The gate settings (kinematics etc) for gate [g]
 		
@@ -1106,7 +1112,7 @@ for(unsigned int j=0;j<S3N;j++){
 				
 				if(debug){
 					//TigressDopplerAngle[g][R]->Fill(ang,e);
-					TigressDopplerTheta[g]->Fill(e,ang,particlevec.Theta());
+					TigressDopplerTheta[g]->Fill(e,ang,thetedet);
 
 					if(gammai[i]->GetNSegments()==0||gammai[i]->GetNSegments()==8){
 						int cor=gammai[i]->GetArrayNumber();

@@ -22,7 +22,10 @@ TigressTimeWalk
 # Tigress time gates have an exponential cut to allow for time broadening of low energy events
 
 TigressTargetOffset 0.5
-# (mm between centre of target and tigress=-8)
+# (Z in mm between centre of target and tigress=-8)
+
+TigressRadialOffset 0.0
+# (R in mm. Small radial offset from the default interaction positions fine adjust on top of TigressSuppressed)  
 
 ### S3 OPTIONS ###
 

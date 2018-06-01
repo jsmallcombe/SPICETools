@@ -199,9 +199,13 @@
 				chanA->AddENGCoefficient(line.GetParameter(0));
 				chanA->AddENGCoefficient(line.GetParameter(1));
 				chanA->AddENGCoefficient(line.GetParameter(2));
-			}
-			
-			if(chanB){
+				if(chanB){
+					chanB->DestroyENGCal();
+					chanB->AddENGCoefficient(0);
+					chanB->AddENGCoefficient(0);
+				}
+					
+			}else if(chanB){
 				chanB->DestroyENGCal();
 				chanB->AddENGCoefficient(line.GetParameter(0));
 				chanB->AddENGCoefficient(line.GetParameter(1));
