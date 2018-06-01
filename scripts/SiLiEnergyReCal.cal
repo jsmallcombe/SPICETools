@@ -1,0 +1,2501 @@
+
+SPI00XN00 0x0700909	{
+Type:      TSiLi
+Name:      SPI00XN00 0x0700909
+Number:    809
+Address:   0x00700909
+Digitizer: TIG10
+EngCoeff:  5.379182	0.362226	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -14.630000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 18.892200
+DecayTime: 4781.180000
+BaseLine: -4351.680000
+}
+//====================================//
+
+
+SPI00XN01 0x0700705	{
+Type:      TSiLi
+Name:      SPI00XN01 0x0700705
+Number:    785
+Address:   0x00700705
+Digitizer: TIG10
+EngCoeff:  0.000000e+00	1.000000	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+FileInt: 1
+RiseTime: 19.627900
+DecayTime: 5509.550000
+BaseLine: -4357.770000
+}
+//====================================//
+
+
+SPI00XN02 0x0700809	{
+Type:      TSiLi
+Name:      SPI00XN02 0x0700809
+Number:    799
+Address:   0x00700809
+Digitizer: TIG10
+EngCoeff:  2.288493	0.382807	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -10.750000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 13.609700
+DecayTime: 9346.610000
+BaseLine: -4367.270000
+}
+//====================================//
+
+
+SPI00XN03 0x0700500	{
+Type:      TSiLi
+Name:      SPI00XN03 0x0700500
+Number:    760
+Address:   0x00700500
+Digitizer: TIG10
+EngCoeff:  2.300730	0.404377	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -13.650000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 16.501400
+DecayTime: 5911.650000
+BaseLine: -4359.390000
+}
+//====================================//
+
+
+SPI00XN04 0x0700604	{
+Type:      TSiLi
+Name:      SPI00XN04 0x0700604
+Number:    774
+Address:   0x00700604
+Digitizer: TIG10
+EngCoeff:  4.431360	0.387292	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -10.250000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 9.297860
+DecayTime: 8997.510000
+BaseLine: -4378.620000
+}
+//====================================//
+
+
+SPI00XN05 0x0700400	{
+Type:      TSiLi
+Name:      SPI00XN05 0x0700400
+Number:    750
+Address:   0x00700400
+Digitizer: TIG10
+EngCoeff:  5.684912	0.340240	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -13.750000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 16.784300
+DecayTime: 5512.610000
+BaseLine: -4319.510000
+}
+//====================================//
+
+
+SPI00XN06 0x0700204	{
+Type:      TSiLi
+Name:      SPI00XN06 0x0700204
+Number:    734
+Address:   0x00700204
+Digitizer: TIG10
+EngCoeff:  0.000000e+00	0.000000e+00	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -13.750000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 16.347600
+DecayTime: 5672.410000
+BaseLine: -4390.760000
+}
+//====================================//
+
+
+SPI00XN07 0x0700300	{
+Type:      TSiLi
+Name:      SPI00XN07 0x0700300
+Number:    740
+Address:   0x00700300
+Digitizer: TIG10
+EngCoeff:  0.749558	0.394148	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -13.650000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 17.195600
+DecayTime: 6388.290000
+BaseLine: -4303.860000
+}
+//====================================//
+
+
+SPI00XN08 0x0700104	{
+Type:      TSiLi
+Name:      SPI00XN08 0x0700104
+Number:    724
+Address:   0x00700104
+Digitizer: TIG10
+EngCoeff:  -2.360599e+00	0.370631	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -14.250000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 17.321800
+DecayTime: 5240.520000
+BaseLine: -4380.370000
+}
+//====================================//
+
+
+SPI00XN09 0x0700c05	{
+Type:      TSiLi
+Name:      SPI00XN09 0x0700c05
+Number:    835
+Address:   0x00700c05
+Digitizer: TIG10
+EngCoeff:  5.175572	0.412035	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -15.250000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 19.283600
+DecayTime: 5217.410000
+BaseLine: -4328.000000
+}
+//====================================//
+
+
+SPI00XN0A 0x0700a09	{
+Type:      TSiLi
+Name:      SPI00XN0A 0x0700a09
+Number:    819
+Address:   0x00700a09
+Digitizer: TIG10
+EngCoeff:  0.000000e+00	0.000000e+00	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -15.450000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 20.000200
+DecayTime: 5558.070000
+BaseLine: -4370.670000
+}
+//====================================//
+
+
+SPI00XN0B 0x0700b05	{
+Type:      TSiLi
+Name:      SPI00XN0B 0x0700b05
+Number:    825
+Address:   0x00700b05
+Digitizer: TIG10
+EngCoeff:  4.688793	0.364616	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -15.150000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 18.662300
+DecayTime: 5431.670000
+BaseLine: -4352.020000
+}
+//====================================//
+
+
+SPI00XN0C 0x0700804	{
+Type:      TSiLi
+Name:      SPI00XN0C 0x0700804
+Number:    794
+Address:   0x00700804
+Digitizer: TIG10
+EngCoeff:  0.000000e+00	1.000000	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+FileInt: 1
+RiseTime: 19.693000
+DecayTime: 4590.680000
+BaseLine: -4348.450000
+}
+//====================================//
+
+
+SPI00XN0D 0x0700900	{
+Type:      TSiLi
+Name:      SPI00XN0D 0x0700900
+Number:    800
+Address:   0x00700900
+Digitizer: TIG10
+EngCoeff:  3.911742	0.366714	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -13.550000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 18.006200
+DecayTime: 5623.240000
+BaseLine: -4384.700000
+}
+//====================================//
+
+
+SPI00XN0E 0x0700704	{
+Type:      TSiLi
+Name:      SPI00XN0E 0x0700704
+Number:    784
+Address:   0x00700704
+Digitizer: TIG10
+EngCoeff:  0.000000e+00	1.000000	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+FileInt: 1
+RiseTime: 20.142100
+DecayTime: 5102.830000
+BaseLine: -4423.700000
+}
+//====================================//
+
+
+SPI00XN0F 0x0700605	{
+Type:      TSiLi
+Name:      SPI00XN0F 0x0700605
+Number:    775
+Address:   0x00700605
+Digitizer: TIG10
+EngCoeff:  2.020171	0.399006	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -9.750000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 9.747340
+DecayTime: 8937.030000
+BaseLine: -4426.330000
+}
+//====================================//
+
+
+SPI00XN10 0x0700409	{
+Type:      TSiLi
+Name:      SPI00XN10 0x0700409
+Number:    759
+Address:   0x00700409
+Digitizer: TIG10
+EngCoeff:  6.425862	0.402752	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -13.950000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 16.814200
+DecayTime: 6416.910000
+BaseLine: -4203.160000
+}
+//====================================//
+
+
+SPI00XN11 0x0700505	{
+Type:      TSiLi
+Name:      SPI00XN11 0x0700505
+Number:    765
+Address:   0x00700505
+Digitizer: TIG10
+EngCoeff:  3.223068	0.393219	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -9.750000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 9.349140
+DecayTime: 9225.690000
+BaseLine: -4398.950000
+}
+//====================================//
+
+
+SPI00XN12 0x0700309	{
+Type:      TSiLi
+Name:      SPI00XN12 0x0700309
+Number:    749
+Address:   0x00700309
+Digitizer: TIG10
+EngCoeff:  6.417233	0.386276	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -13.950000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 16.274600
+DecayTime: 5510.680000
+BaseLine: -4309.080000
+}
+//====================================//
+
+
+SPI00XN13 0x0700105	{
+Type:      TSiLi
+Name:      SPI00XN13 0x0700105
+Number:    725
+Address:   0x00700105
+Digitizer: TIG10
+EngCoeff:  9.190326	0.376255	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -13.450000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 17.234700
+DecayTime: 5504.490000
+BaseLine: -4361.640000
+}
+//====================================//
+
+
+SPI00XN14 0x0700209	{
+Type:      TSiLi
+Name:      SPI00XN14 0x0700209
+Number:    739
+Address:   0x00700209
+Digitizer: TIG10
+EngCoeff:  -1.198824e+00	0.406481	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -13.850000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 16.655800
+DecayTime: 6276.570000
+BaseLine: -4338.400000
+}
+//====================================//
+
+
+SPI00XN15 0x0700b00	{
+Type:      TSiLi
+Name:      SPI00XN15 0x0700b00
+Number:    820
+Address:   0x00700b00
+Digitizer: TIG10
+EngCoeff:  7.153947	0.392402	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -14.050000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 17.905700
+DecayTime: 6336.250000
+BaseLine: -4379.700000
+}
+//====================================//
+
+
+SPI00XN16 0x0700c04	{
+Type:      TSiLi
+Name:      SPI00XN16 0x0700c04
+Number:    834
+Address:   0x00700c04
+Digitizer: TIG10
+EngCoeff:  3.970032	0.396328	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -14.750000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 20.276200
+DecayTime: 5058.810000
+BaseLine: -4377.310000
+}
+//====================================//
+
+
+SPI00XN17 0x0700a00	{
+Type:      TSiLi
+Name:      SPI00XN17 0x0700a00
+Number:    810
+Address:   0x00700a00
+Digitizer: TIG10
+EngCoeff:  3.056073	0.390674	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -14.750000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 19.310400
+DecayTime: 5325.950000
+BaseLine: -4297.710000
+}
+//====================================//
+
+
+SPI00XN18 0x0700908	{
+Type:      TSiLi
+Name:      SPI00XN18 0x0700908
+Number:    808
+Address:   0x00700908
+Digitizer: TIG10
+EngCoeff:  0.000000e+00	0.000000e+00	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -14.750000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 19.622300
+DecayTime: 4833.120000
+BaseLine: -4402.470000
+}
+//====================================//
+
+
+SPI00XN19 0x0700706	{
+Type:      TSiLi
+Name:      SPI00XN19 0x0700706
+Number:    786
+Address:   0x00700706
+Digitizer: TIG10
+EngCoeff:  0.000000e+00	1.000000	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+FileInt: 1
+RiseTime: 19.881700
+DecayTime: 4990.250000
+BaseLine: -4423.670000
+}
+//====================================//
+
+
+SPI00XN1A 0x0700808	{
+Type:      TSiLi
+Name:      SPI00XN1A 0x0700808
+Number:    798
+Address:   0x00700808
+Digitizer: TIG10
+EngCoeff:  1.707714	0.375623	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -13.950000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 20.295600
+DecayTime: 4594.230000
+BaseLine: -4388.890000
+}
+//====================================//
+
+
+SPI00XN1B 0x0700501	{
+Type:      TSiLi
+Name:      SPI00XN1B 0x0700501
+Number:    761
+Address:   0x00700501
+Digitizer: TIG10
+EngCoeff:  6.353719	0.402629	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -13.150000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 17.058200
+DecayTime: 6502.700000
+BaseLine: -4358.170000
+}
+//====================================//
+
+
+SPI00XN1C 0x0700603	{
+Type:      TSiLi
+Name:      SPI00XN1C 0x0700603
+Number:    773
+Address:   0x00700603
+Digitizer: TIG10
+EngCoeff:  5.196670	0.392212	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -9.250000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 10.029200
+DecayTime: 8258.060000
+BaseLine: -4381.910000
+}
+//====================================//
+
+
+SPI00XN1D 0x0700401	{
+Type:      TSiLi
+Name:      SPI00XN1D 0x0700401
+Number:    751
+Address:   0x00700401
+Digitizer: TIG10
+EngCoeff:  0.928877	0.370777	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -12.650000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 16.633700
+DecayTime: 5786.950000
+BaseLine: -4313.060000
+}
+//====================================//
+
+
+SPI00XN1E 0x0700203	{
+Type:      TSiLi
+Name:      SPI00XN1E 0x0700203
+Number:    733
+Address:   0x00700203
+Digitizer: TIG10
+EngCoeff:  5.263928	0.358250	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -13.350000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 17.289200
+DecayTime: 5720.280000
+BaseLine: -4318.660000
+}
+//====================================//
+
+
+SPI00XN1F 0x0700301	{
+Type:      TSiLi
+Name:      SPI00XN1F 0x0700301
+Number:    741
+Address:   0x00700301
+Digitizer: TIG10
+EngCoeff:  3.974792	0.383296	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -13.150000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 17.944400
+DecayTime: 5693.360000
+BaseLine: -4315.800000
+}
+//====================================//
+
+
+SPI00XN20 0x0700103	{
+Type:      TSiLi
+Name:      SPI00XN20 0x0700103
+Number:    723
+Address:   0x00700103
+Digitizer: TIG10
+EngCoeff:  5.644333	0.373649	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -13.050000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 18.033700
+DecayTime: 5584.200000
+BaseLine: -4403.120000
+}
+//====================================//
+
+
+SPI00XN21 0x0700c06	{
+Type:      TSiLi
+Name:      SPI00XN21 0x0700c06
+Number:    836
+Address:   0x00700c06
+Digitizer: TIG10
+EngCoeff:  5.947062	0.398085	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -14.550000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 20.153400
+DecayTime: 5529.460000
+BaseLine: -4387.640000
+}
+//====================================//
+
+
+SPI00XN22 0x0700a08	{
+Type:      TSiLi
+Name:      SPI00XN22 0x0700a08
+Number:    818
+Address:   0x00700a08
+Digitizer: TIG10
+EngCoeff:  0.000000e+00	0.000000e+00	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -14.650000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 20.079700
+DecayTime: 5376.380000
+BaseLine: -4340.130000
+}
+//====================================//
+
+
+SPI00XN23 0x0700b06	{
+Type:      TSiLi
+Name:      SPI00XN23 0x0700b06
+Number:    826
+Address:   0x00700b06
+Digitizer: TIG10
+EngCoeff:  -1.235110e+00	0.382854	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -14.750000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 19.791000
+DecayTime: 5389.260000
+BaseLine: -4334.670000
+}
+//====================================//
+
+
+SPI00XN24 0x0700803	{
+Type:      TSiLi
+Name:      SPI00XN24 0x0700803
+Number:    793
+Address:   0x00700803
+Digitizer: TIG10
+EngCoeff:  0.000000e+00	1.000000	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+FileInt: 1
+RiseTime: 20.155400
+DecayTime: 5137.440000
+BaseLine: -4387.290000
+}
+//====================================//
+
+
+SPI00XN25 0x0700901	{
+Type:      TSiLi
+Name:      SPI00XN25 0x0700901
+Number:    801
+Address:   0x00700901
+Digitizer: TIG10
+EngCoeff:  -7.593917e-02	0.356936	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -13.950000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 20.720700
+DecayTime: 4269.600000
+BaseLine: -4375.520000
+}
+//====================================//
+
+
+SPI00XN26 0x0700703	{
+Type:      TSiLi
+Name:      SPI00XN26 0x0700703
+Number:    783
+Address:   0x00700703
+Digitizer: TIG10
+EngCoeff:  0.000000e+00	1.000000	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+FileInt: 1
+RiseTime: 0.000000
+DecayTime: 0.000000
+BaseLine: 0.000000
+}
+//====================================//
+
+
+SPI00XN27 0x0700606	{
+Type:      TSiLi
+Name:      SPI00XN27 0x0700606
+Number:    776
+Address:   0x00700606
+Digitizer: TIG10
+EngCoeff:  6.766752	0.402850	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -9.450000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 9.993410
+DecayTime: 8941.880000
+BaseLine: -4389.020000
+}
+//====================================//
+
+
+SPI00XN28 0x0700408	{
+Type:      TSiLi
+Name:      SPI00XN28 0x0700408
+Number:    758
+Address:   0x00700408
+Digitizer: TIG10
+EngCoeff:  0.000000e+00	0.000000e+00	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -13.150000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 17.267800
+DecayTime: 5727.950000
+BaseLine: -4235.080000
+}
+//====================================//
+
+
+SPI00XN29 0x0700506	{
+Type:      TSiLi
+Name:      SPI00XN29 0x0700506
+Number:    766
+Address:   0x00700506
+Digitizer: TIG10
+EngCoeff:  2.822278	0.398196	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -9.050000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 9.935310
+DecayTime: 9389.550000
+BaseLine: -4356.830000
+}
+//====================================//
+
+
+SPI00XN2A 0x0700308	{
+Type:      TSiLi
+Name:      SPI00XN2A 0x0700308
+Number:    748
+Address:   0x00700308
+Digitizer: TIG10
+EngCoeff:  3.579095	0.391986	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -13.250000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 17.027600
+DecayTime: 5566.770000
+BaseLine: -4322.420000
+}
+//====================================//
+
+
+SPI00XN2B 0x0700106	{
+Type:      TSiLi
+Name:      SPI00XN2B 0x0700106
+Number:    726
+Address:   0x00700106
+Digitizer: TIG10
+EngCoeff:  8.248962	0.362774	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -13.150000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 17.789300
+DecayTime: 5397.130000
+BaseLine: -4402.540000
+}
+//====================================//
+
+
+SPI00XN2C 0x0700208	{
+Type:      TSiLi
+Name:      SPI00XN2C 0x0700208
+Number:    738
+Address:   0x00700208
+Digitizer: TIG10
+EngCoeff:  5.472395	0.403312	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -13.350000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 17.789600
+DecayTime: 5679.580000
+BaseLine: -4257.360000
+}
+//====================================//
+
+
+SPI00XN2D 0x0700b01	{
+Type:      TSiLi
+Name:      SPI00XN2D 0x0700b01
+Number:    821
+Address:   0x00700b01
+Digitizer: TIG10
+EngCoeff:  3.508378	0.390311	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -14.550000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 20.981400
+DecayTime: 5072.870000
+BaseLine: -4362.900000
+}
+//====================================//
+
+
+SPI00XN2E 0x0700c03	{
+Type:      TSiLi
+Name:      SPI00XN2E 0x0700c03
+Number:    833
+Address:   0x00700c03
+Digitizer: TIG10
+EngCoeff:  6.438369	0.405295	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -14.450000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 20.381300
+DecayTime: 5070.570000
+BaseLine: -4366.020000
+}
+//====================================//
+
+
+SPI00XN2F 0x0700a01	{
+Type:      TSiLi
+Name:      SPI00XN2F 0x0700a01
+Number:    811
+Address:   0x00700a01
+Digitizer: TIG10
+EngCoeff:  4.648358	0.391219	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -14.550000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 19.794900
+DecayTime: 5376.940000
+BaseLine: -4347.290000
+}
+//====================================//
+
+
+SPI00XN30 0x0700907	{
+Type:      TSiLi
+Name:      SPI00XN30 0x0700907
+Number:    807
+Address:   0x00700907
+Digitizer: TIG10
+EngCoeff:  13.530956	0.368882	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -9.650000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 13.879000
+DecayTime: 8956.780000
+BaseLine: -4392.030000
+}
+//====================================//
+
+
+SPI00XN31 0x0700707	{
+Type:      TSiLi
+Name:      SPI00XN31 0x0700707
+Number:    787
+Address:   0x00700707
+Digitizer: TIG10
+EngCoeff:  0.000000e+00	1.000000	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+FileInt: 1
+RiseTime: 21.160600
+DecayTime: 4857.370000
+BaseLine: -4387.390000
+}
+//====================================//
+
+
+SPI00XN32 0x0700807	{
+Type:      TSiLi
+Name:      SPI00XN32 0x0700807
+Number:    797
+Address:   0x00700807
+Digitizer: TIG10
+EngCoeff:  1.310993	0.377057	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -12.550000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 17.964300
+DecayTime: 5212.760000
+BaseLine: -4355.700000
+}
+//====================================//
+
+
+SPI00XN33 0x0700502	{
+Type:      TSiLi
+Name:      SPI00XN33 0x0700502
+Number:    762
+Address:   0x00700502
+Digitizer: TIG10
+EngCoeff:  3.432748	0.397664	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -12.750000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 17.228300
+DecayTime: 6310.900000
+BaseLine: -4432.720000
+}
+//====================================//
+
+
+SPI00XN34 0x0700602	{
+Type:      TSiLi
+Name:      SPI00XN34 0x0700602
+Number:    772
+Address:   0x00700602
+Digitizer: TIG10
+EngCoeff:  6.172871	0.405909	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -8.750000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 10.126700
+DecayTime: 9140.780000
+BaseLine: -4364.250000
+}
+//====================================//
+
+
+SPI00XN35 0x0700402	{
+Type:      TSiLi
+Name:      SPI00XN35 0x0700402
+Number:    752
+Address:   0x00700402
+Digitizer: TIG10
+EngCoeff:  5.412024	0.408717	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -12.650000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 16.652700
+DecayTime: 6096.650000
+BaseLine: -4279.550000
+}
+//====================================//
+
+
+SPI00XN36 0x0700202	{
+Type:      TSiLi
+Name:      SPI00XN36 0x0700202
+Number:    732
+Address:   0x00700202
+Digitizer: TIG10
+EngCoeff:  5.554993	0.358836	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -12.850000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 17.772700
+DecayTime: 5942.570000
+BaseLine: -4330.460000
+}
+//====================================//
+
+
+SPI00XN37 0x0700302	{
+Type:      TSiLi
+Name:      SPI00XN37 0x0700302
+Number:    742
+Address:   0x00700302
+Digitizer: TIG10
+EngCoeff:  0.000000e+00	0.000000e+00	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -12.950000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 17.809400
+DecayTime: 6340.010000
+BaseLine: -4304.230000
+}
+//====================================//
+
+
+SPI00XN38 0x0700102	{
+Type:      TSiLi
+Name:      SPI00XN38 0x0700102
+Number:    722
+Address:   0x00700102
+Digitizer: TIG10
+EngCoeff:  0.853255	0.377131	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -13.050000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 18.289700
+DecayTime: 5117.780000
+BaseLine: -4324.490000
+}
+//====================================//
+
+
+SPI00XN39 0x0700c07	{
+Type:      TSiLi
+Name:      SPI00XN39 0x0700c07
+Number:    837
+Address:   0x00700c07
+Digitizer: TIG10
+EngCoeff:  3.096258	0.419840	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -14.250000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 19.818200
+DecayTime: 6050.490000
+BaseLine: -4374.400000
+}
+//====================================//
+
+
+SPI00XN3A 0x0700a07	{
+Type:      TSiLi
+Name:      SPI00XN3A 0x0700a07
+Number:    817
+Address:   0x00700a07
+Digitizer: TIG10
+EngCoeff:  0.000000e+00	1.000000	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+FileInt: 1
+RiseTime: 0.000000
+DecayTime: 0.000000
+BaseLine: 0.000000
+}
+//====================================//
+
+
+SPI00XN3B 0x0700b07	{
+Type:      TSiLi
+Name:      SPI00XN3B 0x0700b07
+Number:    827
+Address:   0x00700b07
+Digitizer: TIG10
+EngCoeff:  7.623067	0.414738	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -14.250000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 19.236600
+DecayTime: 5467.210000
+BaseLine: -4389.220000
+}
+//====================================//
+
+
+SPI00XN3C 0x0700802	{
+Type:      TSiLi
+Name:      SPI00XN3C 0x0700802
+Number:    792
+Address:   0x00700802
+Digitizer: TIG10
+EngCoeff:  0.000000e+00	1.000000	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+FileInt: 1
+RiseTime: 20.137000
+DecayTime: 5294.880000
+BaseLine: -4361.110000
+}
+//====================================//
+
+
+SPI00XN3D 0x0700902	{
+Type:      TSiLi
+Name:      SPI00XN3D 0x0700902
+Number:    802
+Address:   0x00700902
+Digitizer: TIG10
+EngCoeff:  2.989438	0.366782	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -13.850000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 21.215600
+DecayTime: 5142.950000
+BaseLine: -4370.360000
+}
+//====================================//
+
+
+SPI00XN3E 0x0700702	{
+Type:      TSiLi
+Name:      SPI00XN3E 0x0700702
+Number:    782
+Address:   0x00700702
+Digitizer: TIG10
+EngCoeff:  0.000000e+00	1.000000	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+FileInt: 1
+RiseTime: 21.202100
+DecayTime: 4901.680000
+BaseLine: -4371.170000
+}
+//====================================//
+
+
+SPI00XN3F 0x0700607	{
+Type:      TSiLi
+Name:      SPI00XN3F 0x0700607
+Number:    777
+Address:   0x00700607
+Digitizer: TIG10
+EngCoeff:  5.762920	0.421492	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -8.950000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 9.949170
+DecayTime: 8544.530000
+BaseLine: -4333.380000
+}
+//====================================//
+
+
+SPI00XN40 0x0700407	{
+Type:      TSiLi
+Name:      SPI00XN40 0x0700407
+Number:    757
+Address:   0x00700407
+Digitizer: TIG10
+EngCoeff:  5.290971	0.389097	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -12.950000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 17.363300
+DecayTime: 5656.840000
+BaseLine: -4269.780000
+}
+//====================================//
+
+
+SPI00XN41 0x0700507	{
+Type:      TSiLi
+Name:      SPI00XN41 0x0700507
+Number:    767
+Address:   0x00700507
+Digitizer: TIG10
+EngCoeff:  9.649883	0.410706	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -8.850000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 10.191100
+DecayTime: 8228.550000
+BaseLine: -4382.240000
+}
+//====================================//
+
+
+SPI00XN42 0x0700307	{
+Type:      TSiLi
+Name:      SPI00XN42 0x0700307
+Number:    747
+Address:   0x00700307
+Digitizer: TIG10
+EngCoeff:  -8.246387e-03	0.396310	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -12.750000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 17.516100
+DecayTime: 5818.400000
+BaseLine: -4355.790000
+}
+//====================================//
+
+
+SPI00XN43 0x0700107	{
+Type:      TSiLi
+Name:      SPI00XN43 0x0700107
+Number:    727
+Address:   0x00700107
+Digitizer: TIG10
+EngCoeff:  6.370429	0.393318	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -8.550000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 12.152800
+DecayTime: 8817.160000
+BaseLine: -4360.350000
+}
+//====================================//
+
+
+SPI00XN44 0x0700207	{
+Type:      TSiLi
+Name:      SPI00XN44 0x0700207
+Number:    737
+Address:   0x00700207
+Digitizer: TIG10
+EngCoeff:  5.729695	0.400525	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -13.250000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 18.111700
+DecayTime: 5289.940000
+BaseLine: -4289.930000
+}
+//====================================//
+
+
+SPI00XN45 0x0700b02	{
+Type:      TSiLi
+Name:      SPI00XN45 0x0700b02
+Number:    822
+Address:   0x00700b02
+Digitizer: TIG10
+EngCoeff:  5.121954	0.403602	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -14.450000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 21.228400
+DecayTime: 5536.840000
+BaseLine: -4414.310000
+}
+//====================================//
+
+
+SPI00XN46 0x0700c02	{
+Type:      TSiLi
+Name:      SPI00XN46 0x0700c02
+Number:    832
+Address:   0x00700c02
+Digitizer: TIG10
+EngCoeff:  -1.599917e+00	0.401852	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -13.950000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 20.561400
+DecayTime: 5501.400000
+BaseLine: -4340.570000
+}
+//====================================//
+
+
+SPI00XN47 0x0700a02	{
+Type:      TSiLi
+Name:      SPI00XN47 0x0700a02
+Number:    812
+Address:   0x00700a02
+Digitizer: TIG10
+EngCoeff:  0.000000e+00	1.000000	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+FileInt: 1
+RiseTime: 0.000000
+DecayTime: 0.000000
+BaseLine: 0.000000
+}
+//====================================//
+
+
+SPI00XN48 0x0700906	{
+Type:      TSiLi
+Name:      SPI00XN48 0x0700906
+Number:    806
+Address:   0x00700906
+Digitizer: TIG10
+EngCoeff:  0.000000e+00	0.000000e+00	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -13.950000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 20.347100
+DecayTime: 4962.160000
+BaseLine: -4400.100000
+}
+//====================================//
+
+
+SPI00XN49 0x0700708	{
+Type:      TSiLi
+Name:      SPI00XN49 0x0700708
+Number:    788
+Address:   0x00700708
+Digitizer: TIG10
+EngCoeff:  0.000000e+00	1.000000	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+FileInt: 1
+RiseTime: 20.825300
+DecayTime: 5287.660000
+BaseLine: -4366.750000
+}
+//====================================//
+
+
+SPI00XN4A 0x0700806	{
+Type:      TSiLi
+Name:      SPI00XN4A 0x0700806
+Number:    796
+Address:   0x00700806
+Digitizer: TIG10
+EngCoeff:  5.631721	0.377280	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -13.950000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 21.362300
+DecayTime: 4829.680000
+BaseLine: -4346.700000
+}
+//====================================//
+
+
+SPI00XN4B 0x0700503	{
+Type:      TSiLi
+Name:      SPI00XN4B 0x0700503
+Number:    763
+Address:   0x00700503
+Digitizer: TIG10
+EngCoeff:  6.401864	0.409038	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -12.650000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 17.504900
+DecayTime: 5684.710000
+BaseLine: -4362.810000
+}
+//====================================//
+
+
+SPI00XN4C 0x0700601	{
+Type:      TSiLi
+Name:      SPI00XN4C 0x0700601
+Number:    771
+Address:   0x00700601
+Digitizer: TIG10
+EngCoeff:  0.000000e+00	1.000000	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+FileInt: 1
+RiseTime: 0.000000
+DecayTime: 0.000000
+BaseLine: 0.000000
+}
+//====================================//
+
+
+SPI00XN4D 0x0700403	{
+Type:      TSiLi
+Name:      SPI00XN4D 0x0700403
+Number:    753
+Address:   0x00700403
+Digitizer: TIG10
+EngCoeff:  11.636137	0.407007	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -12.150000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 17.092700
+DecayTime: 6212.770000
+BaseLine: -4331.950000
+}
+//====================================//
+
+
+SPI00XN4E 0x0700201	{
+Type:      TSiLi
+Name:      SPI00XN4E 0x0700201
+Number:    731
+Address:   0x00700201
+Digitizer: TIG10
+EngCoeff:  6.657899	0.372326	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -12.150000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 17.862500
+DecayTime: 5470.340000
+BaseLine: -4341.050000
+}
+//====================================//
+
+
+SPI00XN4F 0x0700303	{
+Type:      TSiLi
+Name:      SPI00XN4F 0x0700303
+Number:    743
+Address:   0x00700303
+Digitizer: TIG10
+EngCoeff:  4.810211	0.378651	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -12.650000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 18.118000
+DecayTime: 5734.720000
+BaseLine: -4328.100000
+}
+//====================================//
+
+
+SPI00XN50 0x0700101	{
+Type:      TSiLi
+Name:      SPI00XN50 0x0700101
+Number:    721
+Address:   0x00700101
+Digitizer: TIG10
+EngCoeff:  7.607932	0.382396	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -12.950000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 18.300000
+DecayTime: 5536.410000
+BaseLine: -4378.040000
+}
+//====================================//
+
+
+SPI00XN51 0x0700c08	{
+Type:      TSiLi
+Name:      SPI00XN51 0x0700c08
+Number:    838
+Address:   0x00700c08
+Digitizer: TIG10
+EngCoeff:  9.197629	0.411513	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -14.350000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 21.043400
+DecayTime: 5161.490000
+BaseLine: -4393.000000
+}
+//====================================//
+
+
+SPI00XN52 0x0700a06	{
+Type:      TSiLi
+Name:      SPI00XN52 0x0700a06
+Number:    816
+Address:   0x00700a06
+Digitizer: TIG10
+EngCoeff:  4.000834	0.390335	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -14.450000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 21.008500
+DecayTime: 5227.520000
+BaseLine: -4442.030000
+}
+//====================================//
+
+
+SPI00XN53 0x0700b08	{
+Type:      TSiLi
+Name:      SPI00XN53 0x0700b08
+Number:    828
+Address:   0x00700b08
+Digitizer: TIG10
+EngCoeff:  9.700987	0.392739	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -14.250000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 20.406000
+DecayTime: 4828.260000
+BaseLine: -4391.550000
+}
+//====================================//
+
+
+SPI00XN54 0x0700801	{
+Type:      TSiLi
+Name:      SPI00XN54 0x0700801
+Number:    791
+Address:   0x00700801
+Digitizer: TIG10
+EngCoeff:  0.000000e+00	1.000000	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+FileInt: 1
+RiseTime: 20.647600
+DecayTime: 5386.760000
+BaseLine: -4355.470000
+}
+//====================================//
+
+
+SPI00XN55 0x0700903	{
+Type:      TSiLi
+Name:      SPI00XN55 0x0700903
+Number:    803
+Address:   0x00700903
+Digitizer: TIG10
+EngCoeff:  4.726130	0.370521	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -13.750000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 21.796400
+DecayTime: 5041.680000
+BaseLine: -4369.090000
+}
+//====================================//
+
+
+SPI00XN56 0x0700701	{
+Type:      TSiLi
+Name:      SPI00XN56 0x0700701
+Number:    781
+Address:   0x00700701
+Digitizer: TIG10
+EngCoeff:  0.000000e+00	1.000000	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+FileInt: 1
+RiseTime: 21.034400
+DecayTime: 4938.910000
+BaseLine: -4386.940000
+}
+//====================================//
+
+
+SPI00XN57 0x0700608	{
+Type:      TSiLi
+Name:      SPI00XN57 0x0700608
+Number:    778
+Address:   0x00700608
+Digitizer: TIG10
+EngCoeff:  2.580592	0.443356	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -8.850000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 9.452620
+DecayTime: 8938.500000
+BaseLine: -4350.870000
+}
+//====================================//
+
+
+SPI00XN58 0x0700406	{
+Type:      TSiLi
+Name:      SPI00XN58 0x0700406
+Number:    756
+Address:   0x00700406
+Digitizer: TIG10
+EngCoeff:  4.232397	0.406352	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -12.550000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 17.356300
+DecayTime: 5572.950000
+BaseLine: -4210.900000
+}
+//====================================//
+
+
+SPI00XN59 0x0700508	{
+Type:      TSiLi
+Name:      SPI00XN59 0x0700508
+Number:    768
+Address:   0x00700508
+Digitizer: TIG10
+EngCoeff:  13.242793	0.415057	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -8.650000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 10.226800
+DecayTime: 7672.840000
+BaseLine: -4381.310000
+}
+//====================================//
+
+
+SPI00XN5A 0x0700306	{
+Type:      TSiLi
+Name:      SPI00XN5A 0x0700306
+Number:    746
+Address:   0x00700306
+Digitizer: TIG10
+EngCoeff:  11.414987	0.403575	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -12.450000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 17.685900
+DecayTime: 5883.470000
+BaseLine: -4375.300000
+}
+//====================================//
+
+
+SPI00XN5B 0x0700108	{
+Type:      TSiLi
+Name:      SPI00XN5B 0x0700108
+Number:    728
+Address:   0x00700108
+Digitizer: TIG10
+EngCoeff:  0.000000e+00	0.000000e+00	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -12.850000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 18.643800
+DecayTime: 5105.790000
+BaseLine: -4408.790000
+}
+//====================================//
+
+
+SPI00XN5C 0x0700206	{
+Type:      TSiLi
+Name:      SPI00XN5C 0x0700206
+Number:    736
+Address:   0x00700206
+Digitizer: TIG10
+EngCoeff:  9.321103	0.402894	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -13.150000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 18.211000
+DecayTime: 5933.080000
+BaseLine: -4350.850000
+}
+//====================================//
+
+
+SPI00XN5D 0x0700b03	{
+Type:      TSiLi
+Name:      SPI00XN5D 0x0700b03
+Number:    823
+Address:   0x00700b03
+Digitizer: TIG10
+EngCoeff:  10.017245	0.405662	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -14.250000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 21.344200
+DecayTime: 5332.340000
+BaseLine: -4387.530000
+}
+//====================================//
+
+
+SPI00XN5E 0x0700c01	{
+Type:      TSiLi
+Name:      SPI00XN5E 0x0700c01
+Number:    831
+Address:   0x00700c01
+Digitizer: TIG10
+EngCoeff:  0.000000e+00	0.000000e+00	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -14.050000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 20.683900
+DecayTime: 5195.720000
+BaseLine: -4408.610000
+}
+//====================================//
+
+
+SPI00XN5F 0x0700a03	{
+Type:      TSiLi
+Name:      SPI00XN5F 0x0700a03
+Number:    813
+Address:   0x00700a03
+Digitizer: TIG10
+EngCoeff:  7.247188	0.397730	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -13.950000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 20.679600
+DecayTime: 4892.840000
+BaseLine: -4363.970000
+}
+//====================================//
+
+
+SPI00XN60 0x0700905	{
+Type:      TSiLi
+Name:      SPI00XN60 0x0700905
+Number:    805
+Address:   0x00700905
+Digitizer: TIG10
+EngCoeff:  10.577569	0.377243	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -13.650000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 21.016300
+DecayTime: 4824.730000
+BaseLine: -4321.660000
+}
+//====================================//
+
+
+SPI00XN61 0x0700709	{
+Type:      TSiLi
+Name:      SPI00XN61 0x0700709
+Number:    789
+Address:   0x00700709
+Digitizer: TIG10
+EngCoeff:  0.000000e+00	1.000000	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+FileInt: 1
+RiseTime: 20.323900
+DecayTime: 5489.600000
+BaseLine: -4409.920000
+}
+//====================================//
+
+
+SPI00XN62 0x0700805	{
+Type:      TSiLi
+Name:      SPI00XN62 0x0700805
+Number:    795
+Address:   0x00700805
+Digitizer: TIG10
+EngCoeff:  9.206399	0.373408	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -14.050000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 21.331400
+DecayTime: 5029.610000
+BaseLine: -4408.510000
+}
+//====================================//
+
+
+SPI00XN63 0x0700504	{
+Type:      TSiLi
+Name:      SPI00XN63 0x0700504
+Number:    764
+Address:   0x00700504
+Digitizer: TIG10
+EngCoeff:  10.266763	0.413423	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -12.550000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 17.872500
+DecayTime: 6388.300000
+BaseLine: -4385.630000
+}
+//====================================//
+
+
+SPI00XN64 0x0700600	{
+Type:      TSiLi
+Name:      SPI00XN64 0x0700600
+Number:    770
+Address:   0x00700600
+Digitizer: TIG10
+EngCoeff:  0.000000e+00	0.000000e+00	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -8.150000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 10.653900
+DecayTime: 8730.260000
+BaseLine: -4417.020000
+}
+//====================================//
+
+
+SPI00XN65 0x0700404	{
+Type:      TSiLi
+Name:      SPI00XN65 0x0700404
+Number:    754
+Address:   0x00700404
+Digitizer: TIG10
+EngCoeff:  12.347900	0.411373	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -12.050000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 17.621700
+DecayTime: 6402.710000
+BaseLine: -4330.680000
+}
+//====================================//
+
+
+SPI00XN66 0x0700200	{
+Type:      TSiLi
+Name:      SPI00XN66 0x0700200
+Number:    730
+Address:   0x00700200
+Digitizer: TIG10
+EngCoeff:  12.294748	0.363046	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -12.350000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 18.757400
+DecayTime: 6028.160000
+BaseLine: -4367.810000
+}
+//====================================//
+
+
+SPI00XN67 0x0700304	{
+Type:      TSiLi
+Name:      SPI00XN67 0x0700304
+Number:    744
+Address:   0x00700304
+Digitizer: TIG10
+EngCoeff:  0.000000e+00	0.000000e+00	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -13.250000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 18.702000
+DecayTime: 5918.820000
+BaseLine: -4327.260000
+}
+//====================================//
+
+
+SPI00XN68 0x0700100	{
+Type:      TSiLi
+Name:      SPI00XN68 0x0700100
+Number:    720
+Address:   0x00700100
+Digitizer: TIG10
+EngCoeff:  8.360540	0.381098	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -12.850000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 18.636300
+DecayTime: 5715.940000
+BaseLine: -4427.770000
+}
+//====================================//
+
+
+SPI00XN69 0x0700c09	{
+Type:      TSiLi
+Name:      SPI00XN69 0x0700c09
+Number:    839
+Address:   0x00700c09
+Digitizer: TIG10
+EngCoeff:  9.703036	0.433980	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -14.150000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 20.578000
+DecayTime: 5582.610000
+BaseLine: -4351.510000
+}
+//====================================//
+
+
+SPI00XN6A 0x0700a05	{
+Type:      TSiLi
+Name:      SPI00XN6A 0x0700a05
+Number:    815
+Address:   0x00700a05
+Digitizer: TIG10
+EngCoeff:  0.000000e+00	0.000000e+00	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -14.350000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 21.364500
+DecayTime: 5046.140000
+BaseLine: -4375.110000
+}
+//====================================//
+
+
+SPI00XN6B 0x0700b09	{
+Type:      TSiLi
+Name:      SPI00XN6B 0x0700b09
+Number:    829
+Address:   0x00700b09
+Digitizer: TIG10
+EngCoeff:  9.786901	0.415927	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -14.350000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 20.374700
+DecayTime: 5661.190000
+BaseLine: -4372.690000
+}
+//====================================//
+
+
+SPI00XN6C 0x0700800	{
+Type:      TSiLi
+Name:      SPI00XN6C 0x0700800
+Number:    790
+Address:   0x00700800
+Digitizer: TIG10
+EngCoeff:  0.000000e+00	1.000000	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+FileInt: 1
+RiseTime: 20.426300
+DecayTime: 5398.170000
+BaseLine: -4383.180000
+}
+//====================================//
+
+
+SPI00XN6D 0x0700904	{
+Type:      TSiLi
+Name:      SPI00XN6D 0x0700904
+Number:    804
+Address:   0x00700904
+Digitizer: TIG10
+EngCoeff:  0.000000e+00	0.000000e+00	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -13.850000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 21.628000
+DecayTime: 4954.920000
+BaseLine: -4370.480000
+}
+//====================================//
+
+
+SPI00XN6E 0x0700700	{
+Type:      TSiLi
+Name:      SPI00XN6E 0x0700700
+Number:    780
+Address:   0x00700700
+Digitizer: TIG10
+EngCoeff:  0.000000e+00	1.000000	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+FileInt: 1
+RiseTime: 24.084300
+DecayTime: 4821.720000
+BaseLine: -4375.270000
+}
+//====================================//
+
+
+SPI00XN6F 0x0700609	{
+Type:      TSiLi
+Name:      SPI00XN6F 0x0700609
+Number:    779
+Address:   0x00700609
+Digitizer: TIG10
+EngCoeff:  0.000000e+00	1.000000	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+FileInt: 1
+RiseTime: 0.000000
+DecayTime: 0.000000
+BaseLine: 0.000000
+}
+//====================================//
+
+
+SPI00XN70 0x0700405	{
+Type:      TSiLi
+Name:      SPI00XN70 0x0700405
+Number:    755
+Address:   0x00700405
+Digitizer: TIG10
+EngCoeff:  0.000000e+00	0.000000e+00	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -13.250000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 17.231600
+DecayTime: 6060.100000
+BaseLine: -4274.850000
+}
+//====================================//
+
+
+SPI00XN71 0x0700509	{
+Type:      TSiLi
+Name:      SPI00XN71 0x0700509
+Number:    769
+Address:   0x00700509
+Digitizer: TIG10
+EngCoeff:  0.000000e+00	1.000000	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+FileInt: 1
+RiseTime: 10.770900
+DecayTime: 8885.040000
+BaseLine: -4390.570000
+}
+//====================================//
+
+
+SPI00XN72 0x0700305	{
+Type:      TSiLi
+Name:      SPI00XN72 0x0700305
+Number:    745
+Address:   0x00700305
+Digitizer: TIG10
+EngCoeff:  7.906933	0.402165	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -12.850000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 17.503200
+DecayTime: 6541.090000
+BaseLine: -4385.750000
+}
+//====================================//
+
+
+SPI00XN73 0x0700109	{
+Type:      TSiLi
+Name:      SPI00XN73 0x0700109
+Number:    729
+Address:   0x00700109
+Digitizer: TIG10
+EngCoeff:  -1.423435e+02	0.502689	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -12.950000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 18.151500
+DecayTime: 5823.420000
+BaseLine: -4357.980000
+}
+//====================================//
+
+
+SPI00XN74 0x0700205	{
+Type:      TSiLi
+Name:      SPI00XN74 0x0700205
+Number:    735
+Address:   0x00700205
+Digitizer: TIG10
+EngCoeff:  7.820293	0.410331	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -13.650000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 18.708400
+DecayTime: 5405.820000
+BaseLine: -4320.680000
+}
+//====================================//
+
+
+SPI00XN75 0x0700b04	{
+Type:      TSiLi
+Name:      SPI00XN75 0x0700b04
+Number:    824
+Address:   0x00700b04
+Digitizer: TIG10
+EngCoeff:  8.810174	0.421794	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -15.050000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 22.431800
+DecayTime: 5091.970000
+BaseLine: -4368.340000
+}
+//====================================//
+
+
+SPI00XN76 0x0700c00	{
+Type:      TSiLi
+Name:      SPI00XN76 0x0700c00
+Number:    830
+Address:   0x00700c00
+Digitizer: TIG10
+EngCoeff:  0.000000e+00	0.000000e+00	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -14.050000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 20.437300
+DecayTime: 5550.930000
+BaseLine: -4374.860000
+}
+//====================================//
+
+
+SPI00XN77 0x0700a04	{
+Type:      TSiLi
+Name:      SPI00XN77 0x0700a04
+Number:    814
+Address:   0x00700a04
+Digitizer: TIG10
+EngCoeff:  12.103576	0.407226	
+Integration: 1
+TimeOffset: 0
+ENGChi2:     1.000000
+EffCoeff:  
+EFFChi2:   0.000000
+TIMECoeff:  -14.150000	0.002601	1.000000	
+FileInt: 1
+RiseTime: 20.744600
+DecayTime: 5659.960000
+BaseLine: -4350.480000
+}
+//====================================//
+
+
