@@ -49,9 +49,9 @@ vector< pair<unsigned int,unsigned int> > ringgroups;
 
 vector< pair<int,int> > BadPixelVec;
 
-enum controlenum{BetaZero,TigressDistance,FrontBackEnergy,FrontBackOffset,FrontBackTime,S3EnergyLimit,SiLiWaveTOffset,TigressTargetOffset,TigressRadialOffset,SiLiNoiseLimit,SiLiSmirnovLimit,SiLiCoincidenceT,SPICEVetoT};
-vector< string > controlnames={"BetaZero","TigressDistance","FrontBackEnergy","FrontBackOffset","FrontBackTime","S3EnergyLimit","SiLiWaveTOffset","TigressTargetOffset","TigressRadialOffset","SiLiNoiseLimit","SiLiSmirnovLimit","SiLiCoincidenceT","SPICEVetoT"};
-vector< double > control={0.0,110.,0.9,0,75,50000,7000,-8,0.15,500,200,50};
+enum controlenum{BetaZero,TigressDistance,FrontBackEnergy,FrontBackOffset,FrontBackTime,S3EnergyLimit,SiLiWaveTOffset,TigressTargetOffset,TigressRadialOffset,SiLiNoiseLimit,SiLiSmirnovLimit,SiLiCoincidenceT,SPICEVetoT,GammaGammaFrac};
+vector< string > controlnames={"BetaZero","TigressDistance","FrontBackEnergy","FrontBackOffset","FrontBackTime","S3EnergyLimit","SiLiWaveTOffset","TigressTargetOffset","TigressRadialOffset","SiLiNoiseLimit","SiLiSmirnovLimit","SiLiCoincidenceT","SPICEVetoT","GammaGammaFrac"};
+vector< double > control={0.0,110.,0.9,0,75,50000,7000,-8,0,0.15,500,200,50,0};
 
 std::vector< string > filelist;
 std::vector< long > fileentriessum;
@@ -169,6 +169,10 @@ if(ApplySLimits)cout<<endl<<"Applying SPICE limits to sort.";
 bool debug=inp.IsPresent("Debug");
 if(debug)cout<<endl<<"Making debug histograms.";
 
+bool BigTigHist=inp.IsPresent("BigTigHist");
+if(BigTigHist)cout<<endl<<"Making extended TIGRESS histograms.";
+
+
 bool SPICELimits=false;
 if(inp.IsPresent("SPICELimits")){	
 	if(LoadSPICELimits(inp.NextString("SPICELimits"))){
@@ -177,8 +181,17 @@ if(inp.IsPresent("SPICELimits")){
 	}
 }
 
+//Single number control parameters
+for(int z=0;z<controlnames.size();z++)
+	if(inp.IsPresent(controlnames[z])){
+		control[z]=inp.Next(controlnames[z]);
+		cout<<endl<<"Setting "<<controlnames[z]<<" "<<control[z];
+	}
+	
+	
 bool GammaEfficiency=false;
 bool GammaError=false;
+bool GammaGammaEff=false;
 if(inp.IsPresent("GammaEfficiency")){
 	GammaEfficiencyGraph=FileTGraph(inp.NextString("GammaEfficiency"));
 	if(GammaEfficiencyGraph){
@@ -192,6 +205,11 @@ if(inp.IsPresent("GammaEfficiency")){
 				cout<<endl<<"Loaded Gamma Efficiency Error.";
 			}
 		}
+		
+		if(inp.IsPresent("GammaGammaFrac")){
+			GammaGammaEff=true;
+			cout<<endl<<"Gamma Gamma Fraction = "<<control[GammaGammaFrac];
+		}
 	}
 }
 
@@ -201,13 +219,6 @@ if(TigressSuppressed){
 	cout<<endl<<"Tigress Suppressed Position.";
 	control[TigressDistance]=145.0;
 }
-
-//Single number control parameters
-for(int z=0;z<controlnames.size();z++)
-	if(inp.IsPresent(controlnames[z])){
-		control[z]=inp.Next(controlnames[z]);
-		cout<<endl<<"Setting "<<controlnames[z]<<" "<<control[z];
-	}
 	
 
 //1D gates		
@@ -601,7 +612,7 @@ for(int i=0;i<timeaveragesamples;i++){
 	}
 	
 	TF1 timef1grad("timef1grad","pol1",0,1000);
-	timegrad.Fit(&timef1grad,"QR");//Warning in <TROOT::Append>: Replacing existing TH1: Graph (Potential memory leak).
+	timegrad.Fit(&timef1grad,"QRN");//Warning in <TROOT::Append>: Replacing existing TH1: Graph (Potential memory leak).
 	double chi=timef1grad.GetChisquare()/timef1grad.GetNDF();
 	if(timef1grad.GetParameter(1)>0){//1E15 might seem high but is an experimentally determined limit, was 1E20 before I fixed tstamp
 		//cout<<endl<<timef1grad.GetParameter(1)<<" "<<chi;

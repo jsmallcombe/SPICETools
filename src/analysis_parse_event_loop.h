@@ -1073,9 +1073,10 @@ for(unsigned int j=0;j<S3N;j++){
 			}
 			
 			double E;
+			double e=gammaE[i];
 			//kinematic adjust
 			if(ggate->use_beta)E=gammai[i]->GetDoppler(betal,&particlevec);
-			else E=gammai[i]->GetEnergy();
+			else E=e;
 			gammaEdop[i]=E;
 							
 			if(debug&&!Telescope)S3IDgammacoinc->Fill(Vdedx[j],SH->GetEnergy(),E);
@@ -1083,7 +1084,6 @@ for(unsigned int j=0;j<S3N;j++){
 			// Fill a specific set of histograms only in use when particle gates have
 			// Significant doppler shift for which correction must be optimised
 			if(ggate->use_beta){
-				double e=gammai[i]->GetEnergy();
 				unsigned int R=s3r(SH);//SH->GetRing();
 				
 				Gcorrectedring[g]->Fill(E,R);
@@ -1127,6 +1127,11 @@ for(unsigned int j=0;j<S3N;j++){
 			TigressEThetaPG[g]->Fill(E,gammaAng[i]);
 			if(gammaRFcyc[i])GammaPGRFcyc[g]->Fill(E);
 			
+			
+			if(GammaEfficiency){
+				GammaPGeffcor[g]->Fill(E,e);
+			}
+			
 			//////////////////////////////////////////////////
 			// Do Gamma-Gamma S3-Particle-Gate Coincidences //
 			//////////////////////////////////////////////////
@@ -1143,6 +1148,11 @@ for(unsigned int j=0;j<S3N;j++){
 					
 					GammaGammaPG[g]->Fill(gammaEdop[i],gammaEdop[m]);
 					GammaGammaPG[g]->Fill(gammaEdop[m],gammaEdop[i]);
+					
+					if(GammaGammaEff){
+						GammaGammaPGeffcor[g]->Fill(gammaEdop[i],gammaE[i],gammaEdop[m],gammaE[m]);
+						GammaGammaPGeffcor[g]->Fill(gammaEdop[m],gammaE[m],gammaEdop[i],gammaE[m]);
+					}
 					
 					TigressEEThetaPG[g]->Fill(gammaEdop[i],gammaEdop[m],gammaAng[m]);
 					TigressEEThetaPG[g]->Fill(gammaEdop[m],gammaEdop[i],gammaAng[i]);

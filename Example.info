@@ -1,5 +1,8 @@
 ### CONTROL FLAGS ###
 
+BigTigHist
+Double all histogram gamma ray axis length (for TH3s number of bins will not be increased
+
 Debug
 #Adds some additional histograms useful for debugging detectors over physics analysis
 
@@ -133,7 +136,7 @@ BadPixel 0 31
 
 GammaEfficiency Infofiles/RelGammaEff.root
 GammaEffError Infofiles/RelGammaError.root
-
+GammaGammaFrac 0.93 #fraction lost for gamma 13/14 for bambino
 
 ### PARTICLE GATE INPUTS ###
 
