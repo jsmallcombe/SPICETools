@@ -1,7 +1,10 @@
 ### CONTROL FLAGS ###
 
+TigNoAdd
+#Disable addback in tigress clovers
+
 BigTigHist
-Double all histogram gamma ray axis length (for TH3s number of bins will not be increased
+#Double all histogram gamma ray axis length (for TH3s number of bins will not be increased
 
 Debug
 #Adds some additional histograms useful for debugging detectors over physics analysis
@@ -60,6 +63,9 @@ StrictSingleParticles
 
 MultiParticles
 # Make special histograms for gamma and electron coincident with several particles.
+
+RFParticlesOnly
+#Particle gates are only filled for particles and gammas that meet RF (trigger) gates
 
 #PreferenceSectors
 # Use the S3 sector energy where possible, worse resolution but strangely more stable
@@ -134,8 +140,8 @@ BadPixel 0 31
 
 ### Gamma Efficiency Options ###
 
-GammaEfficiency Infofiles/RelGammaEff.root
-GammaEffError Infofiles/RelGammaError.root
+GammaEfficiency Infofiles/RelGammaEfficiency.root
+GammaEffError Infofiles/RelGammaEfficiencyError.root
 GammaGammaFrac 0.93 #fraction lost for gamma 13/14 for bambino
 
 ### PARTICLE GATE INPUTS ###

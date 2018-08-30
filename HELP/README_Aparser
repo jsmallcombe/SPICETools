@@ -54,8 +54,9 @@
    AddMonitor - Show histogram of monitor detector, not correlated with experimental data.
    Debug - Adds some additional histograms useful for debugging detectors over physics analysis (LIST AT BOTTOM)
    BigTigHist - Double all histogram gamma ray axis length (for TH3s number of bins will not be increased
+   TigNoAdd - Disable addback in tigress clovers
+   RFParticlesOnly -Particle gates are only filled for particles that meet RF (trigger) gates
    
-
    -----------------------------------------------------
    Set Numbers
    -----------------------------------------------------
@@ -228,7 +229,7 @@
    
    GammaEffError EfficiencyErrorTGraph.root
    
-   Note: The file names are unimportant (avoid other Aparser keywords) but must contain a single TGraph.
+   Note: The file names must include keyword "Efficiency" and must contain a single TGraph.
    
    To also produce the gammagamma histogram, one must provide the loss fraction for gamma gamma events.
    This is mostly the "used" clover and time gate effects

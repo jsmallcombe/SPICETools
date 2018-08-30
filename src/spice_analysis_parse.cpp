@@ -13,7 +13,8 @@ TRandom2 rando;
 double TRFperiodns= 84.409;
 int TRFperiodps= 84409;
 
-TF1 TimeWalkFn("TimeWalkFn","[0]*(1-exp(-[1]/x))",0,4000);
+// TF1 TimeWalkFn("TimeWalkFn","[0]*(1-exp(-[1]/x))",0,4000);
+TF1 TimeWalkFn("TimeWalkFn","[0]*(exp(-x/[1]))",0,4000);
 
 typedef struct gate2Ddata{
 	TGraph gate;
@@ -49,9 +50,9 @@ vector< pair<unsigned int,unsigned int> > ringgroups;
 
 vector< pair<int,int> > BadPixelVec;
 
-enum controlenum{BetaZero,TigressDistance,FrontBackEnergy,FrontBackOffset,FrontBackTime,S3EnergyLimit,SiLiWaveTOffset,TigressTargetOffset,TigressRadialOffset,SiLiNoiseLimit,SiLiSmirnovLimit,SiLiCoincidenceT,SPICEVetoT,GammaGammaFrac};
-vector< string > controlnames={"BetaZero","TigressDistance","FrontBackEnergy","FrontBackOffset","FrontBackTime","S3EnergyLimit","SiLiWaveTOffset","TigressTargetOffset","TigressRadialOffset","SiLiNoiseLimit","SiLiSmirnovLimit","SiLiCoincidenceT","SPICEVetoT","GammaGammaFrac"};
-vector< double > control={0.0,110.,0.9,0,75,50000,7000,-8,0,0.15,500,200,50,0};
+enum controlenum{BetaZero,TigressDistance,FrontBackEnergy,FrontBackOffset,FrontBackTime,S3EnergyLimit,SiLiWaveTOffset,TigressTargetOffset,TigressRadialOffset,SiLiNoiseLimit,SiLiSmirnovLimit,SiLiCoincidenceT,SPICEVetoT,GammaGammaFrac,TimeWalkPar0,TimeWalkPar1};
+vector< string > controlnames={"BetaZero","TigressDistance","FrontBackEnergy","FrontBackOffset","FrontBackTime","S3EnergyLimit","SiLiWaveTOffset","TigressTargetOffset","TigressRadialOffset","SiLiNoiseLimit","SiLiSmirnovLimit","SiLiCoincidenceT","SPICEVetoT","GammaGammaFrac","TimeWalkPar0","TimeWalkPar1"};
+vector< double > control={0.0,110.,0.9,0,75,50000,7000,-8,0,0.15,500,200,50,0,700,50};
 
 std::vector< string > filelist;
 std::vector< long > fileentriessum;
@@ -87,7 +88,7 @@ unsigned short s3r(TS3Hit* s3hit){
 bool t_gate(double,gatenames,double=0,double=0);
 bool t_gate(double,int,double=0,double=0);
 void t_gateRFmake(gatenames);
-bool t_gateRFcycles(double,gatenames);
+bool t_gateRFcycles(double,gatenames,double=0);
 long t_stamp(TRF*,TTigress*,TSiLi*,TS3*);
 long t_stamp_fix(long &);
 TGraph* FileTGraph(string filepath);
@@ -121,7 +122,7 @@ if(!inp.LoadCal(DataChain)){
 	cout<<"FAIL";
 	return 0;
 }
-string outputfile=OrDefault("AparserOut.root",inp.RootFile("gate"));
+string outputfile=OrDefault("AparserOut.root",inp.RootFile("gate","efficiency","Efficiency"));
 
 bool RemoveTimeGaps=!inp.IsPresent("TimeCompressOff");//for decay work or to see DAQ problems you may want to false this
 if(!RemoveTimeGaps)cout<<endl<<"Time Gaps us-suppressed.";
@@ -140,7 +141,9 @@ if(Telescope)cout<<endl<<"Using S3 Telescope.";
 
 bool TigressTimeWalk=inp.IsPresent("TigressTimeWalk");
 if(TigressTimeWalk)cout<<endl<<"Using extended time walked gates for tigress.";
-TimeWalkFn.SetParameters(700,50);
+
+bool TigNoAdd=inp.IsPresent("TigNoAdd");
+if(TigNoAdd)cout<<endl<<"No Tigress Addback.";
 
 bool KeepChargeShare=inp.IsPresent("KeepChargeShare");
 if(KeepChargeShare)cout<<endl<<"Keeping S3 Charge Sharing Events.";
@@ -172,6 +175,17 @@ if(debug)cout<<endl<<"Making debug histograms.";
 bool BigTigHist=inp.IsPresent("BigTigHist");
 if(BigTigHist)cout<<endl<<"Making extended TIGRESS histograms.";
 
+bool GammaRFgating=(inp.IsPresent("rf_gamma")||inp.IsPresent("rfcyc_gamma"));
+if(GammaRFgating)cout<<endl<<"Gamma RF gates in use.";
+
+bool S3RFgating=(inp.IsPresent("rf_S3")||inp.IsPresent("rfcyc_S3"));
+if(S3RFgating)cout<<endl<<"S3 RF gates in use.";
+
+bool SiliRFgating=(inp.IsPresent("rf_sili")||inp.IsPresent("rfcyc_sili"));
+if(SiliRFgating)cout<<endl<<"Sili RF gates in use.";
+
+bool RFParticlesOnly=inp.IsPresent("RFParticlesOnly");
+if(RFParticlesOnly)cout<<endl<<"Only RF gate passed particles.";
 
 bool SPICELimits=false;
 if(inp.IsPresent("SPICELimits")){	
@@ -182,11 +196,16 @@ if(inp.IsPresent("SPICELimits")){
 }
 
 //Single number control parameters
-for(int z=0;z<controlnames.size();z++)
+for(int z=0;z<controlnames.size();z++){
 	if(inp.IsPresent(controlnames[z])){
 		control[z]=inp.Next(controlnames[z]);
 		cout<<endl<<"Setting "<<controlnames[z]<<" "<<control[z];
 	}
+}
+
+TimeWalkFn.SetParameters(control[TimeWalkPar0],control[TimeWalkPar1]);
+//default
+//TimeWalkFn.SetParameters(700,50);
 	
 	
 bool GammaEfficiency=false;
@@ -472,9 +491,9 @@ for(int y=0;y<ParticleGate.size();y++){
 	}else{ParticleGate[y].UseEnergyBeta=false;}
 }
 
-if(gates[rfcyc_S3].first<-1E9&&gates[rfcyc_S3].second>1E9)gates[rfcyc_S3]=gates[rf_S3];
-if(gates[rfcyc_sili].first<-1E9&&gates[rfcyc_sili].second>1E9)gates[rfcyc_sili]=gates[rf_sili];
-if(gates[rfcyc_gamma].first<-1E9&&gates[rfcyc_gamma].second>1E9)gates[rfcyc_gamma]=gates[rf_gamma];
+// if(gates[rfcyc_S3].first<-1E9&&gates[rfcyc_S3].second>1E9)gates[rfcyc_S3]=gates[rf_S3];
+// if(gates[rfcyc_sili].first<-1E9&&gates[rfcyc_sili].second>1E9)gates[rfcyc_sili]=gates[rf_sili];
+// if(gates[rfcyc_gamma].first<-1E9&&gates[rfcyc_gamma].second>1E9)gates[rfcyc_gamma]=gates[rf_gamma];
 t_gateRFmake(rfcyc_S3);
 t_gateRFmake(rfcyc_sili);
 t_gateRFmake(rfcyc_gamma);
@@ -888,16 +907,16 @@ void t_gateRFmake(gatenames g){
 }
 
 //inputs in 10s ns
-bool t_gateRFcycles(double t,gatenames g){
+bool t_gateRFcycles(double t,gatenames g,double Eupper){
 	
 	int T=t*1000.;
 	T=T%TRFperiodps;
 	if(T<0)T+=TRFperiodps;
 	
 	if(gates[g].first<gates[g].second){
-		if(T>=gates[g].first&&T<=gates[g].second)return true;
+		if(T>=gates[g].first&&T<=gates[g].second+Eupper)return true;
 	}else{
-		if(T>=gates[g].first||T<=gates[g].second)return true;
+		if(T>=gates[g].first||T<=gates[g].second+Eupper)return true;
 	}
 		
 	return false;
