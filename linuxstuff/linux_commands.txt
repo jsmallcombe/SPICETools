@@ -1,0 +1,116 @@
+git init			//make current directory a tracked repository
+git add *.C			//add files to tracked list
+git status			//status of all files in directory
+git commit -m "inital commit"	//add changes to local stored version of the branch
+
+git diff			//detailed changes not staged
+git diff --cached		//detailed changes staged for commit
+git pull			//update local files from server
+
+
+git pull upstream master
+git push origin master	
+git remote -v			//List of the repositories you are connected to
+git remote update		//update the local hidden copies from server
+
+git checkout master		//switch to MY fork (If no working changes)
+git checkout upstream/master	//switch to GROUP master (If no working changes)
+
+git push origin master		//push my fork local commit to the server
+git reset --hard upstream/master -- 	//force overwrite current open version to be the same as master fork
+
+git diff upstream/master master //See difference between my fork and other
+git merge upstream/master	//merge the GROUP changes into my fork
+
+
+git remote add origin https://github.com/jsmallcombe/james_library.git
+git push -u origin master
+
+
+valgrind ./program 		//memory checker for fucked code that has compiled 
+
+man 3 range			//display instructions for the dedx range c++ functions 
+man range
+
+apt-file search Xm/Xm.h		//search which package to install for "Xm/Xm.h not found"
+
+gmake				//compile current directory to default target
+
+ps -ef 				//PS show running processes -ef ALL
+
+du -ch R8_* 			//list file sizes for all files starting R8_ -h human readable -c total 
+du -hd1	
+
+ln -s /target/path /link/location 	//create a symbolic link
+
+ps2pdf
+ps2eps -l file.ps 		//converts to eps which has a box ps2pdf can see
+ps2pdf -dEPSCrop file.eps	//converts file and leaves no white space border
+
+tar -zxvf extractme.tar.gz
+tar -xjf extractme.tar.bz2
+
+rsync -ravptn . /directory/	//sync recursive (-r) from here (.) to directory, dry run (n), info during & after (avpt?)
+
+To start a named screen session:
+screen -S myname
+To detach from current screen:
+ctrl-a d
+To list screens:
+screen -ls
+To reattach to a screen:
+screen -r screen_name
+To reattch to a screen and detach the existing attached screen:
+screen -dr screen_name
+To create a window inside a screen
+ctrl-a c
+To go to next or previous window
+ctrl-a n
+ctrl-a p
+
+
+
+rename -vn 's/a/b/' *.html		//rename 's/old-name/new-name/' files
+rename -f  's/\.html$/\.php/' *.html	//includes needed escape characters for . and f force overwrite
+rename 'y/a-z/A-Z/' *.html 		//change case
+
+
+
+rsync -rvnu folder/ folder
+rsync -rvnu folder/*.dat folder
+
+
+
+tar xvzf package.tar.gz (or tar xvjf package.tar.bz2)
+cd package
+./configure --prefix=/npdisks/home/js853/
+make
+make install
+
+
+chmod who=permissions filename
+  u  	 The user who owns the file (this means “you.”)
+  g  	 The group the file belongs to.
+  o  	 The other users
+  a  	 all of the above (an abbreviation for ugo)
+
+  r  	 Permission to read the file.
+  w  	 Permission to write (or delete) the file.
+  x  	 Permission to execute the file, or, in the case of a directory, search it.
+
+- rwx r-x r-- info.sh
+  111 101 100
+
+Binary	Becomes
+000	0
+001	1
+010	2
+011	3
+100	4
+101	5
+110	6
+111	7
+
+
+python setup.py build
+python setup.py install

@@ -1,0 +1,136 @@
+clx_mk_table.awk 
+=================
+
+Puts clx output in a nicer form.
+
+e.g: ./clx <sample_30mg58ni_2.2.clx | ./clx_mk_table.awk 
+
+
+./clx <a.clx | ./clx_mk_table.awk 
+
+
+
+clx
+====
+
+Run as:  clx <input_file.clx
+
+Output goes to stdout and CLXDCY.
+
+
+taken from clx.f
+-----------------
+
+MULTIPLE COULOMB EXCITATION PROGRAM  C L X
+
+FORTRAN VERSION OF THE PL1 PROGRAM WALKUERE WRITTEN BY H. OWER (IKF).
+TRANSLATED AND MODIFIED BY J. GERL.
+slight changes by H. Scheit 8. Dec. 2003
+
+This file modified by C.J. Barton to expand upon input card explanations.
+
+INPUT TO THE PROGRAM: <stdin>
+
+THIS FILE CONTAINS THE INPUT DATASET. THE MEANING OF THE INPUT
+CARDS IS AS FOLLOWS.
+( FREE FORMAT IS USED UNLESS OTHERWISE NOTED )
+
+CARD #	  CONTENTS
+
+  1	  TITLE ( MAX. 40 CHARACTERS )
+
+  2	  I/O CONTROL ( FORMAT: 8I1 )
+	  MEANING OF THE CONTROL BITS: 
+
+          (NOTE WELL - OUCNTL, OUPSI, OUAMP, OUMEM, OUTENS, OUPN AND OUDCY ARE 
+           ALL ARE HARDCODED INTO THE CURRENT CLX CODE AS 1)
+           (ONLY OUPROW CAN BE CHANGED IN THE CURRENT INPUT FILE UNLESS CLX.F IS CHANGED)
+
+	   #	MEANING
+	   1	OUCNTL - Output control. Writes things like eccentricity of hyperbola,
+                         distance of closest approach, range of integration, 
+                         when integration step size changes, integration complete, largest
+                         and final deviations and 1 clx 84 and 1 dcy 84.
+	   2	OUPSI - Output control to print the dimensionless psi matrix for each 
+                        multipole matrix element (E and M1 seperately).
+	   3	OUAMP - Output control to print the final excitation amplitudes for each state
+                        state and polarization (magnetic quantum number). The amplitudes have 
+                        both real and imaginary amplitudes and a final population for that spin
+                        and polarization is printed.
+	   4	OUPROW - The output control to print the excitation probability after every time
+                        integration step. However, the time is really replaced by the parameter, w.
+	   5	OUMEM - Output control to pring the symmetrized matrix elements connecting the 
+                        different nuclear states. 1 martix is show for each multipolarity and E or M.
+	   6	OUTENS - The output control to print the angular distribution tensors in RHOB and RHOC.
+                         RHOB are the statistical tensors in coordinate system B while RHOC is in
+                         coordinate system C, where the beam axis is the z axis.
+	   7	OUPN - output control to print out the level index, excitation probability, and
+                       the differential Coulomb excitation cross section (in b/sr) for a particular
+                       scattering angle in the CM system.
+	   8	OUDCY - Create a file called CLXDCY and write some of the input and output parameters.
+                        Also, for every angle, write RHOC for the decay calculations.
+
+  3	  NMAX, NMPOL, [EMMAX (DEF:10.0)]
+               NMAX - Maximum number of states of levels in the nucleus to
+                      be studied. The largest value is 50 and the default is 2.
+               NMPOL - Does not seem to be used by code any longer - no recommended value
+               EMMAX - The absolute value of the largest magnetic quantum number considered.
+                       It must be >= the total spin of the ground state level. Large values of
+                       magnetic quantum numbers often becomes uninteresting in CoulEx. The 
+                       default is 10.
+
+  4	  [ACCUR (DEF:1.d-8)] [,XIMAX (DEF:6.0)] [,DIPOLE (DEF:0.005)]
+
+               ACCUR - The limit imposed by the clx code on the precision 
+                       of the final probabilities. If ACCUR = 0 then it is
+                       revalued as 1E-8.
+               XIMAX - The maximum allowed value of the parameter, XI, 
+                       which is the symmetrized energy level parameter. 
+                       This becomes the integration step along the hyperbola 
+                       for the calculation. If XIMAX = 0 it is revalued to 6.
+               DIPIOLE - the strength of the E1 polarization. If DIPOLE = 0 then it
+                       is revalued at the default, which is 0.005.
+                       E1-POLARIZATION ACCORDING TO "ALDER WINTHER, ELECTROMAGAGNETIC 
+                       EXCITATION (APPENDIX J)"
+  
+  5	  ZP, AP
+               ZP - Z of Projectile nucleus (swap with target Z for projectile excitation!)
+               AP - A of Projectile nucleus
+
+  6	  ZT, AT
+               ZT - Z of Target nucleus (swap with projectile Z for projectile excitation!)
+               AT - A of Target nucleus
+
+  7	  EP ( MeV ) (laboratory projectile energy!)
+
+  8	  THETA1 [,THETA2 [,DELTATH]] ( CM - SYSTEM )
+               THETA1 - starting angle, in degrees, in the CM system, for CoulEx calculations
+               THETA2 - stopping angle, in degrees, in the CM system, for the CoulEx calculations.
+                        If THETA2 = 0 THEN THETA2=THETA1
+               DELTATH - step angle, in degrees, by which to progress the CoulEx calculations 
+                         between THETA1 and THETA2. If DELTATH =0 THEN DELTATH = THETA2-THETA1
+
+
+  9	  N, SPIN(N), E(N) ( MeV), PARITY(N) (1=+,-1=-), K(N)
+	  A CARD #9 IS REQUIRED FOR ALL STATES N=1,NMAX
+            This card controls the input of the level scheme. N is the index number for the
+            particular level. for example, thne ground state would have N=1 while the first
+            excited state has N=2. The variable, SPIN(N), is the spin of the level defined by
+            the index, N. This can be an integer, such as 2, or half-integers, such as 2.5. The
+            ground state cannot have spin > 14/2. The energy of the state is written in units of
+            MeV and the ground state must have energy = 0. Parity of the state is denoted with a 
+            1 for + parity and a -1 for - parity. The K quantum number, if known, is also input.
+
+ 10	  N, M, ME(LAM,N,M), LAMDA (NEG. VALUE = MAGNETIC TRANSITION)
+	  A CARD #10 IS REQUIRED FOR EACH MATRIXELEMENT. IT IS
+	  SUFFICIENT TO USE ONLY THE MATRIXELEMENT ME(N->M).
+	  THE CORRESPONDING MATRIXELEMENT ME(M->N) IS INCLUDED
+	  BY THE PROGRAM. THE RPT PHASE CONVENTION IS USED ( SEE:
+	  "ALDER WINTHER, ELECTROMAGNETIC EXCITATION" ).
+             This card controls the input of the reduced electric multipole matrix elements for
+             E transitions of multipole order 1,2,3 or 4. N is the index of the first level and
+             M is the index of the second level connected by a matrix element. ME(LAM, N, M) is 
+             the reduced matrix element connecting the two states of eb for E2 transitions, for
+             example. This code only calculates CoulEx Magnetic transitions for M1. for this, 
+             input a negative number OR LAMBDA = 5 for an M1 transition. This code only calculates
+             E1, E2, E3, E4 and M1 transitions!

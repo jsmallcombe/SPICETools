@@ -88,6 +88,7 @@ unsigned short s3r(TS3Hit* s3hit){
 bool t_gate(double,gatenames,double=0,double=0);
 bool t_gate(double,int,double=0,double=0);
 void t_gateRFmake(gatenames);
+int t_convertcycles(double);
 bool t_gateRFcycles(double,gatenames,double=0);
 long t_stamp(TRF*,TTigress*,TSiLi*,TS3*);
 long t_stamp_fix(long &);
@@ -899,20 +900,28 @@ void t_gateRFmake(gatenames g){
 	f=f%TRFperiodps;
 	s=s%TRFperiodps;
 	
-	if(f<0)f+=TRFperiodps;
-	if(s<0)s+=TRFperiodps;
+	while(f<0){f+=TRFperiodps;}
+	while(s<0){s+=TRFperiodps;}
 	
 	gates[g].first=f;
 	gates[g].second=s;
 }
 
-//inputs in 10s ns
-bool t_gateRFcycles(double t,gatenames g,double Eupper){
-	
+
+//inputs in ns
+int t_convertcycles(double t){
 	int T=t*1000.;
 	T=T%TRFperiodps;
-	if(T<0)T+=TRFperiodps;
+	while(T<0){T+=TRFperiodps;}
+	return T;
+}
 	
+//inputs in ns
+//gates have already been internally converted to ps
+bool t_gateRFcycles(double t,gatenames g,double Eupper){
+	
+	int T=t_convertcycles(t);
+    
 	if(gates[g].first<gates[g].second){
 		if(T>=gates[g].first&&T<=gates[g].second+Eupper)return true;
 	}else{

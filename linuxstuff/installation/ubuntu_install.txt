@@ -1,0 +1,58 @@
+Load the correct version of VBoxGuestAdditions.iso from outside
+Install it
+reboot
+
+sudo apt-get install kate
+
+sudo apt-get remove libreoffice*
+sudo apt-get remove firefox*
+sudo apt-get remove rhythmbox*
+sudo apt-get install nautilus-open-terminal
+sudo apt-get remove thunderbird*
+
+sudo adduser $(whoami) vboxsf
+
+ln -s /media/sf_Dropbox ~/Dropbox
+ln -s ~/Dropbox/codes ~/codes
+
+echo "source /home/$(whoami)/Dropbox/codes/linuxstuff/bashrc.sh" >> ~/.bashrc
+
+cd /opt
+sudo chmod -R 777 .
+
+sudo apt-get install gimp fortune cowsay
+echo "fortune | cowsay -f stegosaurus" >> ~/.bashrc
+
+
+##########################
+	# Root6
+##########################
+
+sudo apt-get -y install git dpkg-dev make g++ gcc binutils libx11-dev libxpm-dev libxft-dev libxext-dev
+#Optional packages:
+sudo apt-get -y install gfortran libssl-dev libpcre3-dev xlibmesa-glu-dev libglew1.5-dev libftgl-dev libmysqlclient-dev libfftw3-dev cfitsio-dev graphviz-dev libavahi-compat-libdnssd-dev libldap2-dev python-dev libxml2-dev libkrb5-dev libgsl0-dev libqt4-dev
+
+cd /opt 
+git clone http://root.cern.ch/git/root.git
+cd root
+git pull
+git tag -l
+git checkout -b v6-04-12 v6-04-12
+make clean
+./configure --all
+make
+make install
+
+
+cd range_lib
+sudo apt-get -y install autoconf
+./configure
+make
+autoreconf --force --install
+
+
+echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib" >> ~/.bashrc
+mkdir ~/local
+ln -s /usr/local/lib  ~/local/lib
+
+

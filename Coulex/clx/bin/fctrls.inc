@@ -1,0 +1,2 @@
+      REAL*8 FCT(99),FACT(99)
+      COMMON /FCTRLS/ FCT , FACT

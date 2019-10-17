@@ -1,0 +1,36 @@
+Write input files in the standard format as explained in README_CJBarton
+Uses CM angle!!
+
+Save input files in "input" folder
+
+Run: bash clx.sh file.clx
+This runs the clx code and parses the result through CJBarton's integrating script. Terminal outputs are saved in "output" folder file.clx.txt 
+
+Run: bash pro_clx.sh file.clx
+This ignores the input energy and angles of  file.clx and does many clx calculations over all angles and beam energy from 0.33-10MeV/u
+If you see the following errors, dont worry, it doesnt have an effect:
+"Error in <GSLError>: Error 18 in qags.c at 548 : cannot reach tolerance because of roundoff error"
+Output Ex_....root file is saved in "Output folder" with name matching the experiment details.
+
+A second scrip process the detector part for default labrange 15-50 deg
+Run again user specified range
+root -l -q "JTS/root_detector.cpp(massBeam,massTarget,Z1,Z2,DegreesLabFrom,DegreesLabTo,\"Ex_....root\")"
+
+Alternatively the output "Ex_.....root" file can be processed with clx_process example of jaent
+change the inputs at the top of example/clx_process.cpp then run:
+make examples/clx_process.cpp 
+./bin/clx_process
+
+Finally to integrate your detector cross-section over the energy of the target run
+root -l -q "JTS/root_target.cpp(massBeam,massTarget,Zbeam,Ztarg,mg/cm2,BeamMeV,\"Ex_....det.root\")"
+Leave BeamMeV=0 to use max safe
+latest root 6.08 having trouble with target
+
+OR
+
+To do a detector position calculation (i.e. Get rates for given E and target) runs
+root -l -q "JTS/root_targetsuper.cpp(massBeam,massTarget,Zbeam,Ztarg,mg/cm2,BeamMeV,\"Ex_....root\")"
+Leave BeamMeV=0 to use max safe
+
+root -l -q "JTS/root_targetsuper.cpp(158,58,68,28,1.5,0,\"Ex_158Er_on_58Ni.root\")"
+root -l -q "JTS/root_targetsuper.cpp(158,58,70,28,1.0,580,\"output/Ex_158Yb_on_58Ni.root\")"

@@ -1,0 +1,18 @@
+OBJ    = ampder.o cleb.o djmm.o fctrls.o newpage.o q.o threej.o
+FFLAGS = -g2 -O0 -W -Wall -Wsurprising -fbounds-check -ffixed-line-length-none 
+
+PROG    = clx alaga
+SCRIPT = clx_mk_table.awk clx.sh
+
+.PHONY: all clean install
+
+all: $(PROG)
+
+clx: clx.f $(OBJ)
+alaga: alaga.f $(OBJ)
+
+install: all
+	cp $(PROG) $(SCRIPT) $(HOME)/bin/
+
+clean:
+	rm -f $(PROG) *.o
