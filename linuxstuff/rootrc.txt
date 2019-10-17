@@ -1,2 +1,0 @@
-Unix.*.Root.MacroPath:      .:$(HOME)/codes/library/src:$(HOME)/codes/JAnalysisTools:$(ROOTSYS)/macros
-Rint.Logon: /home/$(whoami)/Dropbox/codes/linuxstuff/root_deuglify.C

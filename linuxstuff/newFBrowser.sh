@@ -1,1 +1,0 @@
-root -l $1 ~/Dropbox/codes/linuxstuff/newFrowser.C
